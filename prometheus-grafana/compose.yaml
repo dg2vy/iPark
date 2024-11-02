@@ -1,0 +1,42 @@
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    network_mode: host
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+    network_mode: host
+
+  nuclei:
+    image: projectdiscovery/nuclei
+    container_name: nuclei
+    ports:
+      - "8000:8000"  
+    command: ["-u", "http://192.168.16.218:4280", "-mp", "8000", "-stats"]
+    restart: unless-stopped  
+    network_mode: host
+
+networks:
+  fuzzer:
+    external: true
+
+volumes:
+  prom_data:

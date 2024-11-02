@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+- name: Prometheus
+  type: prometheus
+  url: http://localhost:9090 
+  isDefault: true
+  access: proxy
+  editable: true
+
+
+- name: nuclei
+  type: nuclei # 또는 nuclei에 대한 유효한 타입으로 변경해야 함
+  url: http://localhost:9000
+  isDefault: false  # 기본값이 아님을 명시
+  access: proxy
+  editable: true
