@@ -1,16 +1,20 @@
-# app/metrics_fetcher.py
 import requests
 import time
+import os
 
 latest_metrics = {}
 
 def fetch_metrics():
     global latest_metrics
+
+    metric_fetch_delay = int(os.getenv("METRIC_FETCH_DELAY"))
+    
     while True:
         try:
             response = requests.get("http://localhost:8000/metrics")
             data = response.json()
-            print(f"Data is {data}")
+            # print(f"Data is {data}")
+
             latest_metrics = {
                 "errors": data.get("errors", 0),
                 "matched": data.get("matched", 0),
@@ -21,8 +25,9 @@ def fetch_metrics():
                 "hosts": data.get("hosts", 0),
                 "rps": float(data.get("rps", 0)),
             }
+
             print("Updated metrics:", latest_metrics)
         except Exception as e:
             print("Failed to fetch metrics:", e)
-        time.sleep(5)
 
+        time.sleep(metric_fetch_delay)

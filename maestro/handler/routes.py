@@ -1,4 +1,3 @@
-# app/routes.py
 from flask import Blueprint
 from .metrics_fetcher import latest_metrics
 

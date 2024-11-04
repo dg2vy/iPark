@@ -1,16 +1,19 @@
-# app/__init__.py
 from flask import Flask
 from threading import Thread
+from dotenv import load_dotenv, find_dotenv # Dev Mode Only
+
 from .metrics_fetcher import fetch_metrics
 from .routes import metrics_bp
 
+import os
+
 def create_app():
+    load_dotenv()
+    
     app = Flask(__name__)
     app.register_blueprint(metrics_bp)
 
-    # 백그라운드 스레드에서 메트릭 업데이트 시작
     thread = Thread(target=fetch_metrics)
     thread.start()
 
     return app
-

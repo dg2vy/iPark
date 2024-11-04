@@ -1,0 +1,124 @@
+body {
+    background-image: url('back.jpg'); /* 배경 사진 경로 설정 */
+    background-size: cover;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.dashboard {
+    width: 500px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    position: relative; /* 절대 위치 요소를 위한 상대 위치 설정 */
+}
+
+.target-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.target-section input {
+    width: 100%;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.start-button {
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.options-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 버튼 간의 간격 조정 */
+}
+
+.checkbox-dropdown {
+    position: relative;
+}
+
+.checkbox-list {
+    position: absolute;
+    background-color: white;
+    color: black;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index: 1000;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 500px; /* 원하는 가로 길이 설정 */
+    max-height: 400px; /* 최대 높이 설정 */
+    overflow-y: auto; /* 스크롤 가능하게 설정 */
+    display: none; /* 기본적으로 숨김 */
+}
+
+.checkbox-list label {
+    display: block; /* 각 체크박스를 블록으로 설정 */
+    margin-bottom: 10px; /* 체크박스 간의 간격 설정 */
+}
+
+.checkbox-list h2 {
+    margin: 0 0 10px; /* 제목 아래에 간격 추가 */
+    font-size: 16px; /* 제목 크기 조정 */
+    color: #333; /* 제목 색상 조정 */
+    border-bottom: 1px solid #ccc; /* 제목 아래에 구분선 추가 */
+    padding-bottom: 5px; /* 제목과 구분선 사이의 간격 조정 */
+}
+
+
+
+.dropdown-button {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.clone-button {
+    width: 40px;
+    height: 40px;
+    background-color: #2196F3;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 복사 완료 메시지 스타일 */
+.copy-message {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 메시지가 보일 때 활성화되는 클래스 */
+.copy-message.show {
+    opacity: 1;
+}
+
