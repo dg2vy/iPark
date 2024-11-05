@@ -1,5 +1,6 @@
 import json
 import websockets
+import os
 
 async def send_attack_request(attack, server_ip, server_port, save_path='./template/'):
     if save_path[-1] != '/': save_path += '/'
