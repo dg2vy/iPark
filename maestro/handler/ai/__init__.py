@@ -4,6 +4,10 @@ import websockets
 async def send_attack_request(attack, server_ip, server_port, save_path='./template/'):
     if save_path[-1] != '/': save_path += '/'
 
+    # 경로가 존재하는 지 검사 ( 없으면 자동 생성 )
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
     attack_map = {
         'SQL Injection' : 'sqli',
         'XSS' : 'xss'
