@@ -552,16 +552,107 @@ function changeLanguage() {
     });
 }
 
+let socket = new WebSocket("ws://192.168.16.218:6789");
+
+socket.onopen = function() {
+    console.log("WebSocket connection established.");
+};
+
+socket.onmessage = function(event) {
+    console.log("Message from server: ", event.data);
+};
+
+socket.onerror = function(error) {
+    console.error("WebSocket Error: ", error);
+};
+
+socket.onclose = function() {
+    console.log("WebSocket connection closed.");
+};
+
+
 // 공격 시작 함수
 function startAttack() {
-    const target = document.getElementById('targetInput').value;
-    if (!target) {
-        alert(i18next.t('targetMissing')); // 타겟 입력이 없으면 경고
+    const targetInput = document.getElementById("targetInput").value;
+    if (!targetInput) {
+        alert("타겟 URL 또는 IP를 입력하세요.");
         return;
     }
 
-    const selectedOptions = getSelectedOptions();
-    const jsonData = JSON.stringify({ target, options: selectedOptions }, null, 2);
-    console.log(jsonData); // JSON 데이터 콘솔에 출력
-    alert(i18next.t('startAlert', { target })); // 공격 시작 알림
+    const selectedOptions = Array.from(document.querySelectorAll(".checkbox-list input[type='checkbox']:checked"))
+        .map(checkbox => checkbox.value);
+
+    const requestData = {
+        target: targetInput,
+        options: selectedOptions
+    };
+
+    const data = {
+        target: targetInput,
+        options: selectedOptions
+    };
+
+    // 웹소켓으로 JSON 데이터를 전송
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(data));
+        alert(`공격이 ${targetInput} 대상으로 시작되었습니다.`);
+    } else {
+        alert("WebSocket 연결이 준비되지 않았습니다. 다시 시도해 주세요.");
+    }
+    
+
+    // 사용자 입력과 옵션 값을 콘솔에 출력
+    console.log("사용자 입력 URL/IP:", targetInput);
+    console.log("선택된 옵션들:", selectedOptions);
+
+    fetch(targetInput, {  // 사용자가 입력한 URL로 요청 전송
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("요청 실패");
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("서버 응답 데이터:", data);
+        alert(`${targetInput}으로 퍼징이 시작되었습니다!`);
+    })
+    .catch(error => {
+        console.error("에러 발생:", error);
+        alert("공격 시작에 실패했습니다.");
+    });
 }
+
+// 웹소켓과 통신 테스트
+const websocket = new WebSocket("ws://localhost:6789");
+
+websocket.onopen = function(event) {
+    console.log("Connected to Python WebSocket server");
+
+    // 서버로 데이터를 전송
+    const message = {
+        command: "check"
+    };
+    websocket.send(JSON.stringify(message));
+};
+
+websocket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    console.log("Received from server:", data);
+    // 데이터 처리 로직을 여기에 추가하세요.
+};
+
+websocket.onclose = function(event) {
+    console.log("Disconnected from WebSocket server");
+};
+
+websocket.onerror = function(error) {
+    console.log("WebSocket error:", error);
+};
+
+

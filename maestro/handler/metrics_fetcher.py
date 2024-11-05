@@ -4,16 +4,15 @@ import os
 
 latest_metrics = {}
 
-def fetch_metrics():
+def fetch_metrics(metric_fetch_port):
     global latest_metrics
 
     metric_fetch_delay = int(os.getenv("METRIC_FETCH_DELAY"))
-    
+
     while True:
         try:
-            response = requests.get("http://localhost:8000/metrics")
+            response = requests.get(f"http://localhost:{metric_fetch_port}/metrics")
             data = response.json()
-            # print(f"Data is {data}")
 
             latest_metrics = {
                 "errors": data.get("errors", 0),
