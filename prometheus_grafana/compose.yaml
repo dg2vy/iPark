@@ -25,14 +25,13 @@ services:
       - ./grafana:/etc/grafana/provisioning/datasources
     network_mode: host
 
-  nuclei:
-    image: projectdiscovery/nuclei
-    container_name: nuclei
+  redis:  # Redis 서비스 추가
+    image: redis:latest
+    container_name: redis
     ports:
-      - "8000:8000"  
-    command: ["-u", "http://192.168.16.218:4280", "-mp", "8000", "-stats"]
-    restart: unless-stopped  
-    network_mode: host
+      - 6379:6379  # 호스트의 6379 포트를 컨테이너의 6379 포트에 매핑
+    restart: unless-stopped
+    network_mode: host  # 동일한 네트워크 모드로 설정
 
 networks:
   fuzzer:

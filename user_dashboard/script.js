@@ -392,6 +392,7 @@ dropdownButton.addEventListener('click', () => {
     checkboxList.style.display = checkboxList.style.display === 'none' ? 'block' : 'none';
 });
 
+
 // 옵션 로드 함수
 function loadOptions() {
     const optionsContainer = document.querySelector('.checkbox-list');
@@ -579,57 +580,32 @@ function startAttack() {
         return;
     }
 
+    // 체크된 옵션들을 가져옴
     const selectedOptions = Array.from(document.querySelectorAll(".checkbox-list input[type='checkbox']:checked"))
         .map(checkbox => checkbox.value);
 
-    const requestData = {
-        target: targetInput,
-        options: selectedOptions
-    };
-
     const data = {
+        command: "execute",
         target: targetInput,
-        options: selectedOptions
+        options: selectedOptions // 선택한 옵션 포함
     };
 
     // 웹소켓으로 JSON 데이터를 전송
     if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(data));
+        socket.send(JSON.stringify(data)); // 데이터 전송
         alert(`공격이 ${targetInput} 대상으로 시작되었습니다.`);
     } else {
         alert("WebSocket 연결이 준비되지 않았습니다. 다시 시도해 주세요.");
     }
-    
 
     // 사용자 입력과 옵션 값을 콘솔에 출력
     console.log("사용자 입력 URL/IP:", targetInput);
     console.log("선택된 옵션들:", selectedOptions);
-
-    fetch(targetInput, {  // 사용자가 입력한 URL로 요청 전송
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("요청 실패");
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("서버 응답 데이터:", data);
-        alert(`${targetInput}으로 퍼징이 시작되었습니다!`);
-    })
-    .catch(error => {
-        console.error("에러 발생:", error);
-        alert("공격 시작에 실패했습니다.");
-    });
 }
 
+
 // 웹소켓과 통신 테스트
-const websocket = new WebSocket("ws://localhost:6789");
+const websocket = new WebSocket("ws://192.168.16.218:6789");
 
 websocket.onopen = function(event) {
     console.log("Connected to Python WebSocket server");
@@ -654,5 +630,6 @@ websocket.onclose = function(event) {
 websocket.onerror = function(error) {
     console.log("WebSocket error:", error);
 };
+
 
 
