@@ -1,7 +1,6 @@
 from runner import start_websocket_server
 from logger import setup_logger
-from handler import app as handler_app
-from handler.routes import subscribe_to_metrics_channel
+from handler import subscribe_to_metrics_channel, handler_app
 
 import threading
 import asyncio
@@ -17,7 +16,7 @@ def start_metrics_thread():
 
 def start_flask_thread(port):
     """Metric Exporter"""
-    thread = threading.Thread(target=handler_app.run, kwargs={'host': '0.0.0.0', 'port': port})
+    thread = threading.Thread(target=handler_app().run, kwargs={'host': '0.0.0.0', 'port': port})
     thread.start()
     return thread
 

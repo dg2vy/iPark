@@ -9,7 +9,7 @@ def get_unused_port():
         port = s.getsockname()[1]
     return port
 
-def check_http_access(url: str):
+def check_http_access(url):
     """http / https URL Health Check"""
     try:
         parsed_url = urlparse(url)

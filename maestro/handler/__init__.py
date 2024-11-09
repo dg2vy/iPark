@@ -1,10 +1,13 @@
 from flask import Flask
-from dotenv import load_dotenv # Dev Mode Only
 from .routes import metrics_bp
-
-# import os
+from dotenv import load_dotenv # Dev Mode Only
 
 load_dotenv()
 
-app = Flask(__name__)
-app.register_blueprint(metrics_bp)
+def handler_app():
+    app = Flask(__name__)
+    app.register_blueprint(metrics_bp)
+
+    return app
+
+from .routes import subscribe_to_metrics_channel

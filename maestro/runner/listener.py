@@ -43,11 +43,11 @@ async def run_nuclei(arguments, debug=False):
     else:
         stdout, stderr = await process.communicate()
 
-        if stdout:
+        if stdout is not None:
             output = stderr.decode()
             logger.info(output)
 
-        if stderr:
+        if stderr is not None:
             error = stderr.decode()
             logger.error(error)
 
