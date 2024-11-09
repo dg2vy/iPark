@@ -17,24 +17,16 @@ class ColoredFormatter(logging.Formatter):
 
 def setup_logger(name, level=logging.INFO, log_file=None):
     logger = logging.getLogger(name)
-    if not logger.hasHandlers():  # 중복 핸들러 방지
+    if not logger.hasHandlers():
         logger.setLevel(level)
 
-        # 로그 포맷터 설정 (색상 지원)
         formatter = ColoredFormatter(
             "%(asctime)s | %(name)s | %(levelname)s | %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S"
         )
 
-        # 콘솔 핸들러
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
-
-        # 파일 핸들러 (옵션)
-        if log_file:
-            file_handler = logging.FileHandler(log_file)
-            file_handler.setFormatter(formatter)
-            logger.addHandler(file_handler)
 
     return logger

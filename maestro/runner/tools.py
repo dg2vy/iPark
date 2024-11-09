@@ -1,14 +1,16 @@
+from urllib.parse import urlparse
 import socket
 import requests
-from urllib.parse import urlparse
 
 def get_unused_port():
+    """Return Unused Port"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('', 0))
         port = s.getsockname()[1]
     return port
 
-def check_http_access(url):
+def check_http_access(url: str):
+    """http / https URL Health Check"""
     try:
         parsed_url = urlparse(url)
         if parsed_url.scheme not in ("http", "https"):
