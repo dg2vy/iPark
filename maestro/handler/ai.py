@@ -1,7 +1,6 @@
 import json
 import websockets
 
-# external ip : 175.120.105.128
 async def send_attack_request(attack, server_ip, server_port, save_path='./template/'):
     if save_path[-1] != '/': save_path += '/'
     
