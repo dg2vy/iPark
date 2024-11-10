@@ -1,5 +1,6 @@
 from flask import Flask
 from .routes import metrics_bp
+from .ai import send_attack_request
 from dotenv import load_dotenv # Dev Mode Only
 
 load_dotenv()
