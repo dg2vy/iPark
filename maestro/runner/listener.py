@@ -70,6 +70,10 @@ async def cmd_handler(websocket, _):
             case "execute":
                 target = client_data.get('target')
 
+                if len(target) <= 0:
+                    await websocket.send(json.dumps({"message": "No Target", "timestamp": time.time()}))
+                    continue
+                
                 match check_http_access(target):
                     case "PERROR":
                         await websocket.send(json.dumps({"message": "Protocol Invalid", "timestamp": time.time()}))
@@ -95,33 +99,37 @@ async def cmd_handler(websocket, _):
                     case _:
                         await websocket.send(json.dumps({"message": "Target Invalid", "timestamp": time.time()}))
 
-            # case "multiple_execute":
-            #     target = client_data.get('target')
+            case "multiple_execute":
+                targets = client_data.get('target')
 
-            #     match check_http_access(target):
-            #         case "PERROR":
-            #             await websocket.send(json.dumps({"message": "Protocol Invalid", "timestamp": time.time()}))
+                if len(targets) >= 0:
+                    await websocket.send(json.dumps({"message": "Target Length Invalid", "timestamp": time.time()}))
+                    continue
 
-            #         case 200:
-            #             await websocket.send(json.dumps({"message": "Target Valid", "timestamp": time.time()}))
-            #             options = client_data.get('options', [])
-            #             metrics_port = str(get_unused_port())
-            #             metric_url = f"http://localhost:{metrics_port}/metrics"
-            #             arguments = ["-stats", "-mp", metrics_port, "-u", target] + options
-                            
-            #             metric_task = asyncio.create_task(fetch_metrics(metric_url))
-            #             return_code = await run_nuclei(arguments, debug=False)
-                        
-            #             websocket.send(json.dumps({"message": f"Nuclei Return Code: {return_code}", "timestamp": time.time()}))
-            #             metric_task.cancel()
+                if all(check_http_access(t) == 200 for t in target):
+                    await websocket.send(json.dumps({"message": "All Targets Valid", "timestamp": time.time()}))
+                    
+                    options = client_data.get('options', [])
+                    
+                    metrics_port = str(get_unused_port())
+                    metric_url = f"http://localhost:{metrics_port}/metrics"
 
-            #             try:
-            #                 await metric_task
-            #             except asyncio.CancelledError:
-            #                 logger.error("Metric fetching task was cancelled")
+                    url_options = ["-u " + t for t in targets]
+                    arguments = ["-stats", "-mp", metrics_port] + url_options + options
 
-            #         case _:
-            #             await websocket.send(json.dumps({"message": "Target Invalid", "timestamp": time.time()}))
+                    metric_task = asyncio.create_task(fetch_metrics(metric_url))
+                    return_code = await run_nuclei(arguments, debug=False)
+                    
+                    await websocket.send(json.dumps({"message": f"Nuclei Return Code: {return_code}", "timestamp": time.time()}))
+                    metric_task.cancel()
+
+                    try:
+                        await metric_task
+                    except asyncio.CancelledError:
+                        logger.error("Metric fetching task was cancelled")
+                else:
+                    await websocket.send(json.dumps({"message": "One or more targets are invalid", "timestamp": time.time()}))
+
                         
             case _:
                 await websocket.send(json.dumps({"message": "Unknown Command", "timestamp": time.time()}))
