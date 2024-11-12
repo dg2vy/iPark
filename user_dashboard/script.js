@@ -733,32 +733,32 @@ function closeOptionsTab() {
     document.getElementById("optionsTab").style.display = "none";
 }
 
-// 새로운 WebSocket 연결 설정
-const websocketCommand = new WebSocket("ws://192.168.16.218:6789");
+// WebSocket 연결 설정
+const socket = new WebSocket("ws://192.168.16.218:6789"); 
 
-websocketCommand.onopen = function (event) {
+// WebSocket 연결 성공 시 실행되는 함수
+socket.onopen = function(event) {
     console.log("WebSocket 연결이 열렸습니다.");
-
-/*     const commandMessage = JSON.stringify({ command: "ai_start" });
-    websocketCommand.send(commandMessage);
-    console.log("백엔드로 'ai_start' 명령을 전송했습니다."); */
 };
 
-websocketCommand.onmessage = function (event) {
+// WebSocket 메시지 수신 시 실행되는 함수
+socket.onmessage = function(event) {
     const message = event.data;
-
-/*     // 받은 메시지가 "Nuclie Finish"일 경우 "ai_start" 명령 전송
-    if (message === "Nuclei Execute Finish") {
+    
+    // 받은 메시지가 "Nuclie Finish"일 경우 "ai_start" 명령 전송
+    if (message === "Nuclie Finish") {
         const commandMessage = JSON.stringify({ command: "ai_start" });
-        websocketCommand.send(commandMessage);
+        socket.send(commandMessage);
         console.log("백엔드로 'ai_start' 명령을 전송했습니다.");
-    } */
+    }
 };
 
-websocketCommand.onclose = function (event) {
+// WebSocket 연결 종료 시 실행되는 함수
+socket.onclose = function(event) {
     console.log("WebSocket 연결이 종료되었습니다.");
 };
 
-websocketCommand.onerror = function (error) {
+// WebSocket 에러 발생 시 실행되는 함수
+socket.onerror = function(error) {
     console.log("WebSocket 에러:", error);
 };
