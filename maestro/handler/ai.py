@@ -1,10 +1,14 @@
+from logger import setup_logger
 import json
 import websockets
+import time
+import os
 
-async def send_attack_request(attack, server_ip, server_port, save_path='./template/'):
-    if save_path[-1] != '/': save_path += '/'
+logger = setup_logger(__name__)
+
+async def send_attack_request(attack_type, server_ip, server_port, root_template_path):
     
-    attack_map = {
+    attack_type_map = {
         'SQL Injection' : 'sqli',
         'XSS' : 'xss',
         'RCE' : 'rce'
@@ -12,10 +16,11 @@ async def send_attack_request(attack, server_ip, server_port, save_path='./templ
     
     url = f"ws://{server_ip}:{server_port}/ws"
     data = {
-        'attack': attack
+        'attack': attack_type
     }
 
     async with websockets.connect(url) as websocket:
+
         await websocket.send(json.dumps(data)) # json 형식으로 데이터 전송
         response = await websocket.recv() # 서버로부터 응답 수신
 
@@ -24,16 +29,26 @@ async def send_attack_request(attack, server_ip, server_port, save_path='./templ
         
         if isinstance(yaml_data, dict):
             if 'error' in yaml_data.keys():
-                print(yaml_data['error'])
+                logger.info(yaml_data['error'])
             else:
-                print(yaml_data)
-            exit()
+                logger.info(yaml_data)
+                
         elif isinstance(yaml_data, str):
-            print('Response : Success')
+            logger.info('Response : Success')
+
+
+        if not os.path.exists(root_template_path):
+            os.makedirs(root_template_path, exist_ok=True)
+
+        file = f"{attack_type_map[attack_type]}_{time.time()}.yaml"
+        full_path = f"{root_template_path}/{file}"
 
         try:
-            with open(f'{save_path}{attack_map[attack]}_new.yaml', 'w') as file:
+            with open(full_path, 'w') as file:
                 file.write(yaml_data)
-            print(f"Yaml file saved : {save_path}{attack_map[attack]}_new.yaml")
+            logger.info(f"Yaml file saved : {full_path}")
+
+            return full_path
+
         except Exception as e:
-            print("Error:", e)
+            logger.error("Error:", e)
