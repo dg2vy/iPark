@@ -18,14 +18,13 @@
 
     <div class="target-section">
         <input type="text" id="targetInput" placeholder="http TARGET URL or IP">
-        <button class="start-button" onclick="startAttack()">공격 시작</button>
+        <button class="start-button" onclick="startAttack()">옵션 확인</button>
     </div>
 
     <div class="options-section">
         <div class="options-section">
             <button class="dropdown-button" onclick="toggleOptionsTab()">옵션 선택</button>
         </div>
-        <button class="clone-button" onclick="showCopyMessage()">⧉</button>
     </div>
 </div>
 
@@ -213,10 +212,17 @@
 </div>
 <!-- 콘솔 추가 -->
 <div class="console" style="display:none;">
+<<<<<<< HEAD
     <h3>옵션 입력</h3>
     <div id="console-content"></div>
     <button class="close-button" onclick="closeConsole()">닫기</button>
     <button class="send-button" onclick="sendPacket()">패킷 전송</button> <!-- 추가된 전송 버튼 -->
+=======
+    <h3>옵션 확인</h3>
+    <div id="console-content"></div>
+    <button class="close-button" onclick="closeConsole()">닫기</button>
+    <button class="send-button" onclick="sendPacket()">공격 시작</button> <!-- 추가된 전송 버튼 -->
+>>>>>>> 7172e10 (Add AI Connect Handler and AI Generated Template)
 </div>
 
 <div id="copyMessage" class="copy-message" style="display: none;"></div>

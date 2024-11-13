@@ -17,14 +17,31 @@ async def ai_runner(event, arguments, metric_url):
     ai_ip = os.getenv('AI_IP')
     ai_port = os.getenv('AI_PORT')
     root_template_folder = os.getenv('AI_TEMPLATE_PATH', '../ai_generated_template')
+    attack_types = ['RCE', 'XSS', 'SQL Injection']
 
     if not os.path.exists(root_template_folder):
         os.mkdir(root_template_folder)
 
-    while not event.is_set():  # 이벤트가 설정되지 않은 동안 계속 실행
+    elif os.path.exists(root_template_folder) and len(os.listdir(root_template_folder)) > 0:
+            arguments.append("-t")
+            arguments.append(root_template_folder)
+
+            metric_task = asyncio.create_task(fetch_metrics(metric_url))
+
+            logger.info(f"Aleady Generated AI Template Included Arguments: {arguments}")
+
+            return_code = await run_nuclei(arguments, debug=True)
+            # logger.info(f"Nuclei Return Code: {return_code}")  
+            
+            metric_task.cancel()  
+            arguments.pop()
+            arguments.pop()
+
+
+    while not event.is_set():
         logger.info("Running ai background task")
 
-        for attack in ['RCE', 'XSS', 'SQL Injection']:
+        for attack in attack_types:
             tempalte_path = await send_attack_request(attack, ai_ip, ai_port, root_template_folder)
             
             arguments.append("-t")
@@ -84,15 +101,11 @@ async def run_nuclei(arguments, debug=False):
             error = stderr.decode()
             logger.error(error)
 
-            # if error:
-                # with open(f"error{time.time()}.log", 'a') as error_file:
-                #     error_file.write(error)
-
     return process.returncode
 
 async def cmd_handler(websocket, _):
-    ai_stop_event = None  # ai_stop_event 초기화
-    ai_task = None     # ai_task 초기화
+    ai_stop_event = None 
+    ai_task = None
 
     while True:
         client_message = await websocket.recv()
@@ -137,8 +150,8 @@ async def cmd_handler(websocket, _):
                                 match new_data.get("command"):
                                     case "ai_start":   
                                         if ai_task and not ai_task.done():
-                                            ai_stop_event.set()         # 기존 이벤트 설정하여 작업 중지
-                                            await ai_task            # 이전 백그라운드 작업이 완료될 때까지 대기
+                                            ai_stop_event.set() 
+                                            await ai_task 
                                         
                                         metrics_port = str(get_unused_port())
                                         metric_url = f"http://localhost:{metrics_port}/metrics"
@@ -148,8 +161,8 @@ async def cmd_handler(websocket, _):
 
                                     case "ai_stop":
                                         if ai_task and not ai_task.done():
-                                            ai_stop_event.set()         # 이벤트 설정하여 작업 중지
-                                            await ai_task            # 백그라운드 작업이 완료될 때까지 대기
+                                            ai_stop_event.set() 
+                                            await ai_task 
                                         break
                         
                             except asyncio.TimeoutError:
@@ -218,8 +231,8 @@ async def cmd_handler(websocket, _):
                         match new_data.get("command"):
                             case "ai_start":   
                                 if ai_task and not ai_task.done():
-                                    ai_stop_event.set()         # 기존 이벤트 설정하여 작업 중지
-                                    await ai_task            # 이전 백그라운드 작업이 완료될 때까지 대기
+                                    ai_stop_event.set()     
+                                    await ai_task          
                                 
                                 metrics_port = str(get_unused_port())
                                 metric_url = f"http://localhost:{metrics_port}/metrics"
@@ -229,8 +242,8 @@ async def cmd_handler(websocket, _):
 
                             case "ai_stop":
                                 if ai_task and not ai_task.done():
-                                    ai_stop_event.set()         # 이벤트 설정하여 작업 중지
-                                    await ai_task            # 백그라운드 작업이 완료될 때까지 대기
+                                    ai_stop_event.set()      
+                                    await ai_task  
 
                                 if os.path.exists(target_file):
                                     os.remove(target_file)

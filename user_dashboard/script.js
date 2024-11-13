@@ -9,6 +9,7 @@ i18next.init({
                 copyMessage: "옵션 복사 완료",
                 startAlert: "{{target}}으로 퍼징이 시작되었습니다!",
                 targetMissing: "타겟 URL 또는 IP를 입력하세요.",
+                dropdownButton: "옵션 선택",
                 options: {
                     target: [
                         /* { label: "-u, -target [스캔할 대상 URL/호스트]", value: "-u" }, */
@@ -198,6 +199,7 @@ i18next.init({
                 copyMessage: "Options copied successfully",
                 startAlert: "Fuzzing has started on {{target}}!",
                 targetMissing: "Please enter the target URL or IP.",
+                dropdownButton: "options selcect",
                 options: {
                     target: [
                         /* { label: "-u, -target [Scan target URL/host]", value: "-u" }, */
@@ -520,20 +522,6 @@ function getSelectedOptions() {
     return selectedOptions;
 }
 
-function showCopyMessage() {
-    const selectedOptions = getSelectedOptions().join(', '); // 선택된 옵션들을 문자열로 변환
-    navigator.clipboard.writeText(selectedOptions).then(() => {
-        const copyMessageElement = document.getElementById('copyMessage');
-        copyMessageElement.textContent = i18next.t('copyMessage'); // 옵션 복사 완료 메시지
-        copyMessageElement.style.display = 'block'; // 메시지 표시
-        setTimeout(() => {
-            copyMessageElement.style.display = 'none'; // 3초 후 메시지 숨기기
-        }, 3000);
-    }).catch(err => {
-        console.error('클립보드 복사 실패:', err);
-    });
-}
-
 function updateUI() {
     document.querySelector('.start-button').textContent = i18next.t('startButton');
     document.querySelector('#targetInput').placeholder = i18next.t('targetPlaceholder');
@@ -628,40 +616,50 @@ function populateConsole(selectedOptions) {
 
 function sendPacket() {
     const targetInput = document.getElementById("targetInput").value;
-    const targets = targetInput.split(",").map(url => url.trim());  // 쉼표로 URL 구분하여 배열로 변환
+    const targets = targetInput.split(",").map(url => url.trim());
     const selectedOptions = getSelectedOptions();
-    const optionsWithInput = []; // 사용자 입력을 포함한 옵션 배열
+    const optionsWithInput = [];
 
-    // 선택된 옵션과 사용자 입력을 통합하여 배열 구성
+    // 사용자 입력 포함 옵션 구성
     selectedOptions.forEach(option => {
-        optionsWithInput.push(option); // 체크된 옵션 추가
-
-        // 각 옵션에 대해 입력된 값을 배열에 추가
+        optionsWithInput.push(option);
         const inputValue = document.querySelector(`input[name='${option}']`).value;
         if (inputValue) {
-            optionsWithInput.push(inputValue); // 사용자 입력 추가
+            optionsWithInput.push(inputValue);
         }
     });
 
-    // target 개수에 따라 command와 target 데이터 타입 결정
+    // command 설정
     const commandType = targets.length > 1 ? "multiple_execute" : "execute";
-    const targetData = targets.length > 1 ? targets : targets[0];  // 단일일 때는 문자열로 처리
+    const targetData = targets.length > 1 ? targets : targets[0];
 
-    // 최종 데이터 구성
+    // 파라미터 구조체
     const data = {
-        command: commandType,  // 2개 이상일 때 "multiple_execute", 그렇지 않으면 "execute"
-        target: targetData,    // target이 하나일 때는 문자열로, 여러 개일 때는 배열로
-        options: optionsWithInput // 사용자 입력이 포함된 옵션
+        command: commandType,
+        target: targetData,
+        options: optionsWithInput
     };
 
-    // 웹소켓으로 JSON 데이터 전송
+    // WebSocket으로 데이터 전송
     if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(data)); // 데이터 전송
+        socket.send(JSON.stringify(data));
         console.log(`공격이 ${targetInput} 대상으로 시작되었습니다.`);
     } else {
         alert("WebSocket 연결이 준비되지 않았습니다. 다시 시도해 주세요.");
     }
 }
+
+// WebSocket에서 메시지 수신
+socket.onmessage = function (event) {
+    const message = event.data;
+
+    // 메시지가 "Nuclei Execute Finish" 일 때
+    if (message === "Nuclei Execute Finish") {
+        const commandMessage = JSON.stringify({ command: "ai_start" });
+        socket.send(commandMessage); // ai_start 명령 전송
+        console.log("백엔드로 'ai_start' 명령을 전송했습니다.");
+    }
+};
 
 
 
@@ -681,33 +679,32 @@ function getSelectedOptions() {
 
 
 
-// 웹소켓과 통신 테스트
-const websocket = new WebSocket("ws://192.168.16.218:6789");
+// 기존 WebSocket 연결들에 대한 변수 이름 변경
+const websocketMain = new WebSocket("ws://192.168.16.218:6789");
 
-websocket.onopen = function (event) {
+websocketMain.onopen = function (event) {
     console.log("Connected to Python WebSocket server");
 
     // 서버로 데이터를 전송
     const message = {
         command: "check"
     };
-    websocket.send(JSON.stringify(message));
+    websocketMain.send(JSON.stringify(message));
 };
 
-websocket.onmessage = function (event) {
+websocketMain.onmessage = function (event) {
     const data = JSON.parse(event.data);
     console.log("Received from server:", data);
     // 데이터 처리 로직을 여기에 추가하세요.
 };
 
-websocket.onclose = function (event) {
+websocketMain.onclose = function (event) {
     console.log("Disconnected from WebSocket server");
 };
 
-websocket.onerror = function (error) {
+websocketMain.onerror = function (error) {
     console.log("WebSocket error:", error);
 };
-
 
 // 콘솔 창 닫기 함수
 function closeConsole() {
@@ -736,32 +733,32 @@ function closeOptionsTab() {
     document.getElementById("optionsTab").style.display = "none";
 }
 
-// WebSocket 연결 설정
-const socket = new WebSocket("ws://192.168.16.218:6789"); 
+// 새로운 WebSocket 연결 설정
+const websocketCommand = new WebSocket("ws://192.168.16.218:6789");
 
-// WebSocket 연결 성공 시 실행되는 함수
-socket.onopen = function(event) {
+websocketCommand.onopen = function (event) {
     console.log("WebSocket 연결이 열렸습니다.");
+
+/*     const commandMessage = JSON.stringify({ command: "ai_start" });
+    websocketCommand.send(commandMessage);
+    console.log("백엔드로 'ai_start' 명령을 전송했습니다."); */
 };
 
-// WebSocket 메시지 수신 시 실행되는 함수
-socket.onmessage = function(event) {
+websocketCommand.onmessage = function (event) {
     const message = event.data;
-    
-    // 받은 메시지가 "Nuclie Finish"일 경우 "ai_start" 명령 전송
-    if (message === "Nuclie Finish") {
+
+/*     // 받은 메시지가 "Nuclie Finish"일 경우 "ai_start" 명령 전송
+    if (message === "Nuclei Execute Finish") {
         const commandMessage = JSON.stringify({ command: "ai_start" });
-        socket.send(commandMessage);
+        websocketCommand.send(commandMessage);
         console.log("백엔드로 'ai_start' 명령을 전송했습니다.");
-    }
+    } */
 };
 
-// WebSocket 연결 종료 시 실행되는 함수
-socket.onclose = function(event) {
+websocketCommand.onclose = function (event) {
     console.log("WebSocket 연결이 종료되었습니다.");
 };
 
-// WebSocket 에러 발생 시 실행되는 함수
-socket.onerror = function(error) {
+websocketCommand.onerror = function (error) {
     console.log("WebSocket 에러:", error);
 };
