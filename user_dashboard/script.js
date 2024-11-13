@@ -512,14 +512,10 @@ function loadOptions() {
 
 // 선택된 체크박스 값을 가져오는 함수
 function getSelectedOptions() {
-    const checkboxes = checkboxList.querySelectorAll('input[type="checkbox"]');
-    const selectedOptions = [];
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            selectedOptions.push(checkbox.value);
-        }
-    });
-    return selectedOptions;
+    const checkboxes = document.querySelectorAll('.checkbox-list input[type="checkbox"]');
+    return Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
 }
 
 function updateUI() {
@@ -527,41 +523,94 @@ function updateUI() {
     document.querySelector('#targetInput').placeholder = i18next.t('targetPlaceholder');
 }
 
-// 언어 변경 함수
 function changeLanguage() {
     const selectedLanguage = document.getElementById('languageSelect').value;
     i18next.changeLanguage(selectedLanguage, () => {
         updateUI();
-        loadOptions(); // 언어 변경 시 옵션 재로드
+        loadOptions();
     });
 }
 
-/* // .env 파일에서 환경 변수를 로드
-require('dotenv').config();
+function toggleOptionsTab() {
+    const optionsTab = document.getElementById("optionsTab");
+    if (optionsTab.style.display === "none" || !optionsTab.style.display) {
+        optionsTab.style.display = "block";
+    } else {
+        optionsTab.style.display = "none";
+    }
+}
 
-// WebSocket 연결에 사용할 IP와 포트
-const websocketIp = process.env.WEBSOCKET_IP;
-const websocketPort = process.env.WEBSOCKET_PORT;
- */
+function closeOptionsTab() {
+    document.getElementById("optionsTab").style.display = "none";
+}
 
-let socket = new WebSocket("ws://192.168.16.218:6789");
+// WebSocket 연결 설정 (단일 인스턴스)
+const websocket = new WebSocket("ws://192.168.16.218:6789");
 
-socket.onopen = function () {
+websocket.onopen = function () {
     console.log("WebSocket connection established.");
+    
+    // 초기 연결 시 check 명령 전송
+    websocket.send(JSON.stringify({ command: "check" }));
 };
 
-socket.onmessage = function (event) {
-    console.log("Message from server: ", event.data);
+websocket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+
+    // 메시지의 command를 기준으로 작업을 구분
+    switch (data.message) {
+        case "Target Valid":
+            console.log("Target is valid.");
+            // ai_start 명령을 전송
+            websocket.send(JSON.stringify({ command: "ai_start" }));
+            console.log("Sending ai_start command to the server."); // ai_start 전송 로그
+            break;
+
+        case "executeFinish":
+            console.log("Nuclei Execute Finish");
+            break;
+
+        case "ai_start":
+            console.log("AI start command processed:", data);
+            break;
+
+        default:
+            console.log("Unrecognized command:", data.message);
+    }
 };
 
-socket.onerror = function (error) {
-    console.error("WebSocket Error: ", error);
+/* websocket.onmessage = function (event) {
+    console.log(`Received: ${event.data}`);
+    const data = JSON.parse(event.data);
+
+    // 메시지의 command를 기준으로 작업을 구분
+    switch (data.command) {
+        case "check":
+            console.log("Check command received:", data);
+            break;
+
+        case "executeFinish":
+            console.log("Nuclei Execute Finish");
+            // ai_start 명령을 서버로 전송
+            websocket.send(JSON.stringify({ command: "ai_start" }));
+            break;
+    
+        case "ai_start":
+            console.log("AI start command processed:", data);
+            break;
+
+        default:
+            console.log("Unrecognized command:", data.command);
+    }
+}; */
+
+websocket.onerror = function (error) {
+    console.error("WebSocket Error:", error);
 };
 
-socket.onclose = function () {
+websocket.onclose = function () {
     console.log("WebSocket connection closed.");
 };
-
 
 // 공격 시작 함수
 function startAttack() {
@@ -571,34 +620,27 @@ function startAttack() {
         return;
     }
 
-    // 체크된 옵션들이 있는지 가져옴
     const selectedOptions = getSelectedOptions();
-
-    // 사용자 입력과 옵션 값을 콘솔에 출력
     console.log("사용자 입력 URL/IP:", targetInput);
     console.log("선택된 옵션들:", selectedOptions);
-    
-    // 대시보드 애니메이션
+
     const dashboard = document.querySelector('.dashboard');
     const consoleDiv = document.querySelector('.console');
 
-    // 애니메이션 적용하여 대시보드 왼쪽으로 이동
     dashboard.style.transition = "transform 0.5s ease";
     dashboard.style.transform = "translateX(-100%)";
 
-    // 애니메이션 후 콘솔 표시
     setTimeout(() => {
         consoleDiv.style.display = "block";
-        populateConsole(selectedOptions); // 선택된 옵션에 맞춰 콘솔 구성
+        populateConsole(selectedOptions);
     }, 500);
 }
 
 // 콘솔에 인자 입력 필드를 추가하는 함수
 function populateConsole(selectedOptions) {
     const consoleContent = document.getElementById('console-content');
-    consoleContent.innerHTML = ''; // 기존 내용 초기화
+    consoleContent.innerHTML = '';
 
-    // 각각의 선택된 옵션에 대해 인자 입력 필드 생성
     selectedOptions.forEach(option => {
         const inputLabel = document.createElement('label');
         inputLabel.innerText = ` ${option}: `;
@@ -618,147 +660,28 @@ function sendPacket() {
     const targetInput = document.getElementById("targetInput").value;
     const targets = targetInput.split(",").map(url => url.trim());
     const selectedOptions = getSelectedOptions();
-    const optionsWithInput = [];
-
-    // 사용자 입력 포함 옵션 구성
-    selectedOptions.forEach(option => {
-        optionsWithInput.push(option);
+    const optionsWithInput = selectedOptions.map(option => {
         const inputValue = document.querySelector(`input[name='${option}']`).value;
-        if (inputValue) {
-            optionsWithInput.push(inputValue);
-        }
-    });
+        return inputValue ? [option, inputValue] : [option];
+    }).flat();
 
-    // command 설정
-    const commandType = targets.length > 1 ? "multiple_execute" : "execute";
-    const targetData = targets.length > 1 ? targets : targets[0];
+    // AI 체크박스 상태 확인
+    const aiCheckbox = document.getElementById("aiCheckbox").checked;
+    const aiOption = aiCheckbox ? "true" : "false";
 
-    // 파라미터 구조체
     const data = {
-        command: commandType,
-        target: targetData,
-        options: optionsWithInput
+        command: targets.length > 1 ? "multiple_execute" : "execute",
+        target: targets.length > 1 ? targets : targets[0],
+        options: optionsWithInput,
+        Ai: aiOption  // AI 옵션 추가
     };
 
     // WebSocket으로 데이터 전송
-    if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(data));
-        console.log(`공격이 ${targetInput} 대상으로 시작되었습니다.`);
+    if (websocket.readyState === WebSocket.OPEN) {
+        websocket.send(JSON.stringify(data));
+        console.log(`공격이 ${targetInput} 대상으로 시작되었습니다. (AI 옵션: ${aiOption})`);
     } else {
         alert("WebSocket 연결이 준비되지 않았습니다. 다시 시도해 주세요.");
     }
 }
 
-// WebSocket에서 메시지 수신
-socket.onmessage = function (event) {
-    const message = event.data;
-
-    // 메시지가 "Nuclei Execute Finish" 일 때
-    if (message === "Nuclei Execute Finish") {
-        const commandMessage = JSON.stringify({ command: "ai_start" });
-        socket.send(commandMessage); // ai_start 명령 전송
-        console.log("백엔드로 'ai_start' 명령을 전송했습니다.");
-    }
-};
-
-
-
-
-// 체크된 체크박스 값을 가져오는 함수
-function getSelectedOptions() {
-    const checkboxes = document.querySelectorAll('.checkbox-list input[type="checkbox"]');
-    const selectedOptions = [];
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            selectedOptions.push(checkbox.value);
-        }
-    });
-    return selectedOptions;
-}
-
-
-
-
-// 기존 WebSocket 연결들에 대한 변수 이름 변경
-const websocketMain = new WebSocket("ws://192.168.16.218:6789");
-
-websocketMain.onopen = function (event) {
-    console.log("Connected to Python WebSocket server");
-
-    // 서버로 데이터를 전송
-    const message = {
-        command: "check"
-    };
-    websocketMain.send(JSON.stringify(message));
-};
-
-websocketMain.onmessage = function (event) {
-    const data = JSON.parse(event.data);
-    console.log("Received from server:", data);
-    // 데이터 처리 로직을 여기에 추가하세요.
-};
-
-websocketMain.onclose = function (event) {
-    console.log("Disconnected from WebSocket server");
-};
-
-websocketMain.onerror = function (error) {
-    console.log("WebSocket error:", error);
-};
-
-// 콘솔 창 닫기 함수
-function closeConsole() {
-    const dashboard = document.querySelector('.dashboard');
-    const consoleDiv = document.querySelector('.console');
-
-    // 대시보드를 원래 위치로 되돌리기
-    dashboard.style.transform = "translateX(0)";
-
-    // 콘솔 숨기기
-    consoleDiv.style.display = "none";
-}
-
-function toggleOptionsTab() {
-    const optionsTab = document.getElementById("optionsTab");
-    if (optionsTab.style.display === "none" || !optionsTab.style.display) {
-        optionsTab.style.display = "block";
-    } else {
-        optionsTab.style.display = "none";
-    }
-}
-
-
-
-function closeOptionsTab() {
-    document.getElementById("optionsTab").style.display = "none";
-}
-
-// 새로운 WebSocket 연결 설정
-const websocketCommand = new WebSocket("ws://192.168.16.218:6789");
-
-websocketCommand.onopen = function (event) {
-    console.log("WebSocket 연결이 열렸습니다.");
-
-/*     const commandMessage = JSON.stringify({ command: "ai_start" });
-    websocketCommand.send(commandMessage);
-    console.log("백엔드로 'ai_start' 명령을 전송했습니다."); */
-};
-
-websocketCommand.onmessage = function (event) {
-    const message = event.data;
-
-/*     // 받은 메시지가 "Nuclie Finish"일 경우 "ai_start" 명령 전송
-    if (message === "Nuclei Execute Finish") {
-        const commandMessage = JSON.stringify({ command: "ai_start" });
-        websocketCommand.send(commandMessage);
-        console.log("백엔드로 'ai_start' 명령을 전송했습니다.");
-    } */
-};
-
-websocketCommand.onclose = function (event) {
-    console.log("WebSocket 연결이 종료되었습니다.");
-};
-
-websocketCommand.onerror = function (error) {
-    console.log("WebSocket 에러:", error);
-};
