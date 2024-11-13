@@ -7,9 +7,8 @@ from logger import setup_logger
 
 logger = setup_logger(__name__)
 
-async def fetch_metrics(url):
+async def fetch_metrics(url, metric_fetch_delay):
     redis_client = redis.from_url(f"redis://localhost:{str(os.getenv('REDIS_PORT', 6379))}", db=0)
-    metric_fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
 
     while True:
         try:

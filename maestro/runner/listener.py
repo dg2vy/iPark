@@ -23,19 +23,19 @@ async def ai_runner(event, arguments, metric_url):
         os.mkdir(root_template_folder)
 
     elif os.path.exists(root_template_folder) and len(os.listdir(root_template_folder)) > 0:
-            arguments.append("-t")
-            arguments.append(root_template_folder)
+        arguments.append("-t")
+        arguments.append(root_template_folder)
 
-            metric_task = asyncio.create_task(fetch_metrics(metric_url))
+        metric_task = asyncio.create_task(fetch_metrics(metric_url, 0.1))
 
-            logger.info(f"Aleady Generated AI Template Included Arguments: {arguments}")
+        logger.info(f"Aleady Generated AI Template Included Arguments: {arguments}")
 
-            return_code = await run_nuclei(arguments, debug=True)
-            # logger.info(f"Nuclei Return Code: {return_code}")  
-            
-            metric_task.cancel()  
-            arguments.pop()
-            arguments.pop()
+        return_code = await run_nuclei(arguments, debug=True)
+        # logger.info(f"Nuclei Return Code: {return_code}")  
+        
+        metric_task.cancel()  
+        arguments.pop()
+        arguments.pop()
 
 
     while not event.is_set():
@@ -47,7 +47,7 @@ async def ai_runner(event, arguments, metric_url):
             arguments.append("-t")
             arguments.append(tempalte_path)
 
-            metric_task = asyncio.create_task(fetch_metrics(metric_url))
+            metric_task = asyncio.create_task(fetch_metrics(metric_url, 0.1))
 
             logger.info(f"AI Template Included Arguments: {arguments}")
 
@@ -125,11 +125,14 @@ async def cmd_handler(websocket, _):
                     case 200:
                         await websocket.send(json.dumps({"message": "Target Valid", "timestamp": time.time()}))
                         options = client_data.get('options', [])
+                        ai_flag = False if client_data.get("Ai") == "false" else True
+                        
                         metrics_port = str(get_unused_port())
                         metric_url = f"http://localhost:{metrics_port}/metrics"
                         arguments = ["-stats", "-mp", metrics_port, "-u", target] + options
-                            
-                        metric_task = asyncio.create_task(fetch_metrics(metric_url))
+                        fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
+
+                        metric_task = asyncio.create_task(fetch_metrics(metric_url, fetch_delay))
                         return_code = await run_nuclei(arguments, debug=True)
                         logger.info(f"Nuclei Return Code: {return_code}")
                         
@@ -141,33 +144,17 @@ async def cmd_handler(websocket, _):
                         except asyncio.CancelledError:
                             logger.debug("Metric fetching task was cancelled")
 
-                        while True:
-                            try:
-                                new_message = await asyncio.wait_for(websocket.recv(), timeout=2.0)
-                                new_data = json.loads(new_message)
-                                logger.info(f"Client Data: {new_data}")
+                        if ai_flag == True:
+                            if ai_task and not ai_task.done():
+                                ai_stop_event.set() 
+                                await ai_task 
+                            
+                            metrics_port = str(get_unused_port())
+                            metric_url = f"http://localhost:{metrics_port}/metrics"
 
-                                match new_data.get("command"):
-                                    case "ai_start":   
-                                        if ai_task and not ai_task.done():
-                                            ai_stop_event.set() 
-                                            await ai_task 
-                                        
-                                        metrics_port = str(get_unused_port())
-                                        metric_url = f"http://localhost:{metrics_port}/metrics"
-
-                                        ai_stop_event = asyncio.Event() 
-                                        ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
-
-                                    case "ai_stop":
-                                        if ai_task and not ai_task.done():
-                                            ai_stop_event.set() 
-                                            await ai_task 
-                                        break
+                            ai_stop_event = asyncio.Event() 
+                            ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
                         
-                            except asyncio.TimeoutError:
-                                continue
-
                     case _:
                         await websocket.send(json.dumps({"message": "Target Invalid", "timestamp": time.time()}))
 
@@ -208,8 +195,9 @@ async def cmd_handler(websocket, _):
                 metric_url = f"http://localhost:{metrics_port}/metrics"
                 
                 arguments = ["-stats", "-mp", metrics_port, "-l", target_file] + options
+                fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
 
-                metric_task = asyncio.create_task(fetch_metrics(metric_url))
+                metric_task = asyncio.create_task(fetch_metrics(metric_url, fetch_delay))
                 return_code = await run_nuclei(arguments, debug=True)
 
                 logger.info(f"Nuclei Return Code: {return_code}")
@@ -222,37 +210,24 @@ async def cmd_handler(websocket, _):
                 except asyncio.CancelledError:
                     logger.error("Metric fetching task was cancelled")
 
-                while True:
-                    try:
-                        new_message = await asyncio.wait_for(websocket.recv(), timeout=2.0)
-                        new_data = json.loads(new_message)
-                        logger.info(f"Client Data: {new_data}")
+                if ai_flag == True:
+                    if ai_task and not ai_task.done():
+                        ai_stop_event.set() 
+                        await ai_task 
+                    
+                    metrics_port = str(get_unused_port())
+                    metric_url = f"http://localhost:{metrics_port}/metrics"
 
-                        match new_data.get("command"):
-                            case "ai_start":   
-                                if ai_task and not ai_task.done():
-                                    ai_stop_event.set()     
-                                    await ai_task          
-                                
-                                metrics_port = str(get_unused_port())
-                                metric_url = f"http://localhost:{metrics_port}/metrics"
+                    ai_stop_event = asyncio.Event() 
+                    ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
 
-                                ai_stop_event = asyncio.Event() 
-                                ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
-
-                            case "ai_stop":
-                                if ai_task and not ai_task.done():
-                                    ai_stop_event.set()      
-                                    await ai_task  
-
-                                if os.path.exists(target_file):
-                                    os.remove(target_file)
-                                    logger.info(f"Target File '{target_file}' is Deleted")
-                                break
-                
-                    except asyncio.TimeoutError:
-                        continue
                         
+            case "ai_stop":
+                if ai_task and not ai_task.done():
+                    ai_stop_event.set() 
+                    await ai_task 
+
+
             case _:
                 await websocket.send(json.dumps({"message": "Unknown Command", "timestamp": time.time()}))
 
