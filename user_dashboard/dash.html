@@ -22,8 +22,11 @@
     </div>
 
     <div class="options-section">
-        <div class="options-section">
-            <button class="dropdown-button" onclick="toggleOptionsTab()">옵션 선택</button>
+        <button class="dropdown-button" onclick="toggleOptionsTab()">옵션 선택</button>
+        <div class="ai-option">
+            <label>
+                <input type="checkbox" id="aiCheckbox"> AI를 사용하시겠습니까?
+            </label>
         </div>
     </div>
 </div>
@@ -210,19 +213,12 @@
         <label><input type="checkbox" value="-sid"> -sid, -scan-id [주어진 스캔 ID에 스캔 결과 업로드]</label>
     </div>
 </div>
-<!-- 콘솔 추가 -->
+
 <div class="console" style="display:none;">
-<<<<<<< HEAD
-    <h3>옵션 입력</h3>
-    <div id="console-content"></div>
-    <button class="close-button" onclick="closeConsole()">닫기</button>
-    <button class="send-button" onclick="sendPacket()">패킷 전송</button> <!-- 추가된 전송 버튼 -->
-=======
     <h3>옵션 확인</h3>
     <div id="console-content"></div>
     <button class="close-button" onclick="closeConsole()">닫기</button>
-    <button class="send-button" onclick="sendPacket()">공격 시작</button> <!-- 추가된 전송 버튼 -->
->>>>>>> 7172e10 (Add AI Connect Handler and AI Generated Template)
+    <button class="send-button" onclick="sendPacket()">공격 시작</button>
 </div>
 
 <div id="copyMessage" class="copy-message" style="display: none;"></div>
