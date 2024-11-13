@@ -59,6 +59,10 @@ body {
     justify-content: space-between; /* 버튼 간의 간격 조정 */
 }
 
+.ai-option {
+    margin-left: 10px; /* 체크박스와 버튼 사이의 간격 */
+}
+
 .checkbox-dropdown {
     position: relative;
 }
