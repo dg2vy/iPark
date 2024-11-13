@@ -9,7 +9,6 @@ i18next.init({
                 copyMessage: "옵션 복사 완료",
                 startAlert: "{{target}}으로 퍼징이 시작되었습니다!",
                 targetMissing: "타겟 URL 또는 IP를 입력하세요.",
-                dropdownButton: "옵션 선택",
                 options: {
                     target: [
                         /* { label: "-u, -target [스캔할 대상 URL/호스트]", value: "-u" }, */
@@ -199,7 +198,6 @@ i18next.init({
                 copyMessage: "Options copied successfully",
                 startAlert: "Fuzzing has started on {{target}}!",
                 targetMissing: "Please enter the target URL or IP.",
-                dropdownButton: "options selcect",
                 options: {
                     target: [
                         /* { label: "-u, -target [Scan target URL/host]", value: "-u" }, */
@@ -522,6 +520,20 @@ function getSelectedOptions() {
     return selectedOptions;
 }
 
+function showCopyMessage() {
+    const selectedOptions = getSelectedOptions().join(', '); // 선택된 옵션들을 문자열로 변환
+    navigator.clipboard.writeText(selectedOptions).then(() => {
+        const copyMessageElement = document.getElementById('copyMessage');
+        copyMessageElement.textContent = i18next.t('copyMessage'); // 옵션 복사 완료 메시지
+        copyMessageElement.style.display = 'block'; // 메시지 표시
+        setTimeout(() => {
+            copyMessageElement.style.display = 'none'; // 3초 후 메시지 숨기기
+        }, 3000);
+    }).catch(err => {
+        console.error('클립보드 복사 실패:', err);
+    });
+}
+
 function updateUI() {
     document.querySelector('.start-button').textContent = i18next.t('startButton');
     document.querySelector('#targetInput').placeholder = i18next.t('targetPlaceholder');
@@ -591,73 +603,6 @@ function startAttack() {
         consoleDiv.style.display = "block";
         populateConsole(selectedOptions); // 선택된 옵션에 맞춰 콘솔 구성
     }, 500);
-<<<<<<< HEAD
-=======
-}
-
-// 콘솔에 인자 입력 필드를 추가하는 함수
-function populateConsole(selectedOptions) {
-    const consoleContent = document.getElementById('console-content');
-    consoleContent.innerHTML = ''; // 기존 내용 초기화
-
-    // 각각의 선택된 옵션에 대해 인자 입력 필드 생성
-    selectedOptions.forEach(option => {
-        const inputLabel = document.createElement('label');
-        inputLabel.innerText = ` ${option}: `;
-
-        const inputField = document.createElement('input'); 
-        inputField.type = 'text';
-        inputField.name = option;
-        inputField.placeholder = `${option}의 인자값`;
-
-        inputLabel.appendChild(inputField);
-        consoleContent.appendChild(inputLabel);
-        consoleContent.appendChild(document.createElement('br'));
-    });
-}
-
-function sendPacket() {
-    const targetInput = document.getElementById("targetInput").value;
-    const targets = targetInput.split(",").map(url => url.trim());  // 쉼표로 URL 구분하여 배열로 변환
-    const selectedOptions = getSelectedOptions();
-    const optionsWithInput = []; // 사용자 입력을 포함한 옵션 배열
-
-    // 선택된 옵션과 사용자 입력을 통합하여 배열 구성
-    selectedOptions.forEach(option => {
-        optionsWithInput.push(option); // 체크된 옵션 추가
-
-        // 각 옵션에 대해 입력된 값을 배열에 추가
-        const inputValue = document.querySelector(`input[name='${option}']`).value;
-        if (inputValue) {
-            optionsWithInput.push(inputValue); // 사용자 입력 추가
-        }
-    });
-
-    // command 설정
-    const commandType = targets.length > 1 ? "multiple_execute" : "execute";
-    const targetData = targets.length > 1 ? targets : targets[0];  // 단일일 때는 문자열로 처리
-
-    // 최종 데이터 구성
-    const data = {
-        command: commandType,  // 2개 이상일 때 "multiple_execute", 그렇지 않으면 "execute"
-        target: targetData,    // target이 하나일 때는 문자열로, 여러 개일 때는 배열로
-        options: optionsWithInput // 사용자 입력이 포함된 옵션
-    };
-
-    // 웹소켓으로 JSON 데이터 전송
-    if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(data)); // 데이터 전송
-        console.log(`공격이 ${targetInput} 대상으로 시작되었습니다.`);
-        
-        // ai_start 명령을 바로 전송
-        const aiStartMessage = JSON.stringify({ command: "ai_start" });
-        socket.send(aiStartMessage); // ai_start 명령 전송
-        console.log("백엔드로 'ai_start' 명령을 전송했습니다.");
-        
-    } else {
-        alert("WebSocket 연결이 준비되지 않았습니다. 다시 시도해 주세요.");
-    }
->>>>>>> 7172e10 (Add AI Connect Handler and AI Generated Template)
 }
 
 // 콘솔에 인자 입력 필드를 추가하는 함수
@@ -736,67 +681,34 @@ function getSelectedOptions() {
 
 
 
+// 웹소켓과 통신 테스트
+const websocket = new WebSocket("ws://192.168.16.218:6789");
 
-<<<<<<< HEAD
 websocket.onopen = function (event) {
-=======
-
-
-// 체크된 체크박스 값을 가져오는 함수
-function getSelectedOptions() {
-    const checkboxes = document.querySelectorAll('.checkbox-list input[type="checkbox"]');
-    const selectedOptions = [];
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            selectedOptions.push(checkbox.value);
-        }
-    });
-    return selectedOptions;
-}
-
-
-
-
-// 기존 WebSocket 연결들에 대한 변수 이름 변경
-const websocketMain = new WebSocket("ws://192.168.16.218:6789");
-
-websocketMain.onopen = function (event) {
->>>>>>> 7172e10 (Add AI Connect Handler and AI Generated Template)
     console.log("Connected to Python WebSocket server");
 
     // 서버로 데이터를 전송
     const message = {
         command: "check"
     };
-    websocketMain.send(JSON.stringify(message));
+    websocket.send(JSON.stringify(message));
 };
 
-<<<<<<< HEAD
 websocket.onmessage = function (event) {
-=======
-websocketMain.onmessage = function (event) {
->>>>>>> 7172e10 (Add AI Connect Handler and AI Generated Template)
     const data = JSON.parse(event.data);
     console.log("Received from server:", data);
     // 데이터 처리 로직을 여기에 추가하세요.
 };
 
-<<<<<<< HEAD
 websocket.onclose = function (event) {
     console.log("Disconnected from WebSocket server");
 };
 
 websocket.onerror = function (error) {
-=======
-websocketMain.onclose = function (event) {
-    console.log("Disconnected from WebSocket server");
-};
-
-websocketMain.onerror = function (error) {
->>>>>>> 7172e10 (Add AI Connect Handler and AI Generated Template)
     console.log("WebSocket error:", error);
 };
 
+
 // 콘솔 창 닫기 함수
 function closeConsole() {
     const dashboard = document.querySelector('.dashboard');
@@ -818,37 +730,12 @@ function toggleOptionsTab() {
     }
 }
 
-// 콘솔 창 닫기 함수
-function closeConsole() {
-    const dashboard = document.querySelector('.dashboard');
-    const consoleDiv = document.querySelector('.console');
 
-<<<<<<< HEAD
-    // 대시보드를 원래 위치로 되돌리기
-    dashboard.style.transform = "translateX(0)";
-
-    // 콘솔 숨기기
-    consoleDiv.style.display = "none";
-}
-
-function toggleOptionsTab() {
-    const optionsTab = document.getElementById("optionsTab");
-    if (optionsTab.style.display === "none" || !optionsTab.style.display) {
-        optionsTab.style.display = "block";
-    } else {
-        optionsTab.style.display = "none";
-    }
-}
-
-
-=======
->>>>>>> 7172e10 (Add AI Connect Handler and AI Generated Template)
 
 function closeOptionsTab() {
     document.getElementById("optionsTab").style.display = "none";
 }
 
-<<<<<<< HEAD
 // WebSocket 연결 설정
 const socket = new WebSocket("ws://192.168.16.218:6789"); 
 
@@ -876,34 +763,5 @@ socket.onclose = function(event) {
 
 // WebSocket 에러 발생 시 실행되는 함수
 socket.onerror = function(error) {
-=======
-// 새로운 WebSocket 연결 설정
-const websocketCommand = new WebSocket("ws://192.168.16.218:6789");
-
-websocketCommand.onopen = function (event) {
-    console.log("WebSocket 연결이 열렸습니다.");
-
-/*     const commandMessage = JSON.stringify({ command: "ai_start" });
-    websocketCommand.send(commandMessage);
-    console.log("백엔드로 'ai_start' 명령을 전송했습니다."); */
-};
-
-websocketCommand.onmessage = function (event) {
-    const message = event.data;
-
-/*     // 받은 메시지가 "Nuclie Finish"일 경우 "ai_start" 명령 전송
-    if (message === "Nuclei Execute Finish") {
-        const commandMessage = JSON.stringify({ command: "ai_start" });
-        websocketCommand.send(commandMessage);
-        console.log("백엔드로 'ai_start' 명령을 전송했습니다.");
-    } */
-};
-
-websocketCommand.onclose = function (event) {
-    console.log("WebSocket 연결이 종료되었습니다.");
-};
-
-websocketCommand.onerror = function (error) {
->>>>>>> 7172e10 (Add AI Connect Handler and AI Generated Template)
     console.log("WebSocket 에러:", error);
 };
