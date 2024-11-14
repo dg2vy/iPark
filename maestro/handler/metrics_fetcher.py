@@ -44,6 +44,20 @@ async def fetch_metrics(url, metric_fetch_delay):
                             logger.info(f"Failed to decode JSON from response: {e}")
                     else:
                         logger.info(f"Unexpected content type: {content_type}")
+        except asyncio.CancelledError:
+            logger.info("fetch_metrics task was cancelled. Performing cleanup.")
+            stale_metrics_data = {
+                "errors": 0,
+                "matched": 0,
+                "templates": 0,
+                "percent_complete": 0.0,
+                "requests": 0,
+                "total_requests": 0,
+                "hosts": 0,
+                "rps": 0.0
+            }
+            await redis_client.publish("metrics_channel", json.dumps(stale_metrics_data))
+            logger.info("Published stale metrics (all zeros) to metrics_channel on cancellation.")
 
         except Exception as e:
             logger.info(f"Failed to fetch metrics: {e}")

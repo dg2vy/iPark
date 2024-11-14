@@ -8,6 +8,7 @@ import websockets
 import json
 import time
 import os
+import shutil
 
 from dotenv import load_dotenv
 
@@ -16,7 +17,7 @@ logger = setup_logger(__name__)
 async def ai_runner(event, arguments, metric_url):
     ai_ip = os.getenv('AI_IP')
     ai_port = os.getenv('AI_PORT')
-    root_template_folder = os.getenv('AI_TEMPLATE_PATH', '../ai_generated_template')
+    root_template_folder = os.getenv('AI_TEMPLATE_PATH', './ai_generated_template')
     attack_types = ['RCE', 'XSS', 'SQL Injection']
 
     if not os.path.exists(root_template_folder):
@@ -30,22 +31,35 @@ async def ai_runner(event, arguments, metric_url):
 
         logger.info(f"Aleady Generated AI Template Included Arguments: {arguments}")
 
-        return_code = await run_nuclei(arguments, debug=True)
-        # logger.info(f"Nuclei Return Code: {return_code}")  
+        await run_nuclei(arguments, debug=True)
         
+
         metric_task.cancel()  
+
         arguments.pop()
         arguments.pop()
+        arguments.pop()
+        
+    try:
+        while not event.is_set():
+            logger.info("Running ai background task")
+            full_path = f"{root_template_folder}/{time.time()}"
 
+            for i in range(20):
+                for attack in attack_types:
+                    await send_attack_request(attack, ai_ip, ai_port, full_path)
+                
+                logger.info(f"Fetch AI Generated Template - {i}")
+                
+                await asyncio.sleep(1)    
+                
 
-    while not event.is_set():
-        logger.info("Running ai background task")
-
-        for attack in attack_types:
-            tempalte_path = await send_attack_request(attack, ai_ip, ai_port, root_template_folder)
+            metrics_port = str(get_unused_port())
+            metric_url = f"http://localhost:{metrics_port}/metrics"
             
+            arguments.append(metrics_port)
             arguments.append("-t")
-            arguments.append(tempalte_path)
+            arguments.append(full_path)
 
             metric_task = asyncio.create_task(fetch_metrics(metric_url, 0.1))
 
@@ -56,30 +70,36 @@ async def ai_runner(event, arguments, metric_url):
             
             metric_task.cancel()  
             arguments.pop()
-            arguments.pop()
-            await asyncio.sleep(1)                     
+            arguments.pop()        
+            arguments.pop()         
 
-    logger.info("Background task stopped")
+            for filename in os.listdir(full_path):
+                file_path = os.path.join(full_path, filename)
+                shutil.move(file_path, root_template_folder)
+            
+            os.rmdir(full_path)
+
+    finally:
+        logger.info("Background task stopped")
 
 
 async def run_nuclei(arguments, debug=False):
-
     nuclei_path = os.getenv(
         "NUCLEI_BIN_PATH",
         os.path.join(os.path.expanduser("~"), 'go', 'bin', 'nuclei')
     )
 
-    logger.debug(f"Execute Command: {nuclei_path} {" ".join(arguments)}")
+    logger.debug(f"Execute Command: {nuclei_path} {' '.join(arguments)}")
 
     process = await asyncio.create_subprocess_exec(
         nuclei_path,
         *arguments,
-        stdout=asyncio.subprocess.PIPE, 
+        stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE
     )
 
     if debug == True:
-        async def read_output(stream, is_error=False):
+        async def read_output(stream):
             while True:
                 line = await stream.readline()
                 if not line:
@@ -88,18 +108,15 @@ async def run_nuclei(arguments, debug=False):
 
         await asyncio.gather(
             read_output(process.stdout),
-            read_output(process.stderr, is_error=True)
+            read_output(process.stderr)
         )
     else:
         stdout, stderr = await process.communicate()
 
-        if stdout is not None:
-            output = stderr.decode()
-            logger.info(output)
-
-        if stderr is not None:
-            error = stderr.decode()
-            logger.error(error)
+        if stdout:
+            logger.info(stdout.decode())
+        if stderr:
+            logger.error(stderr.decode())
 
     return process.returncode
 
@@ -141,6 +158,7 @@ async def cmd_handler(websocket, _):
                         
                         try:
                             await metric_task
+                            logger.debug("Metric fetching task was Finished")
                         except asyncio.CancelledError:
                             logger.debug("Metric fetching task was cancelled")
 
@@ -151,6 +169,7 @@ async def cmd_handler(websocket, _):
                             
                             metrics_port = str(get_unused_port())
                             metric_url = f"http://localhost:{metrics_port}/metrics"
+                            arguments = ["-stats", "-u", target] + options + ["-mp", metrics_port]
 
                             ai_stop_event = asyncio.Event() 
                             ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
@@ -217,6 +236,8 @@ async def cmd_handler(websocket, _):
                     
                     metrics_port = str(get_unused_port())
                     metric_url = f"http://localhost:{metrics_port}/metrics"
+
+                    arguments = ["-stats", "-mp", metrics_port, "-l", target_file] + options
 
                     ai_stop_event = asyncio.Event() 
                     ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))

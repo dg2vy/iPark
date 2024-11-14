@@ -544,6 +544,18 @@ function closeOptionsTab() {
     document.getElementById("optionsTab").style.display = "none";
 }
 
+// 콘솔 창 닫기 함수
+function closeConsole() {
+    const dashboard = document.querySelector('.dashboard');
+    const consoleDiv = document.querySelector('.console');
+
+    // 대시보드를 원래 위치로 되돌리기
+    dashboard.style.transform = "translateX(0)";
+
+    // 콘솔 숨기기
+    consoleDiv.style.display = "none";
+}
+
 // WebSocket 연결 설정 (단일 인스턴스)
 const websocket = new WebSocket("ws://192.168.16.218:6789");
 
@@ -685,3 +697,16 @@ function sendPacket() {
     }
 }
 
+function stopAI() {
+    const data = {
+        command: "ai_stop"
+    };
+
+    // WebSocket으로 데이터 전송
+    if (websocket.readyState === WebSocket.OPEN) {
+        websocket.send(JSON.stringify(data));
+        console.log("AI 중단 명령을 서버로 전송했습니다.");
+    } else {
+        alert("WebSocket 연결이 준비되지 않았습니다. 다시 시도해 주세요.");
+    }
+}

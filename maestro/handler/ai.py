@@ -6,7 +6,7 @@ import os
 
 logger = setup_logger(__name__)
 
-async def send_attack_request(attack_type, server_ip, server_port, root_template_path):
+async def send_attack_request(attack_type, server_ip, server_port, path):
     
     attack_type_map = {
         'SQL Injection' : 'sqli',
@@ -37,18 +37,16 @@ async def send_attack_request(attack_type, server_ip, server_port, root_template
             logger.info('Response : Success')
 
 
-        if not os.path.exists(root_template_path):
-            os.makedirs(root_template_path, exist_ok=True)
+        if not os.path.exists(path):
+            os.makedirs(path, exist_ok=True)
 
         file = f"{attack_type_map[attack_type]}_{time.time()}.yaml"
-        full_path = f"{root_template_path}/{file}"
+        full_path = f"{path}/{file}"
 
         try:
             with open(full_path, 'w') as file:
                 file.write(yaml_data)
             logger.info(f"Yaml file saved : {full_path}")
-
-            return full_path
 
         except Exception as e:
             logger.error("Error:", e)

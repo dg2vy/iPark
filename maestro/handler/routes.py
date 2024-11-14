@@ -17,10 +17,8 @@ def subscribe_to_metrics_channel():
 
     for message in pubsub.listen():
         if message['type'] == 'message':
-            # 메시지 수신 시, latest_metrics를 업데이트
             data = json.loads(message['data'])
             latest_metrics.update(data)
-            print("Metrics updated:", latest_metrics)  # 업데이트된 데이터 로그 출력
 
 @metrics_bp.route('/metrics')
 def metrics():
