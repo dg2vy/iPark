@@ -11,13 +11,13 @@ i18next.init({
                 targetMissing: "타겟 URL 또는 IP를 입력하세요.",
                 options: {
                     target: [
-                        { label: "-u, -target [스캔할 대상 URL/호스트]", value: "-u" },
+                        /* { label: "-u, -target [스캔할 대상 URL/호스트]", value: "-u" }, */
                         { label: "-l, -list [스캔할 대상 URL/호스트 목록이 있는 파일 경로 (한 줄에 하나씩)]", value: "-l" },
                         { label: "-resume [resume.cfg를 사용하여 스캔 재개 (클러스터링은 비활성화됨)]", value: "-resume" },
                         { label: "-sa, -scan-all-ips [dns 레코드와 관련된 모든 IP 스캔]", value: "-sa" },
                         { label: "-iv, -ip-version [스캔할 호스트의 IP 버전 (4,6) - (기본값 4)]", value: "-iv" },
                     ],
-                    templates: [
+                    /* templates: [
                         { label: "-nt, -new-templates [최신 nuclei-templates 릴리스에 추가된 새 템플릿만 실행]", value: "-nt" },
                         { label: "-ntv, -new-templates-version [특정 버전에 추가된 새 템플릿 실행]", value: "-ntv" },
                         { label: "-as, -automatic-scan [wappalyzer 기술 감지를 사용하여 태그 매핑으로 자동 웹 스캔]", value: "-as" },
@@ -31,7 +31,7 @@ i18next.init({
                         { label: "-tl [사용 가능한 모든 템플릿 목록]", value: "-tl" },
                         { label: "-sign [NUCLEI_SIGNATURE_PRIVATE_KEY 환경 변수에서 정의된 개인 키로 템플릿에 서명]", value: "-sign" },
                         { label: "-code [코드 프로토콜 기반 템플릿 로딩 활성화]", value: "-code" },
-                    ],
+                    ], */
                     filtering: [
                         { label: "-a, -author [저자를 기반으로 실행할 템플릿 (쉼표로 구분, 파일)]", value: "-a" },
                         { label: "-tags [태그를 기반으로 실행할 템플릿 (쉼표로 구분, 파일)]", value: "-tags" },
@@ -48,7 +48,7 @@ i18next.init({
                         { label: "-ept, -exclude-type [프로토콜 유형을 기반으로 제외할 템플릿. 가능한 값: dns, file, http, headless, tcp, workflow, ssl, websocket, whois, code, javascript]", value: "-ept" },
                         { label: "-tc, -template-condition [표현식 조건을 기반으로 실행할 템플릿]", value: "-tc" },
                     ],
-                    output: [
+                    /* output: [
                         { label: "-o, -output [발견된 문제/취약점을 작성할 출력 파일]", value: "-o" },
                         { label: "-sresp, -store-resp [모든 요청/응답을 nuclei를 통해 출력 디렉토리에 저장]", value: "-sresp" },
                         { label: "-srd, -store-resp-dir [모든 요청/응답을 nuclei를 통해 사용자 정의 디렉토리에 저장 (기본값 'output')]", value: "-srd" },
@@ -66,7 +66,7 @@ i18next.init({
                         { label: "-se, -sarif-export [SARIF 형식으로 결과를 내보낼 파일]", value: "-se" },
                         { label: "-je, -json-export [JSON 형식으로 결과를 내보낼 파일]", value: "-je" },
                         { label: "-jle, -jsonl-export [JSONL 형식으로 결과를 내보낼 파일]", value: "-jle" },
-                    ],
+                    ], */
                     configurations: [
                         { label: "-config [nuclei 구성 파일 경로]", value: "-config" },
                         { label: "-fr, -follow-redirects [http 템플릿에 대한 리디렉션 따라가기 활성화]", value: "-fr" },
@@ -143,15 +143,15 @@ i18next.init({
                         { label: "-nh, -no-httpx [비 URL 입력에 대한 httpx 프로브 비활성화]", value: "-nh" },
                         { label: "-no-stdin [stdin 처리를 비활성화]", value: "-no-stdin" },
                     ],
-                    headless: [
+                    /* headless: [
                         { label: "-headless [headless 브라우저 지원이 필요한 템플릿 활성화]", value: "-headless" },
                         { label: "-page-timeout [headless 모드에서 각 페이지를 기다리는 시간]", value: "-page-timeout" },
                         { label: "-sb, -show-browser [headless 모드로 실행하는 템플릿에서 브라우저 화면 표시]", value: "-sb" },
                         { label: "-ho, -headless-options [추가 옵션으로 headless chrome 시작]", value: "-ho" },
                         { label: "-sc, -system-chrome [nuclei가 설치한 Chrome 대신 로컬에 설치된 Chrome 브라우저 사용]", value: "-sc" },
                         { label: "-lha, -list-headless-action [사용 가능한 headless 액션 목록 표시]", value: "-lha" },
-                    ],
-                    debug: [
+                    ], */
+                    /* debug: [
                         { label: "-debug [모든 요청과 응답 표시]", value: "-debug" },
                         { label: "-dreq, -debug-req [보낸 모든 요청 표시]", value: "-dreq" },
                         { label: "-dresp, -debug-resp [받은 모든 응답 표시]", value: "-dresp" },
@@ -169,24 +169,24 @@ i18next.init({
                         { label: "-ep, -enable-pprof [pprof 디버깅 서버 활성화]", value: "-ep" },
                         { label: "-tv, -templates-version [설치된 nuclei-templates의 버전 표시]", value: "-tv" },
                         { label: "-hc, -health-check [진단 검사 실행]", value: "-hc" },
-                    ],
-                    update: [
+                    ], */
+                    /* update: [
                         { label: "-up, -update [최신 릴리스 버전으로 nuclei 엔진 업데이트]", value: "-up" },
                         { label: "-ut, -update-templates [최신 릴리스 버전으로 nuclei-templates 업데이트]", value: "-ut" },
                         { label: "-ud, -update-template-dir [nuclei-templates를 설치/업데이트할 사용자 지정 디렉토리]", value: "-ud" },
                         { label: "-duc, -disable-update-check [자동 nuclei/templates 업데이트 확인 비활성화]", value: "-duc" },
-                    ],
-                    statistics: [
+                    ], */
+                    /* statistics: [
                         { label: "-stats [실행 중인 스캔에 대한 통계 표시]", value: "-stats" },
                         { label: "-sj, -stats-json [JSONL 형식으로 통계 표시]", value: "-sj" },
                         { label: "-si, -stats-interval [통계 업데이트를 표시하기까지 기다릴 초 수]", value: "-si" },
                         { label: "-mp, -metrics-port [nuclei 메트릭스를 노출할 포트]", value: "-mp" },
-                    ],
-                    cloud: [
+                    ], */
+                    /* cloud: [
                         { label: "-auth [projectdiscovery 클라우드 API 키 구성]", value: "-auth" },
                         { label: "-cup, -cloud-upload [스캔 결과를 pdcp 대시보드에 업로드]", value: "-cup" },
                         { label: "-sid, -scan-id [주어진 스캔 ID에 스캔 결과 업로드]", value: "-sid" },
-                    ],
+                    ], */
                 }
             }
         },
@@ -200,13 +200,13 @@ i18next.init({
                 targetMissing: "Please enter the target URL or IP.",
                 options: {
                     target: [
-                        { label: "-u, -target [Scan target URL/host]", value: "-u" },
+                        /* { label: "-u, -target [Scan target URL/host]", value: "-u" }, */
                         { label: "-l, -list [Path to a file containing target URLs/hosts (one per line)]", value: "-l" },
                         { label: "-resume [Resume scanning using resume.cfg]", value: "-resume" },
                         { label: "-sa, -scan-all-ips [Scan all IPs related to DNS records]", value: "-sa" },
                         { label: "-iv, -ip-version [IP version of the host to scan (4,6) - (default is 4)]", value: "-iv" },
                     ],
-                    templates: [
+                    /* templates: [
                         { label: "-nt, -new-templates [Run only new templates added in the latest nuclei-templates release]", value: "-nt" },
                         { label: "-ntv, -new-templates-version [Run new templates added in a specific version]", value: "-ntv" },
                         { label: "-as, -automatic-scan [Automatically web scan using Wappalyzer technology detection]", value: "-as" },
@@ -220,7 +220,7 @@ i18next.init({
                         { label: "-tl [List all available templates]", value: "-tl" },
                         { label: "-sign [Sign templates with the private key defined in the NUCLEI_SIGNATURE_PRIVATE_KEY environment variable]", value: "-sign" },
                         { label: "-code [Enable code protocol-based template loading]", value: "-code" },
-                    ],
+                    ], */
                     filtering: [
                         { label: "-a, -author [Run templates based on authors (comma-separated, file)]", value: "-a" },
                         { label: "-tags [Run templates based on tags (comma-separated, file)]", value: "-tags" },
@@ -237,7 +237,7 @@ i18next.init({
                         { label: "-ept, -exclude-type [Exclude templates based on protocol type. Possible values: dns, file, http, headless, tcp, workflow, ssl, websocket, whois, code, javascript]", value: "-ept" },
                         { label: "-tc, -template-condition [Run templates based on expression conditions]", value: "-tc" },
                     ],
-                    output: [
+                    /* output: [
                         { label: "-o, -output [Output file to write discovered issues/vulnerabilities]", value: "-o" },
                         { label: "-sresp, -store-resp [Store all requests/responses in the output directory through nuclei]", value: "-sresp" },
                         { label: "-srd, -store-resp-dir [Store all requests/responses in a user-defined directory (default 'output')]", value: "-srd" },
@@ -255,7 +255,7 @@ i18next.init({
                         { label: "-se, -sarif-export [File to export results in SARIF format]", value: "-se" },
                         { label: "-je, -json-export [File to export results in JSON format]", value: "-je" },
                         { label: "-jle, -jsonl-export [File to export results in JSONL format]", value: "-jle" },
-                    ],
+                    ], */
                     configurations: [
                         { label: "-config [Path to nuclei configuration file]", value: "-config" },
                         { label: "-fr, -follow-redirects [Enable following redirects for HTTP templates]", value: "-fr" },
@@ -332,15 +332,15 @@ i18next.init({
                         { label: "-nh, -no-httpx [Disable httpx probes for non-URL input]", value: "-nh" },
                         { label: "-no-stdin [Disable stdin processing]", value: "-no-stdin" },
                     ],
-                    headless: [
+                    /* headless: [
                         { label: "-headless [Enable templates requiring headless browser support]", value: "-headless" },
                         { label: "-page-timeout [Time to wait for each page in headless mode]", value: "-page-timeout" },
                         { label: "-sb, -show-browser [Show browser screen when running templates in headless mode]", value: "-sb" },
                         { label: "-ho, -headless-options [Start headless chrome with additional options]", value: "-ho" },
                         { label: "-sc, -system-chrome [Use locally installed Chrome browser instead of the one installed by nuclei]", value: "-sc" },
                         { label: "-lha, -list-headless-action [Show available headless actions]", value: "-lha" },
-                    ],
-                    debug: [
+                    ], */
+                    /* debug: [
                         { label: "-debug [Display all requests and responses]", value: "-debug" },
                         { label: "-dreq, -debug-req [Display all sent requests]", value: "-dreq" },
                         { label: "-dresp, -debug-resp [Display all received responses]", value: "-dresp" },
@@ -358,40 +358,35 @@ i18next.init({
                         { label: "-ep, -enable-pprof [Enable pprof debugging server]", value: "-ep" },
                         { label: "-tv, -templates-version [Display the version of installed nuclei-templates]", value: "-tv" },
                         { label: "-hc, -health-check [Run a health check]", value: "-hc" },
-                    ],
-                    update: [
+                    ], */
+                    /* update: [
                         { label: "-up, -update [Update nuclei engine to the latest release version]", value: "-up" },
                         { label: "-ut, -update-templates [Update nuclei-templates to the latest release version]", value: "-ut" },
                         { label: "-ud, -update-template-dir [Custom directory to install/update nuclei-templates]", value: "-ud" },
                         { label: "-duc, -disable-update-check [Disable automatic nuclei/templates update checks]", value: "-duc" },
-                    ],
-                    statistics: [
+                    ], */
+                    /* statistics: [
                         { label: "-stats [Display statistics for the running scan]", value: "-stats" },
                         { label: "-sj, -stats-json [Display statistics in JSONL format]", value: "-sj" },
                         { label: "-si, -stats-interval [Number of seconds to wait before displaying statistics updates]", value: "-si" },
                         { label: "-mp, -metrics-port [Port to expose nuclei metrics]", value: "-mp" },
-                    ],
-                    cloud: [
+                    ], */
+                    /* cloud: [
                         { label: "-auth [Configure projectdiscovery cloud API key]", value: "-auth" },
                         { label: "-cup, -cloud-upload [Upload scan results to pdcp dashboard]", value: "-cup" },
                         { label: "-sid, -scan-id [Upload scan results to a given scan ID]", value: "-sid" },
-                    ],
+                    ], */
                 }
             }
         }
     }
-}, function(err, t) {
+}, function (err, t) {
     updateUI();
     loadOptions(); // 초기 로드 시 옵션 로드
 });
 
 const dropdownButton = document.querySelector('.dropdown-button');
 const checkboxList = document.querySelector('.checkbox-list');
-
-dropdownButton.addEventListener('click', () => {
-    checkboxList.style.display = checkboxList.style.display === 'none' ? 'block' : 'none';
-});
-
 
 // 옵션 로드 함수
 function loadOptions() {
@@ -413,12 +408,12 @@ function loadOptions() {
 
     optionsContainer.innerHTML += `<h3>TARGET</h3>${targetOptions}`;
 
-    // TEMPLATE 섹션 옵션 추가
+    /* // TEMPLATE 섹션 옵션 추가
     const templateOptions = currentLangOptions.templates.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
-    optionsContainer.innerHTML += `<h3>TEMPLATES</h3>${templateOptions}`;
+    optionsContainer.innerHTML += `<h3>TEMPLATES</h3>${templateOptions}`; */
 
     // filtering 섹션 옵션 추가
     const filteringOptions = currentLangOptions.filtering.map(option => {
@@ -427,89 +422,89 @@ function loadOptions() {
 
     optionsContainer.innerHTML += `<h3>FILTERING</h3>${filteringOptions}`;
 
-     // output 섹션 옵션 추가
-     const outputingOptions = currentLangOptions.output.map(option => {
+    /* // output 섹션 옵션 추가
+    const outputingOptions = currentLangOptions.output.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
-    optionsContainer.innerHTML += `<h3>OUPUT</h3>${outputingOptions}`;
+    optionsContainer.innerHTML += `<h3>OUPUT</h3>${outputingOptions}`; */
 
-     // configurations 섹션 옵션 추가
-     const configurationsingOptions = currentLangOptions.configurations.map(option => {
+    // configurations 섹션 옵션 추가
+    const configurationsingOptions = currentLangOptions.configurations.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>CONFIGURAIONTS</h3>${configurationsingOptions}`;
-  
-      // interactsh 섹션 옵션 추가
-      const interactshingOptions = currentLangOptions.interactsh.map(option => {
+
+    // interactsh 섹션 옵션 추가
+    const interactshingOptions = currentLangOptions.interactsh.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>INTERACTSH</h3>${interactshingOptions}`;
 
-      // fuzzing 섹션 옵션 추가
-      const fuzzingingOptions = currentLangOptions.fuzzing.map(option => {
+    // fuzzing 섹션 옵션 추가
+    const fuzzingingOptions = currentLangOptions.fuzzing.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>FUZZING</h3>${fuzzingingOptions}`;
 
-      // uncover 섹션 옵션 추가
-      const uncoveringOptions = currentLangOptions.uncover.map(option => {
+    // uncover 섹션 옵션 추가
+    const uncoveringOptions = currentLangOptions.uncover.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>UNCOVER</h3>${uncoveringOptions}`;
 
-      // rate_limit 섹션 옵션 추가
-      const rate_limitingOptions = currentLangOptions.rate_limit.map(option => {
+    // rate_limit 섹션 옵션 추가
+    const rate_limitingOptions = currentLangOptions.rate_limit.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>RATE_LIMIT</h3>${rate_limitingOptions}`;
-    
-      // optimizations 섹션 옵션 추가
-      const optimizationsingOptions = currentLangOptions.optimizations.map(option => {
+
+    // optimizations 섹션 옵션 추가
+    const optimizationsingOptions = currentLangOptions.optimizations.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>OPTIMIZATIONS</h3>${optimizationsingOptions}`;
-    
-      // headless 섹션 옵션 추가
-      const headlessingOptions = currentLangOptions.headless.map(option => {
+
+    /* // headless 섹션 옵션 추가
+    const headlessingOptions = currentLangOptions.headless.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>HEADLESS</h3>${headlessingOptions}`;
-    
-      // debug 섹션 옵션 추가
-      const debugingOptions = currentLangOptions.debug.map(option => {
+
+    // debug 섹션 옵션 추가
+    const debugingOptions = currentLangOptions.debug.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>DEBUG</h3>${debugingOptions}`;
-    
-      // update 섹션 옵션 추가
-      const updateingOptions = currentLangOptions.update.map(option => {
+
+    // update 섹션 옵션 추가
+    const updateingOptions = currentLangOptions.update.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>UPDATE</h3>${updateingOptions}`;
-    
-      // statistics 섹션 옵션 추가
-      const statisticsingOptions = currentLangOptions.statistics.map(option => {
+
+    // statistics 섹션 옵션 추가
+    const statisticsingOptions = currentLangOptions.statistics.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
     optionsContainer.innerHTML += `<h3>STATISTICS</h3>${statisticsingOptions}`;
 
-      // cloud 섹션 옵션 추가
-      const cloudingOptions = currentLangOptions.cloud.map(option => {
+    // cloud 섹션 옵션 추가
+    const cloudingOptions = currentLangOptions.cloud.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
 
-    optionsContainer.innerHTML += `<h3>CLOUD</h3>${cloudingOptions}`;
+    optionsContainer.innerHTML += `<h3>CLOUD</h3>${cloudingOptions}`; */
 
 }
 
@@ -553,21 +548,29 @@ function changeLanguage() {
     });
 }
 
+/* // .env 파일에서 환경 변수를 로드
+require('dotenv').config();
+
+// WebSocket 연결에 사용할 IP와 포트
+const websocketIp = process.env.WEBSOCKET_IP;
+const websocketPort = process.env.WEBSOCKET_PORT;
+ */
+
 let socket = new WebSocket("ws://192.168.16.218:6789");
 
-socket.onopen = function() {
+socket.onopen = function () {
     console.log("WebSocket connection established.");
 };
 
-socket.onmessage = function(event) {
+socket.onmessage = function (event) {
     console.log("Message from server: ", event.data);
 };
 
-socket.onerror = function(error) {
+socket.onerror = function (error) {
     console.error("WebSocket Error: ", error);
 };
 
-socket.onclose = function() {
+socket.onclose = function () {
     console.log("WebSocket connection closed.");
 };
 
@@ -580,34 +583,108 @@ function startAttack() {
         return;
     }
 
-    // 체크된 옵션들을 가져옴
-    const selectedOptions = Array.from(document.querySelectorAll(".checkbox-list input[type='checkbox']:checked"))
-        .map(checkbox => checkbox.value);
-
-    const data = {
-        command: "execute",
-        target: targetInput,
-        options: selectedOptions // 선택한 옵션 포함
-    };
-
-    // 웹소켓으로 JSON 데이터를 전송
-    if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(data)); // 데이터 전송
-        alert(`공격이 ${targetInput} 대상으로 시작되었습니다.`);
-    } else {
-        alert("WebSocket 연결이 준비되지 않았습니다. 다시 시도해 주세요.");
-    }
+    // 체크된 옵션들이 있는지 가져옴
+    const selectedOptions = getSelectedOptions();
 
     // 사용자 입력과 옵션 값을 콘솔에 출력
     console.log("사용자 입력 URL/IP:", targetInput);
     console.log("선택된 옵션들:", selectedOptions);
+    
+    // 대시보드 애니메이션
+    const dashboard = document.querySelector('.dashboard');
+    const consoleDiv = document.querySelector('.console');
+
+    // 애니메이션 적용하여 대시보드 왼쪽으로 이동
+    dashboard.style.transition = "transform 0.5s ease";
+    dashboard.style.transform = "translateX(-100%)";
+
+    // 애니메이션 후 콘솔 표시
+    setTimeout(() => {
+        consoleDiv.style.display = "block";
+        populateConsole(selectedOptions); // 선택된 옵션에 맞춰 콘솔 구성
+    }, 500);
 }
+
+// 콘솔에 인자 입력 필드를 추가하는 함수
+function populateConsole(selectedOptions) {
+    const consoleContent = document.getElementById('console-content');
+    consoleContent.innerHTML = ''; // 기존 내용 초기화
+
+    // 각각의 선택된 옵션에 대해 인자 입력 필드 생성
+    selectedOptions.forEach(option => {
+        const inputLabel = document.createElement('label');
+        inputLabel.innerText = ` ${option}: `;
+
+        const inputField = document.createElement('input'); 
+        inputField.type = 'text';
+        inputField.name = option;
+        inputField.placeholder = `${option}의 인자값`;
+
+        inputLabel.appendChild(inputField);
+        consoleContent.appendChild(inputLabel);
+        consoleContent.appendChild(document.createElement('br'));
+    });
+}
+
+function sendPacket() {
+    const targetInput = document.getElementById("targetInput").value;
+    const targets = targetInput.split(",").map(url => url.trim());  // 쉼표로 URL 구분하여 배열로 변환
+    const selectedOptions = getSelectedOptions();
+    const optionsWithInput = []; // 사용자 입력을 포함한 옵션 배열
+
+    // 선택된 옵션과 사용자 입력을 통합하여 배열 구성
+    selectedOptions.forEach(option => {
+        optionsWithInput.push(option); // 체크된 옵션 추가
+
+        // 각 옵션에 대해 입력된 값을 배열에 추가
+        const inputValue = document.querySelector(`input[name='${option}']`).value;
+        if (inputValue) {
+            optionsWithInput.push(inputValue); // 사용자 입력 추가
+        }
+    });
+
+    // target 개수에 따라 command와 target 데이터 타입 결정
+    const commandType = targets.length > 1 ? "multiple_execute" : "execute";
+    const targetData = targets.length > 1 ? targets : targets[0];  // 단일일 때는 문자열로 처리
+
+    // 최종 데이터 구성
+    const data = {
+        command: commandType,  // 2개 이상일 때 "multiple_execute", 그렇지 않으면 "execute"
+        target: targetData,    // target이 하나일 때는 문자열로, 여러 개일 때는 배열로
+        options: optionsWithInput // 사용자 입력이 포함된 옵션
+    };
+
+    // 웹소켓으로 JSON 데이터 전송
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(data)); // 데이터 전송
+        console.log(`공격이 ${targetInput} 대상으로 시작되었습니다.`);
+    } else {
+        alert("WebSocket 연결이 준비되지 않았습니다. 다시 시도해 주세요.");
+    }
+}
+
+
+
+
+// 체크된 체크박스 값을 가져오는 함수
+function getSelectedOptions() {
+    const checkboxes = document.querySelectorAll('.checkbox-list input[type="checkbox"]');
+    const selectedOptions = [];
+    checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            selectedOptions.push(checkbox.value);
+        }
+    });
+    return selectedOptions;
+}
+
+
 
 
 // 웹소켓과 통신 테스트
 const websocket = new WebSocket("ws://192.168.16.218:6789");
 
-websocket.onopen = function(event) {
+websocket.onopen = function (event) {
     console.log("Connected to Python WebSocket server");
 
     // 서버로 데이터를 전송
@@ -617,19 +694,44 @@ websocket.onopen = function(event) {
     websocket.send(JSON.stringify(message));
 };
 
-websocket.onmessage = function(event) {
+websocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     console.log("Received from server:", data);
     // 데이터 처리 로직을 여기에 추가하세요.
 };
 
-websocket.onclose = function(event) {
+websocket.onclose = function (event) {
     console.log("Disconnected from WebSocket server");
 };
 
-websocket.onerror = function(error) {
+websocket.onerror = function (error) {
     console.log("WebSocket error:", error);
 };
 
 
+// 콘솔 창 닫기 함수
+function closeConsole() {
+    const dashboard = document.querySelector('.dashboard');
+    const consoleDiv = document.querySelector('.console');
 
+    // 대시보드를 원래 위치로 되돌리기
+    dashboard.style.transform = "translateX(0)";
+
+    // 콘솔 숨기기
+    consoleDiv.style.display = "none";
+}
+
+function toggleOptionsTab() {
+    const optionsTab = document.getElementById("optionsTab");
+    if (optionsTab.style.display === "none" || !optionsTab.style.display) {
+        optionsTab.style.display = "block";
+    } else {
+        optionsTab.style.display = "none";
+    }
+}
+
+
+
+function closeOptionsTab() {
+    document.getElementById("optionsTab").style.display = "none";
+}

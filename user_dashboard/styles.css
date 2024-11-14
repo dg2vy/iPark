@@ -1,7 +1,15 @@
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
 body {
-    background-image: url('back.jpg'); /* 배경 사진 경로 설정 */
-    background-size: cover;
-    color: white;
+    background-color: #1e1e2e; /* 어두운 배경색 */
+    color: #c9d1d9; /* 밝은 텍스트 색상 */
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
@@ -13,8 +21,9 @@ body {
 .dashboard {
     width: 500px;
     padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #2d2d3d; /* 어두운 패널 배경 */
+    color: #c9d1d9; /* 패널 텍스트 색상 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* 그림자 강조 */
     border-radius: 8px;
     position: relative; /* 절대 위치 요소를 위한 상대 위치 설정 */
 }
@@ -29,8 +38,10 @@ body {
     width: 100%;
     padding: 10px;
     margin-right: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #000007;
     border-radius: 4px;
+    background-color: #2d2d3d; /* 어두운 배경색 */
+    color: #ffffff; /* 흰색 글씨 */
 }
 
 .start-button {
@@ -53,18 +64,14 @@ body {
 }
 
 .checkbox-list {
-    position: absolute;
-    background-color: white;
-    color: black;
+    background-color: #2d2d3d; /* 어두운 배경 */
+    color: #c9d1d9; /* 밝은 텍스트 */
     border: 1px solid #ccc;
-    border-radius: 4px;
-    z-index: 1000;
-    padding: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 500px; /* 원하는 가로 길이 설정 */
-    max-height: 400px; /* 최대 높이 설정 */
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%; /* options-tab의 너비에 맞춤 */
+    max-height: 100%; /* options-tab의 높이에 맞춤 */
     overflow-y: auto; /* 스크롤 가능하게 설정 */
-    display: none; /* 기본적으로 숨김 */
 }
 
 .checkbox-list label {
@@ -120,5 +127,53 @@ body {
 /* 메시지가 보일 때 활성화되는 클래스 */
 .copy-message.show {
     opacity: 1;
+}
+
+/* 콘솔 추가 */
+.console {
+    position: absolute;
+    border-radius: 8px;
+    top: 50;
+    right: 50;
+    width: 300px; /*콘솔의 너비 설정*/
+    background: #2d2d3d;
+    padding: 20px;
+    border-left: 1px solid #000000;
+    display: none; /* 콘솔 숨김 */
+}
+
+.send-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* 빨간색 배경 */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.close-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #f44336; /* 빨간색 배경 */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.options-tab {
+    position: fixed;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px !important;
+    height: 80vh !important;
+    background-color: #2d2d3d;
+    color: #c9d1d9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+    overflow-y: auto;
+    z-index: 1000;
 }
 
