@@ -168,3 +168,18 @@ body {
     z-index: 1000;
 }
 
+.ai-stop-button {
+    background-color: #ff4d4d; /* 빨간색 배경 */
+    color: #ffffff; /* 흰색 텍스트 */
+    border: none;
+    padding: 10px 20px;
+    margin-top: 3px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.ai-stop-button:hover {
+    background-color: #cc0000; /* 더 어두운 빨간색 */
+}
