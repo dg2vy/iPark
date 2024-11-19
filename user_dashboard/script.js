@@ -12,6 +12,8 @@ i18next.init({
                 targetMissing: "타겟 URL 또는 IP를 입력하세요.",
                 stopAI: "AI 중단",
                 dropdownButton: "옵션 선택",
+                stopAI: "AI 중단",
+                dropdownButton: "옵션 선택",
                 aiUsage: "AI를 사용하시겠습니까?",
                 optionsCheck: "옵션 확인",
                 closeButton: "닫기",
@@ -205,6 +207,7 @@ i18next.init({
                 copyMessage: "Options copied successfully",
                 startAlert: "Fuzzing has started on {{target}}!",
                 targetMissing: "Please enter the target URL or IP.",
+                dropdownButton: "options selcect",
                 stopAI: "Stop ai",
                 dropdownButton: "Options seclect",
                 aiUsage: "Would you like to use AI?",
@@ -421,7 +424,7 @@ const optionsWithArguments = {
     "-rl": true, "-rlm": true,
     "-bs": true, "-c": true,
     "-tlog": true, "-elog": true,
-    "-ud": true, "-timeout": true,
+    "-ud": true
 };
 
 const dropdownButton = document.querySelector('.dropdown-button');
@@ -561,7 +564,7 @@ function updateUI() {
     document.querySelector('.ai-stop-button').textContent = i18next.t('stopAI'); 
     document.querySelector('.dropdown-button').textContent = i18next.t('dropdownButton')
     document.querySelector('#aiLabel').textContent = i18next.t('aiUsage'); // 체크박스 번역 추가
-    document.querySelector('#consoleTitle').textContent = i18next.t('optionsCheck'); // 제목 번역
+        document.querySelector('#consoleTitle').textContent = i18next.t('optionsCheck'); // 제목 번역
     document.querySelector('#closeButton').textContent = i18next.t('closeButton'); // 닫기 버튼 번역
     document.querySelector('#sendButton').textContent = i18next.t('startAttack'); // 공격 시작 버튼 번역
 }
