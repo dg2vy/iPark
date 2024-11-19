@@ -1,3 +1,4 @@
+
 i18next.init({
     lng: 'ko', // 초기 언어
     resources: {
@@ -5,11 +6,16 @@ i18next.init({
             translation: {
                 title: "웹 퍼징 대시보드",
                 targetPlaceholder: "TARGET URL or IP",
-                startButton: "공격 시작",
+                startButton: "옵션\n확인",
                 copyMessage: "옵션 복사 완료",
                 startAlert: "{{target}}으로 퍼징이 시작되었습니다!",
                 targetMissing: "타겟 URL 또는 IP를 입력하세요.",
+                stopAI: "AI 중단",
                 dropdownButton: "옵션 선택",
+                aiUsage: "AI를 사용하시겠습니까?",
+                optionsCheck: "옵션 확인",
+                closeButton: "닫기",
+                startAttack: "공격 시작",
                 options: {
                     target: [
                         /* { label: "-u, -target [스캔할 대상 URL/호스트]", value: "-u" }, */
@@ -195,11 +201,16 @@ i18next.init({
             translation: {
                 title: "Web Fuzzing Dashboard",
                 targetPlaceholder: "TARGET URL or IP",
-                startButton: "Start Attack",
+                startButton: "Options Check",
                 copyMessage: "Options copied successfully",
                 startAlert: "Fuzzing has started on {{target}}!",
                 targetMissing: "Please enter the target URL or IP.",
-                dropdownButton: "options selcect",
+                stopAI: "Stop ai",
+                dropdownButton: "Options seclect",
+                aiUsage: "Would you like to use AI?",
+                optionsCheck: "Options check",
+                closeButton: "Close",
+                startAttack: "Start Attack",
                 options: {
                     target: [
                         /* { label: "-u, -target [Scan target URL/host]", value: "-u" }, */
@@ -386,6 +397,32 @@ i18next.init({
     updateUI();
     loadOptions(); // 초기 로드 시 옵션 로드
 });
+const optionsWithArguments = {
+    "-u": true, "-target": true,
+    "-l": true, "-resume": true,
+    "-iv": true, "-ntv": true,
+    "-t": true, "-turl": true,
+    "-w": true, "-wurl": true,
+    "-a": true, "-tags": true,
+    "-etags": true, "-id": true,
+    "-eid": true, "-itags": true,
+    "-s": true, "-es": true,
+    "-pt": true, "-ept": true,
+    "-o": true, "-srd": true,
+    "-me": true, "-se": true,
+    "-je": true, "-jle": true,
+    "-config": true, "-H": true,
+    "-V": true, "-r": true,
+    "-cc": true, "-ck": true,
+    "-ca": true, "-sni": true,
+    "-sip": true, "-at": true,
+    "-iserver": true, "-itoken": true,
+    "-ul": true, "-ur": true,
+    "-rl": true, "-rlm": true,
+    "-bs": true, "-c": true,
+    "-tlog": true, "-elog": true,
+    "-ud": true, "-timeout": true,
+};
 
 const dropdownButton = document.querySelector('.dropdown-button');
 const checkboxList = document.querySelector('.checkbox-list');
@@ -410,7 +447,7 @@ function loadOptions() {
 
     optionsContainer.innerHTML += `<h3>TARGET</h3>${targetOptions}`;
 
-    /* // TEMPLATE 섹션 옵션 추가
+    /* // TEMPLATE 섹션 옵션 추가   
     const templateOptions = currentLangOptions.templates.map(option => {
         return `<label><input type="checkbox" value="${option.value}"> ${option.label}</label>`;
     }).join('');
@@ -521,6 +558,12 @@ function getSelectedOptions() {
 function updateUI() {
     document.querySelector('.start-button').textContent = i18next.t('startButton');
     document.querySelector('#targetInput').placeholder = i18next.t('targetPlaceholder');
+    document.querySelector('.ai-stop-button').textContent = i18next.t('stopAI'); 
+    document.querySelector('.dropdown-button').textContent = i18next.t('dropdownButton')
+    document.querySelector('#aiLabel').textContent = i18next.t('aiUsage'); // 체크박스 번역 추가
+    document.querySelector('#consoleTitle').textContent = i18next.t('optionsCheck'); // 제목 번역
+    document.querySelector('#closeButton').textContent = i18next.t('closeButton'); // 닫기 버튼 번역
+    document.querySelector('#sendButton').textContent = i18next.t('startAttack'); // 공격 시작 버튼 번역
 }
 
 function changeLanguage() {
@@ -651,18 +694,27 @@ function startAttack() {
 // 콘솔에 인자 입력 필드를 추가하는 함수
 function populateConsole(selectedOptions) {
     const consoleContent = document.getElementById('console-content');
-    consoleContent.innerHTML = '';
+    consoleContent.innerHTML = ''; // 기존 내용 초기화
 
     selectedOptions.forEach(option => {
         const inputLabel = document.createElement('label');
-        inputLabel.innerText = ` ${option}: `;
+        inputLabel.innerText = `${option}: `;
 
-        const inputField = document.createElement('input'); 
-        inputField.type = 'text';
-        inputField.name = option;
-        inputField.placeholder = `${option}의 인자값`;
+        if (optionsWithArguments[option]) {
+            // 인자값이 필요한 옵션
+            const inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.name = option;
+            inputField.placeholder = `${option} parameter value`;
+            inputLabel.appendChild(inputField);
+        } else {
+            // 인자값이 필요하지 않은 옵션
+            const message = document.createElement('span');
+            message.innerText = "no parameter value";
+            message.style.color = "#888"; // 메시지 스타일 설정
+            inputLabel.appendChild(message);
+        }
 
-        inputLabel.appendChild(inputField);
         consoleContent.appendChild(inputLabel);
         consoleContent.appendChild(document.createElement('br'));
     });

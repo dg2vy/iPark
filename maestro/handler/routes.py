@@ -13,7 +13,7 @@ latest_metrics = {}
 def subscribe_to_metrics_channel():
     global latest_metrics
     pubsub = redis_client.pubsub()
-    pubsub.subscribe("metrics_channel")  # metrics_channel 채널 구독
+    pubsub.subscribe("metrics_channel")
 
     for message in pubsub.listen():
         if message['type'] == 'message':

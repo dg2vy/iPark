@@ -18,18 +18,18 @@
 
     <div class="target-section">
         <input type="text" id="targetInput" placeholder="http TARGET URL or IP">
-        <button class="start-button" onclick="startAttack()">옵션 확인</button>
+        <button class="start-button" onclick="startAttack()"></button>
     </div>
 
     <div class="options-section">
-        <button class="dropdown-button" onclick="toggleOptionsTab()">옵션 선택</button>
+        <button class="dropdown-button" onclick="toggleOptionsTab()"></button>
         <div class="ai-option">
             <label>
-                <input type="checkbox" id="aiCheckbox"> AI를 사용하시겠습니까?
+                <input type="checkbox" id="aiCheckbox"> <span id="aiLabel"></span>
             </label>
         </div>
             <!-- AI 중단 버튼 추가 -->
-        <button class="ai-stop-button" onclick="stopAI()">AI 중단</button>
+        <button class="ai-stop-button" onclick="stopAI()"></button>
     </div>
 </div>
 
@@ -38,189 +38,190 @@
     <button class="close-button" onclick="closeOptionsTab()">X</button>
     <div class="checkbox-list">
         <h3>TARGET</h3>
-        <label><input type="checkbox" value="-u"> -u, -target [스캔할 대상 URL/호스트]</label>
-        <label><input type="checkbox" value="-l"> -l, -list [스캔할 대상 URL/호스트 목록이 있는 파일 경로 (한 줄에 하나씩)]</label>
-        <label><input type="checkbox" value="-resume"> -resume [resume.cfg를 사용하여 스캔 재개 (클러스터링은 비활성화됨)]</label>
-        <label><input type="checkbox" value="-sa"> -sa, -scan-all-ips [dns 레코드와 관련된 모든 IP 스캔]</label>
-        <label><input type="checkbox" value="-iv"> -iv, -ip-version [스캔할 호스트의 IP 버전 (4,6) - (기본값 4)]</label>
+        <label><input type="checkbox" value="-u"> </label>
+        <label><input type="checkbox" value="-l"> </label>
+        <label><input type="checkbox" value="-resume"></label>
+        <label><input type="checkbox" value="-sa"></label>
+        <label><input type="checkbox" value="-iv"></label>
     
         <h3>TEMPLATES</h3>
-        <label><input type="checkbox" value="-nt"> -nt, -new-templates [최신 nuclei-templates 릴리스에 추가된 새 템플릿만 실행]</label>
-        <label><input type="checkbox" value="-ntv"> -ntv, -new-templates-version [특정 버전에 추가된 새 템플릿 실행]</label>
-        <label><input type="checkbox" value="-as"> -as, -automatic-scan [wappalyzer 기술 감지를 사용하여 태그 매핑으로 자동 웹 스캔]</label>
-        <label><input type="checkbox" value="-t"> -t, -templates [실행할 템플릿 또는 템플릿 디렉토리 목록 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-turl"> -turl, -template-url [실행할 템플릿 url 또는 템플릿 url 목록 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-w"> -w, -workflows [실행할 워크플로우 또는 워크플로우 디렉토리 목록 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-wurl"> -wurl, -workflow-url [실행할 워크플로우 url 또는 워크플로우 url 목록 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-validate"> -validate [nuclei에 전달된 템플릿 검증]</label>
-        <label><input type="checkbox" value="-nss"> -nss, -no-strict-syntax [템플릿에서 엄격한 구문 검사 비활성화]</label>
-        <label><input type="checkbox" value="-td"> -td, -template-display [템플릿 내용 표시]</label>
-        <label><input type="checkbox" value="-tl"> -tl [사용 가능한 모든 템플릿 목록]</label>
-        <label><input type="checkbox" value="-sign"> -sign [NUCLEI_SIGNATURE_PRIVATE_KEY 환경 변수에서 정의된 개인 키로 템플릿에 서명]</label>
-        <label><input type="checkbox" value="-code"> -code [코드 프로토콜 기반 템플릿 로딩 활성화]</label>
+        <label><input type="checkbox" value="-nt"></label>
+        <label><input type="checkbox" value="-ntv"></label>
+        <label><input type="checkbox" value="-as"></label>
+        <label><input type="checkbox" value="-t"></label>
+        <label><input type="checkbox" value="-turl"></label>
+        <label><input type="checkbox" value="-w"></label>
+        <label><input type="checkbox" value="-wurl"></label>
+        <label><input type="checkbox" value="-validate"></label>
+        <label><input type="checkbox" value="-nss"></label>
+        <label><input type="checkbox" value="-td"></label>
+        <label><input type="checkbox" value="-tl"></label>
+        <label><input type="checkbox" value="-sign"></label>
+        <label><input type="checkbox" value="-code"></label>
     
         <h3>FILTERING</h3>
-        <label><input type="checkbox" value="-a"> -a, -author [저자를 기반으로 실행할 템플릿 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-tags"> -tags [태그를 기반으로 실행할 템플릿 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-etags"> -etags, -exclude-tags [태그를 기반으로 제외할 템플릿 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-itags"> -itags, -include-tags [기본값 또는 구성에 의해 제외되더라도 실행되어야 하는 태그]</label>
-        <label><input type="checkbox" value="-id"> -id, -template-id [템플릿 id를 기반으로 실행할 템플릿 (쉼표로 구분, 파일, 와일드카드 허용)]</label>
-        <label><input type="checkbox" value="-eid"> -eid, -exclude-id [템플릿 id를 기반으로 제외할 템플릿 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-it"> -it, -include-templates [기본값 또는 구성에 의해 제외되더라도 실행되어야 하는 템플릿]</label>
-        <label><input type="checkbox" value="-et"> -et, -exclude-templates [제외할 템플릿 또는 템플릿 디렉토리 (쉼표로 구분, 파일)]</label>
-        <label><input type="checkbox" value="-em"> -em, -exclude-matchers [결과에서 제외할 템플릿 매처]</label>
-        <label><input type="checkbox" value="-s"> -s, -severity [심각도를 기반으로 실행할 템플릿. 가능한 값: info, low, medium, high, critical, unknown]</label>
-        <label><input type="checkbox" value="-es"> -es, -exclude-severity [심각도를 기반으로 제외할 템플릿. 가능한 값: info, low, medium, high, critical, unknown]</label>
-        <label><input type="checkbox" value="-pt"> -pt, -type [프로토콜 유형을 기반으로 실행할 템플릿. 가능한 값: dns, file, http, headless, tcp, workflow, ssl, websocket, whois, code, javascript]</label>
-        <label><input type="checkbox" value="-ept"> -ept, -exclude-type [프로토콜 유형을 기반으로 제외할 템플릿. 가능한 값: dns, file, http, headless, tcp, workflow, ssl, websocket, whois, code, javascript]</label>
-        <label><input type="checkbox" value="-tc"> -tc, -template-condition [표현식 조건을 기반으로 실행할 템플릿]</label>
-    
+        <label><input type="checkbox" value="-a"></label>
+        <label><input type="checkbox" value="-tags"></label>
+        <label><input type="checkbox" value="-etags"></label>
+        <label><input type="checkbox" value="-itags"></label>
+        <label><input type="checkbox" value="-id"></label>
+        <label><input type="checkbox" value="-eid"></label>
+        <label><input type="checkbox" value="-it"></label>
+        <label><input type="checkbox" value="-et"></label>
+        <label><input type="checkbox" value="-em"></label>
+        <label><input type="checkbox" value="-s"></label>
+        <label><input type="checkbox" value="-es"></label>
+        <label><input type="checkbox" value="-pt"></label>
+        <label><input type="checkbox" value="-ept"></label>
+        <label><input type="checkbox" value="-tc"></label>
+        
         <h3>OUTPUT</h3>
-        <label><input type="checkbox" value="-o"> -o, -output [발견된 문제/취약점을 작성할 출력 파일]</label>
-        <label><input type="checkbox" value="-sresp"> -sresp, -store-resp [모든 요청/응답을 nuclei를 통해 출력 디렉토리에 저장]</label>
-        <label><input type="checkbox" value="-srd"> -srd, -store-resp-dir [모든 요청/응답을 nuclei를 통해 사용자 정의 디렉토리에 저장 (기본값 "output")]</label>
-        <label><input type="checkbox" value="-silent"> -silent [결과만 표시]</label>
-        <label><input type="checkbox" value="-nc"> -nc, -no-color [출력 내용 색상 비활성화 (ANSI 이스케이프 코드)]</label>
-        <label><input type="checkbox" value="-j"> -j, -jsonl [JSONL 형식으로 출력 작성]</label>
-        <label><input type="checkbox" value="-irr"> -irr, -include-rr [JSON, JSONL, Markdown 출력에 요청/응답 쌍 포함 (결과만 해당)]</label>
-        <label><input type="checkbox" value="-or"> -or, -omit-raw [JSON, JSONL, Markdown 출력에서 요청/응답 쌍 생략 (결과만 해당)]</label>
-        <label><input type="checkbox" value="-ot"> -ot, -omit-template [JSON, JSONL 출력에서 인코딩된 템플릿 생략]</label>
-        <label><input type="checkbox" value="-nm"> -nm, -no-meta [CLI 출력에서 결과 메타데이터 인쇄 비활성화]</label>
-        <label><input type="checkbox" value="-ts"> -ts, -timestamp [CLI 출력에 타임스탬프 인쇄 활성화]</label>
-        <label><input type="checkbox" value="-rdb"> -rdb, -report-db [nuclei 보고 데이터베이스 (보고 데이터를 유지하려면 항상 이것을 사용)]</label>
-        <label><input type="checkbox" value="-ms"> -ms, -matcher-status [매치 실패 상태 표시]</label>
-        <label><input type="checkbox" value="-me"> -me, -markdown-export [Markdown 형식으로 결과를 내보낼 디렉토리]</label>
-        <label><input type="checkbox" value="-se"> -se, -sarif-export [SARIF 형식으로 결과를 내보낼 파일]</label>
-        <label><input type="checkbox" value="-je"> -je, -json-export [JSON 형식으로 결과를 내보낼 파일]</label>
-        <label><input type="checkbox" value="-jle"> -jle, -jsonl-export [JSONL 형식으로 결과를 내보낼 파일]</label>
-    
+        <label><input type="checkbox" value="-o"></label>
+        <label><input type="checkbox" value="-sresp"></label>
+        <label><input type="checkbox" value="-srd"></label>
+        <label><input type="checkbox" value="-silent"></label>
+        <label><input type="checkbox" value="-nc"></label>
+        <label><input type="checkbox" value="-j"></label>
+        <label><input type="checkbox" value="-irr"></label>
+        <label><input type="checkbox" value="-or"></label>
+        <label><input type="checkbox" value="-ot"></label>
+        <label><input type="checkbox" value="-nm"></label>
+        <label><input type="checkbox" value="-ts"></label>
+        <label><input type="checkbox" value="-rdb"></label>
+        <label><input type="checkbox" value="-ms"></label>
+        <label><input type="checkbox" value="-me"></label>
+        <label><input type="checkbox" value="-se"></label>
+        <label><input type="checkbox" value="-je"></label>
+        <label><input type="checkbox" value="-jle"></label>
+        
         <h3>CONFIGURATIONS</h3>
-        <label><input type="checkbox" value="-config"> -config [nuclei 구성 파일 경로]</label>
-        <label><input type="checkbox" value="-fr"> -fr, -follow-redirects [http 템플릿에 대한 리디렉션 따라가기 활성화]</label>
-        <label><input type="checkbox" value="-fhr"> -fhr, -follow-host-redirects [같은 호스트에서 리디렉션 따라가기]</label>
-        <label><input type="checkbox" value="-mr"> -mr, -max-redirects [http 템플릿에 대해 따라갈 최대 리디렉션 수 (기본값 10)]</label>
-        <label><input type="checkbox" value="-dr"> -dr, -disable-redirects [http 템플릿에 대한 리디렉션 비활성화]</label>
-        <label><input type="checkbox" value="-rc"> -rc, -report-config [nuclei 보고 모듈 구성 파일]</label>
-        <label><input type="checkbox" value="-H"> -H, -header [모든 http 요청에 포함할 사용자 정의 헤더/쿠키 (header:value 형식)]</label>
-        <label><input type="checkbox" value="-V"> -V, -var [key=value 형식의 사용자 정의 변수]</label>
-        <label><input type="checkbox" value="-r"> -r, -resolvers [nuclei에 대한 리졸버 목록이 있는 파일]</label>
-        <label><input type="checkbox" value="-sr"> -sr, -system-resolvers [오류 대체로 시스템 DNS 해결 사용]</label>
-        <label><input type="checkbox" value="-dc"> -dc, -disable-clustering [요청 클러스터링 비활성화]</label>
-        <label><input type="checkbox" value="-passive"> -passive [수동 HTTP 응답 처리 모드 활성화]</label>
-        <label><input type="checkbox" value="-fh2"> -fh2, -force-http2 [요청에 http2 연결 강제]</label>
-        <label><input type="checkbox" value="-ev"> -ev, -env-vars [템플릿에서 환경 변수 사용 활성화]</label>
-        <label><input type="checkbox" value="-cc"> -cc, -client-cert [스캔 대상 호스트에 대한 인증에 사용되는 클라이언트 인증서 파일 (PEM 인코딩)]</label>
-        <label><input type="checkbox" value="-ck"> -ck, -client-key [스캔 대상 호스트에 대한 인증에 사용되는 클라이언트 키 파일 (PEM 인코딩)]</label>
-        <label><input type="checkbox" value="-ca"> -ca, -client-ca [스캔 대상 호스트에 대한 인증에 사용되는 클라이언트 인증서 기관 파일 (PEM 인코딩)]</label>
-        <label><input type="checkbox" value="-sml"> -sml, -show-match-line [파일 템플릿에 대한 매치 라인 표시]</label>
-        <label><input type="checkbox" value="-ztls"> -ztls [ztls 라이브러리 사용]</label>
-        <label><input type="checkbox" value="-sni"> -sni [사용할 tls sni 호스트 이름 (기본값: 입력 도메인 이름)]</label>
-        <label><input type="checkbox" value="-lfa"> -lfa, -allow-local-file-access [시스템 어디서나 파일 액세스 허용]</label>
-        <label><input type="checkbox" value="-lna"> -lna, -restrict-local-network-access [로컬/개인 네트워크로의 연결 차단]</label>
-        <label><input type="checkbox" value="-i"> -i, -interface [네트워크 스캔에 사용할 네트워크 인터페이스]</label>
-        <label><input type="checkbox" value="-at"> -at, -attack-type [수행할 페이로드 조합 유형]</label>
-        <label><input type="checkbox" value="-sip"> -sip, -source-ip [네트워크 스캔에 사용할 소스 IP 주소]</label>
-        <label><input type="checkbox" value="-rsr"> -rsr, -response-size-read [바이트 단위로 읽을 최대 응답 크기 (기본값 10485760)]</label>
-        <label><input type="checkbox" value="-rss"> -rss, -response-size-save [바이트 단위로 읽을 최대 응답 크기 (기본값 1048576)]</label>
-        <label><input type="checkbox" value="-reset"> -reset [모든 nuclei 구성 및 데이터 파일을 제거합니다]</label>
-        <label><input type="checkbox" value="-tlsi"> -tls-impersonate [실험적인 클라이언트 hello tls 무작위화 활성화]</label>
-    
+        <label><input type="checkbox" value="-config"></label>
+        <label><input type="checkbox" value="-fr"></label>
+        <label><input type="checkbox" value="-fhr"></label>
+        <label><input type="checkbox" value="-mr"></label>
+        <label><input type="checkbox" value="-dr"></label>
+        <label><input type="checkbox" value="-rc"></label>
+        <label><input type="checkbox" value="-H"></label>
+        <label><input type="checkbox" value="-V"></label>
+        <label><input type="checkbox" value="-r"></label>
+        <label><input type="checkbox" value="-sr"></label>
+        <label><input type="checkbox" value="-dc"></label>
+        <label><input type="checkbox" value="-passive"></label>
+        <label><input type="checkbox" value="-fh2"></label>
+        <label><input type="checkbox" value="-ev"></label>
+        <label><input type="checkbox" value="-cc"></label>
+        <label><input type="checkbox" value="-ck"></label>
+        <label><input type="checkbox" value="-ca"></label>
+        <label><input type="checkbox" value="-sml"></label>
+        <label><input type="checkbox" value="-ztls"></label>
+        <label><input type="checkbox" value="-sni"></label>
+        <label><input type="checkbox" value="-lfa"></label>
+        <label><input type="checkbox" value="-lna"></label>
+        <label><input type="checkbox" value="-i"></label>
+        <label><input type="checkbox" value="-at"></label>
+        <label><input type="checkbox" value="-sip"></label>
+        <label><input type="checkbox" value="-rsr"></label>
+        <label><input type="checkbox" value="-rss"></label>
+        <label><input type="checkbox" value="-reset"></label>
+        <label><input type="checkbox" value="-tlsi"></label>
+        
         <h3>INTERACTSH</h3>
-        <label><input type="checkbox" value="-iserver"> -iserver, -interactsh-server [자체 호스팅 인스턴스를 위한 interactsh 서버 url]</label>
-        <label><input type="checkbox" value="-itoken"> -itoken, -interactsh-token [자체 호스팅 interactsh 서버를 위한 인증 토큰]</label>
-        <label><input type="checkbox" value="-interactions-cache-size"> -interactions-cache-size [상호 작용 캐시에 유지할 요청 수]</label>
-        <label><input type="checkbox" value="-interactions-eviction"> -interactions-eviction [캐시에서 요청을 제거하기 전에 기다릴 초 수]</label>
-        <label><input type="checkbox" value="-interactions-poll-duration"> -interactions-poll-duration [각 상호 작용 폴 요청 사이에 기다릴 초 수]</label>
-        <label><input type="checkbox" value="-interactions-cooldown-period"> -interactions-cooldown-period [종료 전에 상호 작용 폴링에 추가 시간]</label>
-        <label><input type="checkbox" value="-ni"> -ni, -no-interactsh [OAST 테스트를 위한 interactsh 서버 비활성화]</label>
-    
+        <label><input type="checkbox" value="-iserver"></label>
+        <label><input type="checkbox" value="-itoken"></label>
+        <label><input type="checkbox" value="-interactions-cache-size"></label>
+        <label><input type="checkbox" value="-interactions-eviction"></label>
+        <label><input type="checkbox" value="-interactions-poll-duration"></label>
+        <label><input type="checkbox" value="-interactions-cooldown-period"></label>
+        <label><input type="checkbox" value="-ni"></label>
+        
         <h3>FUZZING</h3>
-        <label><input type="checkbox" value="-ft"> -ft, -fuzzing-type [템플릿에 설정된 퍼징 유형 재정의]</label>
-        <label><input type="checkbox" value="-fm"> -fm, -fuzzing-mode [템플릿에 설정된 퍼징 모드 재정의]</label>
-    
+        <label><input type="checkbox" value="-ft"></label>
+        <label><input type="checkbox" value="-fm"></label>
+        
         <h3>UNCOVER</h3>
-        <label><input type="checkbox" value="-uc"> -uc, -uncover [uncover 엔진 활성화]</label>
-        <label><input type="checkbox" value="-uq"> -uq, -uncover-query [uncover 검색 쿼리]</label>
-        <label><input type="checkbox" value="-ue"> -ue, -uncover-engine [uncover 검색 엔진]</label>
-        <label><input type="checkbox" value="-uf"> -uf, -uncover-field [반환할 uncover 필드]</label>
-        <label><input type="checkbox" value="-ul"> -ul, -uncover-limit [반환할 uncover 결과]</label>
-        <label><input type="checkbox" value="-ur"> -ur, -uncover-ratelimit [알려지지 않은 ratelimit의 엔진을 재정의하는 ratelimit]</label>
-    
+        <label><input type="checkbox" value="-uc"></label>
+        <label><input type="checkbox" value="-uq"></label>
+        <label><input type="checkbox" value="-ue"></label>
+        <label><input type="checkbox" value="-uf"></label>
+        <label><input type="checkbox" value="-ul"></label>
+        <label><input type="checkbox" value="-ur"></label>
+        
         <h3>RATE-LIMIT</h3>
-        <label><input type="checkbox" value="-rl"> -rl, -rate-limit [초당 보낼 최대 요청 수]</label>
-        <label><input type="checkbox" value="-rlm"> -rlm, -rate-limit-minute [분당 보낼 최대 요청 수]</label>
-        <label><input type="checkbox" value="-bs"> -bs, -bulk-size [템플릿당 병렬로 분석할 최대 호스트 수]</label>
-        <label><input type="checkbox" value="-c"> -c, -concurrency [병렬로 실행할 최대 템플릿 수]</label>
-        <label><input type="checkbox" value="-hbs"> -hbs, -headless-bulk-size [템플릿당 병렬로 분석할 최대 headless 호스트 수]</label>
-        <label><input type="checkbox" value="-headc"> -headc, -headless-concurrency [병렬로 실행할 최대 headless 템플릿 수]</label>
-    
+        <label><input type="checkbox" value="-rl"></label>
+        <label><input type="checkbox" value="-rlm"></label>
+        <label><input type="checkbox" value="-bs"></label>
+        <label><input type="checkbox" value="-c"></label>
+        <label><input type="checkbox" value="-hbs"></label>
+        <label><input type="checkbox" value="-headc"></label>
+        
         <h3>OPTIMIZATIONS</h3>
-        <label><input type="checkbox" value="-timeout"> -timeout [타임아웃 전에 기다릴 초 수]</label>
-        <label><input type="checkbox" value="-retries"> -retries [실패한 요청을 재시도하는 횟수]</label>
-        <label><input type="checkbox" value="-ldp"> -ldp, -leave-default-ports [기본 HTTP/HTTPS 포트 남겨두기]</label>
-        <label><input type="checkbox" value="-mhe"> -mhe, -max-host-error [스캔에서 건너뛰기 전에 호스트에서 허용되는 최대 오류 수]</label>
-        <label><input type="checkbox" value="-te"> -te, -track-error [최대 호스트 오류 감시 목록에 주어진 오류 추가]</label>
-        <label><input type="checkbox" value="-nmhe"> -nmhe, -no-mhe [오류를 기반으로 스캔에서 호스트 건너뛰기 비활성화]</label>
-        <label><input type="checkbox" value="-project"> -project [동일한 요청을 여러 번 보내는 것을 피하기 위해 프로젝트 폴더 사용]</label>
-        <label><input type="checkbox" value="-project-path"> -project-path [특정 프로젝트 경로 설정]</label>
-        <label><input type="checkbox" value="-spm"> -spm, -stop-at-first-match [첫 번째 매치 후 HTTP 요청 처리 중지]</label>
-        <label><input type="checkbox" value="-stream"> -stream [스트림 모드 - 입력 정렬 없이 시작]</label>
-        <label><input type="checkbox" value="-ss"> -ss, -scan-strategy [스캔하는 동안 사용할 전략]</label>
-        <label><input type="checkbox" value="-irt"> -irt, -input-read-timeout [입력 읽기 시간 초과]</label>
-        <label><input type="checkbox" value="-nh"> -nh, -no-httpx [비 URL 입력에 대한 httpx 프로브 비활성화]</label>
-        <label><input type="checkbox" value="-no-stdin"> -no-stdin [stdin 처리를 비활성화]</label>
-    
+        <label><input type="checkbox" value="-timeout"></label>
+        <label><input type="checkbox" value="-retries"></label>
+        <label><input type="checkbox" value="-ldp"></label>
+        <label><input type="checkbox" value="-mhe"></label>
+        <label><input type="checkbox" value="-te"></label>
+        <label><input type="checkbox" value="-nmhe"></label>
+        <label><input type="checkbox" value="-project"></label>
+        <label><input type="checkbox" value="-project-path"></label>
+        <label><input type="checkbox" value="-spm"></label>
+        <label><input type="checkbox" value="-stream"></label>
+        <label><input type="checkbox" value="-ss"></label>
+        <label><input type="checkbox" value="-irt"></label>
+        <label><input type="checkbox" value="-nh"></label>
+        <label><input type="checkbox" value="-no-stdin"></label>
+        
         <h3>HEADLESS</h3>
-        <label><input type="checkbox" value="-headless"> -headless [headless 브라우저 지원이 필요한 템플릿 활성화]</label>
-        <label><input type="checkbox" value="-page-timeout"> -page-timeout [headless 모드에서 각 페이지를 기다리는 시간]</label>
-        <label><input type="checkbox" value="-sb"> -sb, -show-browser [headless 모드로 실행하는 템플릿에서 브라우저 화면 표시]</label>
-        <label><input type="checkbox" value="-ho"> -ho, -headless-options [추가 옵션으로 headless chrome 시작]</label>
-        <label><input type="checkbox" value="-sc"> -sc, -system-chrome [nuclei가 설치한 Chrome 대신 로컬에 설치된 Chrome 브라우저 사용]</label>
-        <label><input type="checkbox" value="-lha"> -lha, -list-headless-action [사용 가능한 headless 액션 목록 표시]</label>
-    
+        <label><input type="checkbox" value="-headless"></label>
+        <label><input type="checkbox" value="-page-timeout"></label>
+        <label><input type="checkbox" value="-sb"></label>
+        <label><input type="checkbox" value="-ho"></label>
+        <label><input type="checkbox" value="-sc"></label>
+        <label><input type="checkbox" value="-lha"></label>
+        
         <h3>DEBUG</h3>
-        <label><input type="checkbox" value="-debug"> -debug [모든 요청과 응답 표시]</label>
-        <label><input type="checkbox" value="-dreq"> -dreq, -debug-req [보낸 모든 요청 표시]</label>
-        <label><input type="checkbox" value="-dresp"> -dresp, -debug-resp [받은 모든 응답 표시]</label>
-        <label><input type="checkbox" value="-p"> -p, -proxy [사용할 http/socks5 프록시 목록]</label>
-        <label><input type="checkbox" value="-pi"> -pi, -proxy-internal [모든 내부 요청을 프록시를 통해 전송]</label>
-        <label><input type="checkbox" value="-ldf"> -ldf, -list-dsl-function [지원되는 모든 DSL 함수 시그니처 목록 표시]</label>
-        <label><input type="checkbox" value="-tlog"> -tlog, -trace-log [보낸 요청 추적 로그를 기록할 파일]</label>
-        <label><input type="checkbox" value="-elog"> -elog, -error-log [보낸 요청 오류 로그를 기록할 파일]</label>
-        <label><input type="checkbox" value="-version"> -version [nuclei 버전 표시]</label>
-        <label><input type="checkbox" value="-hm"> -hm, -hang-monitor [nuclei 멈춤 모니터링 활성화]</label>
-        <label><input type="checkbox" value="-v"> -v, -verbose [자세한 출력 표시]</label>
-        <label><input type="checkbox" value="-profile-mem"> -profile-mem [선택적인 nuclei 메모리 프로필 덤프 파일]</label>
-        <label><input type="checkbox" value="-vv"> -vv [스캔에 로드된 템플릿 표시]</label>
-        <label><input type="checkbox" value="-svd"> -svd, -show-var-dump [디버깅을 위한 변수 덤프 표시]</label>
-        <label><input type="checkbox" value="-ep"> -ep, -enable-pprof [pprof 디버깅 서버 활성화]</label>
-        <label><input type="checkbox" value="-tv"> -tv, -templates-version [설치된 nuclei-templates의 버전 표시]</label>
-        <label><input type="checkbox" value="-hc"> -hc, -health-check [진단 검사 실행]</label>
-    
+        <label><input type="checkbox" value="-debug"></label>
+        <label><input type="checkbox" value="-dreq"></label>
+        <label><input type="checkbox" value="-dresp"></label>
+        <label><input type="checkbox" value="-p"></label>
+        <label><input type="checkbox" value="-pi"></label>
+        <label><input type="checkbox" value="-ldf"></label>
+        <label><input type="checkbox" value="-tlog"></label>
+        <label><input type="checkbox" value="-elog"></label>
+        <label><input type="checkbox" value="-version"></label>
+        <label><input type="checkbox" value="-hm"></label>
+        <label><input type="checkbox" value="-v"></label>
+        <label><input type="checkbox" value="-profile-mem"></label>
+        <label><input type="checkbox" value="-vv"></label>
+        <label><input type="checkbox" value="-svd"></label>
+        <label><input type="checkbox" value="-ep"></label>
+        <label><input type="checkbox" value="-tv"></label>
+        <label><input type="checkbox" value="-hc"></label>
+        
         <h3>UPDATE</h3>
-        <label><input type="checkbox" value="-up"> -up, -update [최신 릴리스 버전으로 nuclei 엔진 업데이트]</label>
-        <label><input type="checkbox" value="-ut"> -ut, -update-templates [최신 릴리스 버전으로 nuclei-templates 업데이트]</label>
-        <label><input type="checkbox" value="-ud"> -ud, -update-template-dir [nuclei-templates를 설치/업데이트할 사용자 지정 디렉토리]</label>
-        <label><input type="checkbox" value="-duc"> -duc, -disable-update-check [자동 nuclei/templates 업데이트 확인 비활성화]</label>
-    
+        <label><input type="checkbox" value="-up"></label>
+        <label><input type="checkbox" value="-ut"></label>
+        <label><input type="checkbox" value="-ud"></label>
+        <label><input type="checkbox" value="-duc"></label>
+        
         <h3>STATISTICS</h3>
-        <label><input type="checkbox" value="-stats"> -stats [실행 중인 스캔에 대한 통계 표시]</label>
-        <label><input type="checkbox" value="-sj"> -sj, -stats-json [JSONL 형식으로 통계 표시]</label>
-        <label><input type="checkbox" value="-si"> -si, -stats-interval [통계 업데이트를 표시하기까지 기다릴 초 수]</label>
-        <label><input type="checkbox" value="-mp"> -mp, -metrics-port [nuclei 메트릭스를 노출할 포트]</label>
-    
+        <label><input type="checkbox" value="-stats"></label>
+        <label><input type="checkbox" value="-sj"></label>
+        <label><input type="checkbox" value="-si"></label>
+        <label><input type="checkbox" value="-mp"></label>
+        
         <h3>CLOUD</h3>
-        <label><input type="checkbox" value="-auth"> -auth [projectdiscovery 클라우드 API 키 구성]</label>
-        <label><input type="checkbox" value="-cup"> -cup, -cloud-upload [스캔 결과를 pdcp 대시보드에 업로드]</label>
-        <label><input type="checkbox" value="-sid"> -sid, -scan-id [주어진 스캔 ID에 스캔 결과 업로드]</label>
+        <label><input type="checkbox" value="-auth"></label>
+        <label><input type="checkbox" value="-cup"></label>
+        <label><input type="checkbox" value="-sid"></label>
+        
     </div>
 </div>
 
 <div class="console" style="display:none;">
-    <h3>옵션 확인</h3>
+    <h3 id="consoleTitle">옵션 확인</h3>
     <div id="console-content"></div>
-    <button class="close-button" onclick="closeConsole()">닫기</button>
-    <button class="send-button" onclick="sendPacket()">공격 시작</button>
+    <button class="close-button" onclick="closeConsole()" id="closeButton">닫기</button>
+    <button class="send-button" onclick="sendPacket()" id="sendButton">공격 시작</button>
 </div>
 
 <div id="copyMessage" class="copy-message" style="display: none;"></div>

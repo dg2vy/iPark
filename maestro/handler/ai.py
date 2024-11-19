@@ -21,10 +21,9 @@ async def send_attack_request(attack_type, server_ip, server_port, path):
 
     async with websockets.connect(url) as websocket:
 
-        await websocket.send(json.dumps(data)) # json 형식으로 데이터 전송
-        response = await websocket.recv() # 서버로부터 응답 수신
+        await websocket.send(json.dumps(data))
+        response = await websocket.recv()
 
-        # json 형식으로 응답 parsing
         yaml_data = json.loads(response)
         
         if isinstance(yaml_data, dict):

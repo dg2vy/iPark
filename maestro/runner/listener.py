@@ -254,7 +254,7 @@ async def cmd_handler(websocket, _):
 
 async def main():
     load_dotenv()
-
-    async with websockets.serve(cmd_handler, os.getenv("BACKEND_WS_IP"), int(os.getenv("BACKEND_WS_PORT"))):
-        logger.info(f"WebSocket server is running on ws://{os.getenv('BACKEND_WS_IP')}:{os.getenv('BACKEND_WS_PORT')}")
+    bip, bport = os.getenv("BACKEND_WS_IP"), int(os.getenv("BACKEND_WS_PORT"))
+    async with websockets.serve(cmd_handler, bip, bport):
+        logger.info(f"WebSocket server is running on ws://{bip}:{bport}")
         await asyncio.Future() 
