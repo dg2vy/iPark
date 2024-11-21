@@ -1,7 +1,7 @@
 <script>
   import Form from './lib/Form.svelte';
   import Console from './lib/Console.svelte';
-  import Modal from './lib/Modal.svelte';
+  import OptionsModal from './lib/OptionsModal.svelte';
   import { onMount, onDestroy } from 'svelte';
   import optionsData from './lib/options.json';
 
@@ -9,7 +9,7 @@
   let messages = [];
   let wsLogs = [];
   let inputMessage = '';
-  let isChecked = false;
+  let isChecked = true;
   let showModal = false;
   let selectedOptions = [];
 
@@ -38,7 +38,7 @@
     };
 
     ws.onerror = (error) => {
-      addLog('error', `웹소켓 에러: ${error}`);
+      addLog('error', `웹소켓 에러: ${JSON.stringify(error, null, 2)}`);
     };
 
     ws.onclose = () => {
@@ -65,35 +65,63 @@
 
 <main>
   <div class="container">
-    <Form
-      {handleSubmit}
-      bind:inputMessage
-      bind:isChecked
-      on:openOptions={() => showModal = true}
-    />
-    <Console {wsLogs} />
-    <Modal
-      bind:show={showModal}
-      options={optionsData}
-      bind:selectedOptions
-    />
+    <div class="logo">
+      <h1>iPark</h1>
+    </div>
+
+    <div class="form">
+      <Form
+        {handleSubmit}
+        bind:inputMessage
+        bind:isChecked
+        bind:showModal
+      />
+    </div>
+
+    <div class="console">
+      <Console {wsLogs} />
+      <OptionsModal 
+        bind:showModal
+        options={optionsData}
+        bind:selectedOptions
+      /></div>
   </div>
 </main>
 
 <style>
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    padding: 1rem;
-    max-width: 800px;
-    margin: 0 auto;
+  .container {  
+    display: grid;
+    gap: 0px 0px;
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    grid-template-areas:
+      ". logo ."
+      ". form ."
+      ". console .";
+    grid-template-rows: .8fr 1fr 1.5fr;
+    grid-template-columns: 1fr 1.5fr 1fr;
   }
 
-  @media (max-width: 768px) {
-    .container {
-      padding: 0.5rem;
-    }
+  .logo { 
+    grid-area: logo;
+    justify-self: center;
+    align-self: center;   
+  }
+
+  .form { 
+    grid-area: form;
+    justify-self: center;
+    align-self: center; 
+    width: 100%;
+  }
+
+  .console { 
+    grid-area: console;
+    justify-self: center;
+    align-self: center;  
+    width: 100%; 
+    height: 100%;
   }
 </style>

