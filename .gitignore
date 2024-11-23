@@ -3,6 +3,7 @@
 
 README.md
 target_*.txt
+OUTPUT/*
 
 ### dotenv ###
 .env

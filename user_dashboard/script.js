@@ -564,7 +564,7 @@ function updateUI() {
     document.querySelector('.ai-stop-button').textContent = i18next.t('stopAI'); 
     document.querySelector('.dropdown-button').textContent = i18next.t('dropdownButton')
     document.querySelector('#aiLabel').textContent = i18next.t('aiUsage'); // 체크박스 번역 추가
-        document.querySelector('#consoleTitle').textContent = i18next.t('optionsCheck'); // 제목 번역
+    document.querySelector('#consoleTitle').textContent = i18next.t('optionsCheck'); // 제목 번역
     document.querySelector('#closeButton').textContent = i18next.t('closeButton'); // 닫기 버튼 번역
     document.querySelector('#sendButton').textContent = i18next.t('startAttack'); // 공격 시작 버튼 번역
 }

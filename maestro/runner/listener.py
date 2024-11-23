@@ -2,6 +2,7 @@ from .tools import *
 from handler.metrics_fetcher import fetch_metrics
 from logger import setup_logger
 from handler.ai import send_attack_request
+from file_server import websocket_server as watcher
 
 import asyncio
 import websockets
@@ -13,6 +14,7 @@ import shutil
 from dotenv import load_dotenv
 
 logger = setup_logger(__name__)
+connected_clients = set()
 
 async def ai_runner(event, arguments, metric_url):
     ai_ip = os.getenv('AI_IP')
@@ -32,7 +34,6 @@ async def ai_runner(event, arguments, metric_url):
         logger.info(f"Aleady Generated AI Template Included Arguments: {arguments}")
 
         await run_nuclei(arguments, debug=True)
-        
 
         metric_task.cancel()  
 
@@ -90,12 +91,12 @@ async def run_nuclei(arguments, debug=False):
     )
 
     logger.debug(f"Execute Command: {nuclei_path} {' '.join(arguments)}")
-
+    
     process = await asyncio.create_subprocess_exec(
         nuclei_path,
         *arguments,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        stderr=asyncio.subprocess.PIPE,
     )
 
     if debug == True:
@@ -121,140 +122,167 @@ async def run_nuclei(arguments, debug=False):
     return process.returncode
 
 async def cmd_handler(websocket, _):
+    connected_clients.add(websocket)
     ai_stop_event = None 
     ai_task = None
+    try:
+        while True:
+            client_message = await websocket.recv()
+            client_data = json.loads(client_message)
+            logger.info(f"Cliend Data: {client_data}")
 
-    while True:
-        client_message = await websocket.recv()
-        client_data = json.loads(client_message)
-        logger.info(f"Cliend Data: {client_data}")
+            match client_data.get("command"):
+                case "execute":
+                    target = client_data.get('target')
+                    match check_http_access(target):
+                        case "PERROR":
+                            await websocket.send(json.dumps({"message": "Protocol Invalid", "timestamp": time.time()}))
 
-        match client_data.get("command"):
-            case "check":
-                await websocket.send(json.dumps({"message": "Connected", "timestamp": time.time()}))
+                        case 200:
+                            await websocket.send(json.dumps({"message": "Target Valid", "timestamp": time.time()}))
+                            options = client_data.get('options', [])
+                            ai_flag = False if client_data.get("Ai") == "false" else True
 
-            case "execute":
-                target = client_data.get('target')
-                match check_http_access(target):
-                    case "PERROR":
-                        await websocket.send(json.dumps({"message": "Protocol Invalid", "timestamp": time.time()}))
-
-                    case 200:
-                        await websocket.send(json.dumps({"message": "Target Valid", "timestamp": time.time()}))
-                        options = client_data.get('options', [])
-                        ai_flag = False if client_data.get("Ai") == "false" else True
-                        
-                        metrics_port = str(get_unused_port())
-                        metric_url = f"http://localhost:{metrics_port}/metrics"
-                        arguments = ["-stats", "-mp", metrics_port, "-u", target] + options
-                        fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
-
-                        metric_task = asyncio.create_task(fetch_metrics(metric_url, fetch_delay))
-                        return_code = await run_nuclei(arguments, debug=True)
-                        logger.info(f"Nuclei Return Code: {return_code}")
-                        
-                        await websocket.send(json.dumps({"message": f"Nuclei Execute Finish", "timestamp": time.time()}))
-                        metric_task.cancel()
-                        
-                        try:
-                            await metric_task
-                            logger.debug("Metric fetching task was Finished")
-                        except asyncio.CancelledError:
-                            logger.debug("Metric fetching task was cancelled")
-
-                        if ai_flag == True:
-                            if ai_task and not ai_task.done():
-                                ai_stop_event.set() 
-                                await ai_task 
+                            serve_dir = os.getenv("SERVING_PATH")
+                            vuln_dir = f"{serve_dir}/vuln_output.md"
+                            conn_dir = f"{serve_dir}/conn_output"
+                            report_dir = f"{serve_dir}/markdown_output"
                             
                             metrics_port = str(get_unused_port())
                             metric_url = f"http://localhost:{metrics_port}/metrics"
-                            arguments = ["-stats", "-u", target] + options + ["-mp", metrics_port]
+                            arguments = ["-o", vuln_dir, "-fr", "-srd", conn_dir, "-irr", "-as", "-me", report_dir,"-vv", "-debug", "-stats", "-u", target] + options + ["-mp", metrics_port]
 
-                            ai_stop_event = asyncio.Event() 
-                            ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
-                        
-                    case _:
-                        await websocket.send(json.dumps({"message": "Target Invalid", "timestamp": time.time()}))
+                            # arguments = ["-stats", "-mp", metrics_port, "-u", target] + options
+                            fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
 
-            case "multiple_execute":
-                targets = client_data.get('target')
+                            metric_task = asyncio.create_task(fetch_metrics(metric_url, fetch_delay))
+                            return_code = await run_nuclei(arguments, debug=False)
+                            logger.info(f"Nuclei Return Code: {return_code}")
+                            
+                            await websocket.send(json.dumps({"message": f"Nuclei Execute Finish", "timestamp": time.time()}))
+                            metric_task.cancel()
 
-                if len(targets) <= 0:
-                    await websocket.send(json.dumps({"message": "Target Length Invalid", "timestamp": time.time()}))
-                    continue
+                            try:
+                                await metric_task
+                                logger.debug("Metric fetching task was Finished")
+                            except asyncio.CancelledError:
+                                logger.debug("Metric fetching task was cancelled")
 
-                all_valid = True
-                for t in targets:
-                    status = check_http_access(t)
-                    if status != 200:
-                        logger.error(f"Target {t} Invalid: Status: {status}")
-                        await websocket.send(json.dumps({"message": f"Target {t} Invalid", "timestamp": time.time()}))
-                        all_valid = False
-                        break
+                            if ai_flag == True:
+                                if ai_task and not ai_task.done():
+                                    ai_stop_event.set() 
+                                    await ai_task 
+        
+                                metrics_port = str(get_unused_port())
+                                metric_url = f"http://localhost:{metrics_port}/metrics"
+                                arguments = ["-o", vuln_dir, "-fr", "-srd", conn_dir, "-irr", "-as", "-me", report_dir,"-vv", "-debug", "-stats", "-u", target] + options + ["-mp", metrics_port]
 
-                if not all_valid:
-                    continue
-                
-                timestamp = time.time()
-                await websocket.send(json.dumps({"message": "All Targets Valid", "timestamp": timestamp}))
+                                # arguments = ["-o", "vuln_output", "-fr", "-srd", "req_res_output", "-irr", "-as", "-me", "./markdown_output/","-vv", "-debug", "-stats", "-u", target] + options + ["-mp", metrics_port]
 
-                target_file = f"target_{timestamp}.txt"
+                                ai_stop_event = asyncio.Event() 
+                                ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
+                            
+                        case _:
+                            await websocket.send(json.dumps({"message": "Target Invalid", "timestamp": time.time()}))
 
-                try:
-                    with open(target_file, "w") as f:
-                        f.writelines(t+'\n' for t in targets)
-                except:
-                    await websocket.send(json.dumps({"message": "Make Multiple Target List Error", "timestamp": time.time()}))
-                    continue
-                
-                options = client_data.get('options')
-                
-                metrics_port = str(get_unused_port())
-                metric_url = f"http://localhost:{metrics_port}/metrics"
-                
-                arguments = ["-stats", "-mp", metrics_port, "-l", target_file] + options
-                fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
+                case "multiple_execute":
+                    targets = client_data.get('target')
 
-                metric_task = asyncio.create_task(fetch_metrics(metric_url, fetch_delay))
-                return_code = await run_nuclei(arguments, debug=True)
+                    if len(targets) <= 0:
+                        await websocket.send(json.dumps({"message": "Target Length Invalid", "timestamp": time.time()}))
+                        continue
 
-                logger.info(f"Nuclei Return Code: {return_code}")
-                
-                await websocket.send(json.dumps({"message": f"Nuclei Execute Finish", "timestamp": time.time()}))
-                metric_task.cancel()
+                    all_valid = True
+                    for t in targets:
+                        status = check_http_access(t)
+                        if status != 200:
+                            logger.error(f"Target {t} Invalid: Status: {status}")
+                            await websocket.send(json.dumps({"message": f"Target {t} Invalid", "timestamp": time.time()}))
+                            all_valid = False
+                            break
 
-                try:
-                    await metric_task
-                except asyncio.CancelledError:
-                    logger.error("Metric fetching task was cancelled")
+                    if not all_valid:
+                        continue
+                    
+                    timestamp = time.time()
+                    await websocket.send(json.dumps({"message": "All Targets Valid", "timestamp": timestamp}))
 
-                if ai_flag == True:
-                    if ai_task and not ai_task.done():
-                        ai_stop_event.set() 
-                        await ai_task 
+                    target_file = f"target_{timestamp}.txt"
+
+                    try:
+                        with open(target_file, "w") as f:
+                            f.writelines(t+'\n' for t in targets)
+                    except:
+                        await websocket.send(json.dumps({"message": "Make Multiple Target List Error", "timestamp": time.time()}))
+                        continue
+                    
+                    options = client_data.get('options')
                     
                     metrics_port = str(get_unused_port())
                     metric_url = f"http://localhost:{metrics_port}/metrics"
 
-                    arguments = ["-stats", "-mp", metrics_port, "-l", target_file] + options
+                    serve_dir = os.getenv("SERVING_PATH")
+                    vuln_dir = f"{serve_dir}/vuln_output.md"
+                    conn_dir = f"{serve_dir}/conn_output"
+                    report_dir = f"{serve_dir}/markdown_output"
+                    
+                    arguments = ["-o", vuln_dir, "-fr", "-srd", conn_dir, "-irr", "-as", "-me", report_dir,"-vv", "-debug", "-stats", "-l", target_file] + options + ["-mp", metrics_port]
 
-                    ai_stop_event = asyncio.Event() 
-                    ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
+                    arguments = ["-debug", "-stats", "-l", target_file] + options + ["-mp", metrics_port]
+                    fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
 
+                    metric_task = asyncio.create_task(fetch_metrics(metric_url, fetch_delay))
+                    watcher.start()
+                    return_code = await run_nuclei(arguments, debug=True)
+
+                    logger.info(f"Nuclei Return Code: {return_code}")
+                    
+                    await websocket.send(json.dumps({"message": f"Nuclei Execute Finish", "timestamp": time.time()}))
+                    metric_task.cancel()
+
+                    try:
+                        await metric_task
+                    except asyncio.CancelledError:
+                        logger.error("Metric fetching task was cancelled")
+
+                    if ai_flag == True:
+                        if ai_task and not ai_task.done():
+                            ai_stop_event.set() 
+                            await ai_task 
                         
-            case "ai_stop":
-                if ai_task and not ai_task.done():
-                    ai_stop_event.set() 
-                    await ai_task 
+                        metrics_port = str(get_unused_port())
+                        metric_url = f"http://localhost:{metrics_port}/metrics"
+                        arguments = ["-o", vuln_dir, "-fr", "-srd", conn_dir, "-irr", "-as", "-me", report_dir,"-vv", "-debug", "-stats", "-l", target_file] + options + ["-mp", metrics_port]
+
+                        # arguments = ["-debug", "-stats", "-mp", metrics_port, "-l", target_file] + options
+
+                        ai_stop_event = asyncio.Event() 
+                        ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
+
+                            
+                case "ai_stop":
+                    if ai_task and not ai_task.done():
+                        ai_stop_event.set() 
+                        await ai_task 
 
 
-            case _:
-                await websocket.send(json.dumps({"message": "Unknown Command", "timestamp": time.time()}))
+                case _:
+                    await websocket.send(json.dumps({"message": "Unknown Command", "timestamp": time.time()}))
+
+    except websockets.exceptions.ConnectionClosed:
+        logger.info(f"Client disconnected: {websocket.remote_address}")
+        watcher.stop()
+        if ai_task and not ai_task.done():
+            ai_stop_event.set() 
+            await ai_task 
+        connected_clients.remove(websocket)
+
 
 async def main():
     load_dotenv()
     bip, bport = os.getenv("BACKEND_WS_IP"), int(os.getenv("BACKEND_WS_PORT"))
+    watcher.start()
+
     async with websockets.serve(cmd_handler, bip, bport):
         logger.info(f"WebSocket server is running on ws://{bip}:{bport}")
         await asyncio.Future() 

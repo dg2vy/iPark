@@ -22,3 +22,15 @@ html, body {
     height: 100vh;
     width: 100%;
 }
+
+/* 모든 입력 바 색상 설정 */
+input, textarea {
+    border: 1px solid #4a90e2; /* 테두리 색상 */
+}
+
+/* 입력창 포커스 시 커서 색상 변경 */
+input:focus, textarea:focus {
+    outline: none; /* 기본 아웃라인 제거 */
+    border-color: #4a90e2; /* 포커스 시 테두리 색상 */
+    caret-color: #4a90e2; /* 깜빡이는 커서 색상 */
+}

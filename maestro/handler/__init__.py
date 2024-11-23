@@ -12,4 +12,3 @@ def handler_app():
     return app
 
 from .routes import subscribe_to_metrics_channel
-from .ai import send_attack_request

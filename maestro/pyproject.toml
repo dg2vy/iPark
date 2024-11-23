@@ -14,6 +14,8 @@ websockets = "^13.1"
 logging = "^0.4.9.6"
 redis = "^5.2.0"
 aiohttp = "^3.10.10"
+watchdog = "^6.0.0"
+aiofiles = "^24.1.0"
 
 [tool.poetry.group.dev.dependencies]
 python-dotenv = "^1.0.1"
