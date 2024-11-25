@@ -7,6 +7,8 @@ from watchdog.events import FileSystemEventHandler
 import aiofiles
 import json
 import websockets
+import tempfile
+import zipfile
 from logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -26,10 +28,39 @@ class WebSocketFileServer:
         self.connected_clients.add(websocket)
         logger.info("Client connected.")
         try:
-            await websocket.wait_closed()
+            async for message in websocket:
+                await self.handle_client_message(websocket, message)
+        except websockets.exceptions.ConnectionClosed:
+            logger.info("Client disconnected.")
         finally:
             self.connected_clients.remove(websocket)
-            logger.info("Client disconnected.")
+            
+    async def handle_client_message(self, websocket, message):
+        """클라이언트 메시지 처리"""
+        try:
+            data = json.loads(message)  # 메시지가 JSON 형식이라고 가정
+            command = data.get("command")
+            file_dir = os.getenv("SERVING_PATH")
+
+            match command:
+                case "get_file": 
+                    if not file_dir or not os.path.isdir(file_dir):
+                        await websocket.send(json.dumps({
+                            "response": "error",
+                            "message": "Invalid or non-existent folder path"
+                        }))
+                        return
+                    
+                    await self.send_folder_as_zip(websocket, file_dir)
+
+                case _:
+                    await websocket.send(json.dumps({"response": "error", "message": "Unknown command"}))
+                    
+        except json.JSONDecodeError:
+            await websocket.send(json.dumps({"response": "error", "message": "Invalid JSON format"}))
+        except Exception as e:
+            logger.error(f"Error handling client message: {e}")
+            await websocket.send(json.dumps({"response": "error", "message": "Internal server error"}))
 
     async def read_file_content(self, file_path):
         """파일 내용을 비동기로 읽어 반환"""
@@ -70,6 +101,44 @@ class WebSocketFileServer:
                         *[client.send(json.dumps(updates)) for client in self.connected_clients]
                     )
             await asyncio.sleep(2)  # 2초마다 확인
+
+    async def send_folder_as_zip(self, websocket, folder_path):
+        try:
+            # 임시 파일 생성
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as temp_zip:
+                zip_file_path = temp_zip.name
+
+            # 폴더를 ZIP 파일로 압축
+            with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+                for root, dirs, files in os.walk(folder_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, folder_path)
+                        zipf.write(file_path, arcname)
+
+            # ZIP 파일을 읽어서 WebSocket으로 전송
+            with open(zip_file_path, "rb") as f:
+                zip_data = f.read()  # ZIP 파일 전체를 메모리에 읽음
+
+            await websocket.send(json.dumps({
+                "response": "file_transfer",
+                "file_size": len(zip_data)
+            }))
+
+            await websocket.send(zip_data) 
+
+            await websocket.send(json.dumps({"response": "end_file_transfer"}))
+
+        except Exception as e:
+            await websocket.send(json.dumps({
+                "response": "error",
+                "message": f"Error during file transfer: {str(e)}"
+            }))
+
+        finally:
+            # 임시 ZIP 파일 삭제
+            if os.path.exists(zip_file_path):
+                os.remove(zip_file_path)
 
     async def start_websocket_server(self):
         """WebSocket 서버 및 디렉토리 감시 시작"""

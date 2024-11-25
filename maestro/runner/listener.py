@@ -33,7 +33,7 @@ async def ai_runner(event, arguments, metric_url):
 
         logger.info(f"Aleady Generated AI Template Included Arguments: {arguments}")
 
-        await run_nuclei(arguments, debug=True)
+        await run_nuclei(arguments, debug=False)
 
         metric_task.cancel()  
 
@@ -66,7 +66,7 @@ async def ai_runner(event, arguments, metric_url):
 
             logger.info(f"AI Template Included Arguments: {arguments}")
 
-            return_code = await run_nuclei(arguments, debug=True)
+            return_code = await run_nuclei(arguments, debug=False)
             logger.info(f"Nuclei Return Code: {return_code}")  
             
             metric_task.cancel()  
@@ -102,22 +102,25 @@ async def run_nuclei(arguments, debug=False):
     if debug == True:
         async def read_output(stream):
             while True:
-                line = await stream.readline()
+                try:
+                    line = await stream.read(1024)
+                except asyncio.exceptions.LimitOverrunError:
+                    pass
                 if not line:
                     break
-                logger.info(f"{line.decode().strip()}")
+                # logger.info(f"{line.decode().strip()}")
 
         await asyncio.gather(
             read_output(process.stdout),
             read_output(process.stderr)
         )
-    else:
-        stdout, stderr = await process.communicate()
+    # else:
+    #     stdout, stderr = await process.communicate()
 
-        if stdout:
-            logger.info(stdout.decode())
-        if stderr:
-            logger.error(stderr.decode())
+    #     if stdout:
+    #         logger.info(stdout.decode())
+    #     if stderr:
+    #         logger.error(stderr.decode())
 
     return process.returncode
 
@@ -226,14 +229,14 @@ async def cmd_handler(websocket, _):
                     conn_dir = f"{serve_dir}/conn_output"
                     report_dir = f"{serve_dir}/markdown_output"
                     
-                    arguments = ["-o", vuln_dir, "-fr", "-srd", conn_dir, "-irr", "-as", "-me", report_dir,"-vv", "-debug", "-stats", "-l", target_file] + options + ["-mp", metrics_port]
+                    arguments = ["-o", vuln_dir, "-fr", "-srd", conn_dir, "-irr", "-as", "-me", report_dir, "-vv", "-debug", "-stats", "-l", target_file] + options + ["-mp", metrics_port]
 
-                    arguments = ["-debug", "-stats", "-l", target_file] + options + ["-mp", metrics_port]
+                    # arguments = ["-debug", "-stats", "-l", target_file] + options + ["-mp", metrics_port]
                     fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
 
                     metric_task = asyncio.create_task(fetch_metrics(metric_url, fetch_delay))
                     watcher.start()
-                    return_code = await run_nuclei(arguments, debug=True)
+                    return_code = await run_nuclei(arguments, debug=False)
 
                     logger.info(f"Nuclei Return Code: {return_code}")
                     
@@ -260,10 +263,10 @@ async def cmd_handler(websocket, _):
                         ai_task = asyncio.create_task(ai_runner(ai_stop_event, arguments, metric_url))
 
                             
-                case "ai_stop":
-                    if ai_task and not ai_task.done():
-                        ai_stop_event.set() 
-                        await ai_task 
+                # case "ai_stop":
+                #     if ai_task and not ai_task.done():
+                #         ai_stop_event.set() 
+                #         await ai_task 
 
 
                 case _:

@@ -4,6 +4,7 @@
   import Console from './lib/Console.svelte';
   import OptionsModal from './lib/OptionsModal.svelte';
   import { marked } from 'marked'; // marked 라이브러리 임포트
+  import { saveAs } from 'file-saver'; // FileSaver.js 라이브러리 임포트
 
   import { inputArguments } from './lib/store'; 
   import optionsData from './lib/options.json';
@@ -27,7 +28,6 @@
   let currentArguments; // store 값을 저장할 변수
   let isFileViewerVisible = false; // 파일 뷰어 가시성 상태 추가
   let fileViewerContent = ''; // 파일 내용을 저장할 변수 추가
-  let isFileViewerConnected = false; // 파일 뷰어 연결 상태 추가
   let fileViewerFiles = new Map(); // 파일 이름과 내용을 저장할 Map 객체로 변경
   let selectedFile = null; // 선택된 파일을 저장할 변수 추가
 
@@ -48,20 +48,72 @@
       addLog('success', '파일 웹소켓 연결 성공!');
     };
 
-    fileWs.onmessage = (event) => {
-      
-      const data = JSON.parse(event.data); // 수신한 데이터를 JSON으로 파싱
-      if (Array.isArray(data) && data.length > 0) {
-        data.forEach(({ file, content }) => {
-          if (file) {
-            fileViewerFiles.set(file, content); // 파일 이름을 키로, 내용을 값으로 저장
-            addLog('info', `파일 웹소켓 데이터 수신: ${file}`);
-            
-          }
-        });
-        file_messages = [...fileViewerFiles.keys()]; // 파일 목록 업데이트
+    fileWs.onmessage = async (event) => {
+      try {
+        // 수신한 데이터 확인
+        let data;
+        if (typeof event.data === 'string') {
+          data = JSON.parse(event.data);
+        } else {
+          handleBinaryData(event.data);
+          return;
+        }
+
+        // JSON 데이터 처리
+        if (data.response === "file_transfer") {
+          handleFileTransferStart(data.file_size);
+        } else if (data.response === "end_file_transfer") {
+          handleFileTransferEnd();
+        } else if (Array.isArray(data) && data.length > 0) {
+          handleFileMessages(data);
+        } else {
+          addLog('error', `알 수 없는 데이터 형식: ${data}`);
+        }
+      } catch (error) {
+        addLog(`error`, `WebSocket 메시지 처리 중 오류 발생: ${error}`);
       }
     };
+
+    // 전역 변수
+    let chunks = [];
+    let receivedBytes = 0;
+    let fileSize = 0;
+
+    // 파일 전송 시작 처리
+    function handleFileTransferStart(size) {
+      fileSize = size;
+      receivedBytes = 0;
+      chunks = [];
+      addLog('info', `파일 전송이 시작되었습니다.`);
+      addLog(`info`, `크기: ${fileSize} 바이트`)
+    }
+
+    // 바이너리 데이터 수신 처리
+    function handleBinaryData(binaryData) {
+      chunks.push(binaryData);
+      receivedBytes += binaryData.byteLength;
+    }
+
+    // 파일 전송 완료 처리
+    function handleFileTransferEnd() {
+      const zipBlob = new Blob(chunks);
+      const zipFilePath = 'report_files.zip'; // 저장할 파일 이름
+      saveAs(zipBlob, zipFilePath); // FileSaver.js를 사용하여 파일 저장
+      addLog('info', '파일이 저장되었습니다.');
+    }
+
+    // 파일 메시지 처리
+    function handleFileMessages(dataArray) {
+      const fileViewerFiles = new Map();
+      dataArray.forEach(({ file, content }) => {
+        if (file) {
+          fileViewerFiles.set(file, content);
+          addLog('info', `파일 웹소켓 데이터 수신: ${file}`);
+        }
+      });
+      const fileMessages = [...fileViewerFiles.keys()];
+      console.log('파일 메시지 업데이트:', fileMessages);
+    }
 
     fileWs.onerror = (error) => {
       addLog('error', '파일 웹소켓 연결 실패');
@@ -69,7 +121,6 @@
 
     fileWs.onclose = () => {
       addLog('info', '파일 웹소켓 연결 종료');
-      isFileViewerConnected = false; // 연결 상태 업데이트
     };
   }
 
@@ -89,6 +140,7 @@
     
     ws.onopen = () => {
       addLog('success', '웹소켓 연결 성공!');
+      connectFileWebSocket(); // onMount 시 파일 웹소켓 연결
     };
     
     ws.onmessage = (event) => {
@@ -111,7 +163,7 @@
               break;
 
           default:
-              addLog('warning', `데이터 수신: ${message}`);
+              addLog('info', `데이터 수신: ${message}`);
       }
     };
 
@@ -127,7 +179,7 @@
 
   onDestroy(() => {
     if (ws) ws.close();
-    if (fileWs) fileWs.close();
+    if (fileWs) fileWs.close(); // 파일 웹소켓 종료
   });
 
   function handleSubmit() {
@@ -136,40 +188,37 @@
       return; 
     }
     
-    inputMessage = inputMessage.trim();
-    const target = inputMessage.includes(',') ? inputMessage.split(',').map(item => item.trim()) : inputMessage;
 
     const urlPattern = /^(http|https):\/\/[^\s/$.?#].[^\s]*$/;
     const isValidUrl = (url) => urlPattern.test(url);
 
-    if (typeof target === 'string' && isValidUrl(target)) {
+    if (typeof inputMessage === 'string' && isValidUrl(inputMessage)) {
       const data = {
         command: "execute",
-        target: target,
+        target: inputMessage,
         Ai: isChecked ? "true" : "false",
         options: currentArguments
       };
       
-      
       ws.send(JSON.stringify(data));
-      connectFileWebSocket(); 
       addLog('send', `데이터 전송: ${JSON.stringify(data)}`);
-
-    }     
-    else if (Array.isArray(target) && target.every(isValidUrl)) {
+    } 
+    
+    else if (Array.isArray(inputMessage) && inputMessage.every(isValidUrl)) {
       const data = {
         command: "multiple_execute",
-        target: target,
+        target: inputMessage,
         Ai: isChecked ? "true" : "false",
         options: currentArguments
       };
-
+      
       ws.send(JSON.stringify(data));
-      connectFileWebSocket(); 
       addLog('send', `데이터 전송: ${JSON.stringify(data)}`);
     } else {
+      addLog(`warning`, target)
       addLog('warning', '유효하지 않은 URL입니다.');
     }
+
     inputMessage = '';
   }
 
@@ -180,22 +229,28 @@
   }
 
   function handleFileClick(file) {
-    selectedFile = file; // 클릭한 파일을 선택
+    console.log('클릭한 파일:', file);
+    selectedFile = file;
   }
 
-  // 파일 뷰어 관련 반응형 선언 추가
-  $: {
-    if (selectedFile) {
-      const content = fileViewerFiles.get(selectedFile);
-      fileViewerContent = marked(content);
-    }
+  function requestFileData() {
+    if (fileWs) {
+      const requestData = {
+        command: "get_file", // 요청할 명령어
+      };
+      fileWs.send(JSON.stringify(requestData)); // 파일 웹소켓으로 요청 전송
+      addLog('info', '파일 다운로드 요청 전송'); // 로그 추가
+    } else {
+      addLog('warning', '파일 웹소켓이 연결되어 있지 않습니다.'); // 연결 상태 확인
+    } 
   }
+
 </script>
 
 <main>
   <div class={`container ${isFileViewerVisible ? 'file-viewer-visible' : ''}`}>
     <div class="logo">
-      <h1>iPark</h1>
+      <img src="/logo.png" alt="iPark Logo" />
     </div>
 
     <div class="form">
@@ -204,6 +259,7 @@
         bind:inputMessage
         bind:isChecked
         bind:showModal
+        addLog={addLog}
       />
     </div>
 
@@ -227,7 +283,11 @@
                   class="file-item" 
                   class:selected={selectedFile === file}
                   title={file}
-                  on:click={() => handleFileClick(file)}
+                  on:click={() => { 
+                    const content = fileViewerFiles.get(file); // 선택한 파일의 내용을 로드
+                    $: fileViewerContent = marked(content); // 마크다운을 HTML로 변환
+                    handleFileClick(file); // 파일 클릭 처리
+                  }}
                 >
                 <h3>{file.length > 20 ? '...' + file.slice(-10) : file}</h3>
                 </div>
@@ -235,15 +295,20 @@
           </div>
         </div>
         <div class="file-content">
-          {@html fileViewerContent}
+          {@html fileViewerContent} <!-- 렌더링된 마크다운을 HTML로 출력 -->
         </div>
       </div>
     {/if}
-  </div>
 
-  <button class="toggle-button" on:click={toggleFileViewer}>
-    {isFileViewerVisible ? '파일 뷰어 숨기기' : '파일 뷰어 보기'}
-  </button>
+    <button class="get-file-button" on:click={requestFileData}>
+      모든 파일 다운로드
+    </button>
+
+    <button class="toggle-button" on:click={toggleFileViewer}>
+      {isFileViewerVisible ? '파일 뷰어 숨기기' : '파일 뷰어 보기'}
+    </button>
+
+  </div>
 </main>
 
 <style>
@@ -273,8 +338,9 @@
   .file-viewer {
       grid-area: file-viewer;
       width: 92%;
-      height: 90dvh;
+      height: 88dvh;
       margin-top: 1%;
+      margin-bottom: 1%;
       justify-self: center;
       align-self: start; /* 상단 정렬 */
       display: flex; /* 플렉스 박스 사용 */
@@ -382,8 +448,8 @@
 
   .toggle-button {
     position: fixed; /* 화면 고정 */
-    bottom: 20px; /* 아래쪽 여백 */
-    right: 20px; /* 오른쪽 여백 */
+    bottom: 20px; /* 아래쪽 여백을 80px로 변경하여 file-viewer와의 거리 유지 */
+    right: 32px; /* 오른쪽 여백 */
     padding: 10px 20px; /* 패딩 */
     background-color: #007bff; /* 배경색 */
     color: white; /* 글자색 */
@@ -403,6 +469,11 @@
     align-self: center;   
   }
 
+  .logo img {
+    width: 18dvw;
+    height: auto;
+  }
+
   .form { 
     grid-area: form;
     justify-self: center;
@@ -416,5 +487,21 @@
     align-self: center;  
     width: 100%; 
     height: 100%;
+  }
+
+  .get-file-button {
+    position: fixed; /* 고정 위치 */
+    bottom: 20px; /* 아래쪽 여백 */
+    right: 192px; /* 오른쪽 여백 */
+    padding: 10px 20px; /* 패딩 */
+    background-color: #007bff; /* 배경색 */
+    color: white; /* 글자색 */
+    border: none; /* 테두리 없음 */
+    border-radius: 5px; /* 모서리 둥글게 */
+    cursor: pointer; /* 커서 포인터 */
+    transition: background-color 0.3s; /* 배경색 전환 효과 */
+  }
+  .get-file-button:hover {
+    background-color: #0056b3; /* 호버 시 배경색 변경 */
   }
 </style>
