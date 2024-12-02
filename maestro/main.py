@@ -6,7 +6,7 @@ import threading
 import asyncio
 import os
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 def start_metrics_thread():
     """Metrics Subscribe Channel"""
@@ -21,7 +21,7 @@ def start_flask_thread(port):
     return thread
 
 async def main():
-    load_dotenv()
+    # load_dotenv()
     logger = setup_logger(__name__)
     
     start_metrics_thread()

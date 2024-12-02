@@ -1,0 +1,59 @@
+services:
+  maestro:
+    build:
+      context: ./maestro
+      dockerfile: Dockerfile
+    ports:
+      - "${METRIC_EXPORT_PORT}:${METRIC_EXPORT_PORT}"
+      - "${BACKEND_WS_PORT}:${BACKEND_WS_PORT}"
+      - "${FILE_SERVE_WS_PORT}:${FILE_SERVE_WS_PORT}"
+    network_mode: host
+    container_name: maestro
+    env_file: .env
+    restart: unless-stopped 
+
+  user-dashboard:
+    build:
+      context: ./user-dashboard
+      dockerfile: Dockerfile
+    restart: unless-stopped 
+    container_name: user-dashboard
+    network_mode: host
+    env_file: .env
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    restart: unless-stopped
+    network_mode: host
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    network_mode: host
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "${GRAFANA_PORT}:${GRAFANA_PORT}"
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+    network_mode: host
+
+volumes:
+  prom_data:

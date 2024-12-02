@@ -11,7 +11,8 @@ async def send_attack_request(attack_type, server_ip, server_port, path):
     attack_type_map = {
         'SQL Injection' : 'sqli',
         'XSS' : 'xss',
-        'RCE' : 'rce'
+        'RCE' : 'rce',
+        'File Inclusion' : 'File Inclusion',
     }
     
     url = f"ws://{server_ip}:{server_port}/ws"

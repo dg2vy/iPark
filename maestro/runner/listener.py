@@ -11,7 +11,7 @@ import time
 import os
 import shutil
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 logger = setup_logger(__name__)
 connected_clients = set()
@@ -20,7 +20,7 @@ async def ai_runner(event, arguments, metric_url):
     ai_ip = os.getenv('AI_IP')
     ai_port = os.getenv('AI_PORT')
     root_template_folder = os.getenv('AI_TEMPLATE_PATH', './ai_generated_template')
-    attack_types = ['RCE', 'XSS', 'SQL Injection']
+    attack_types = ['RCE', 'XSS', 'SQL Injection', 'File Inclusion']
 
     if not os.path.exists(root_template_folder):
         os.mkdir(root_template_folder)
@@ -46,7 +46,7 @@ async def ai_runner(event, arguments, metric_url):
             logger.info("Running ai background task")
             full_path = f"{root_template_folder}/{time.time()}"
 
-            for i in range(20):
+            for i in range(1):
                 for attack in attack_types:
                     await send_attack_request(attack, ai_ip, ai_port, full_path)
                 
@@ -90,7 +90,7 @@ async def run_nuclei(arguments, debug=False):
         os.path.join(os.path.expanduser("~"), 'go', 'bin', 'nuclei')
     )
 
-    logger.debug(f"Execute Command: {nuclei_path} {' '.join(arguments)}")
+    logger.info(f"Execute Command: {nuclei_path} {' '.join(arguments)}")
     
     process = await asyncio.create_subprocess_exec(
         nuclei_path,
@@ -108,14 +108,17 @@ async def run_nuclei(arguments, debug=False):
                     pass
                 if not line:
                     break
-                # logger.info(f"{line.decode().strip()}")
+                try:
+                    logger.info(f"{line.decode().strip()}")
+                except:
+                    logger.error(f"nuclei debug logging error")
 
         await asyncio.gather(
             read_output(process.stdout),
             read_output(process.stderr)
         )
-    # else:
-    #     stdout, stderr = await process.communicate()
+    else:
+        stdout, stderr = await process.communicate()
 
     #     if stdout:
     #         logger.info(stdout.decode())
@@ -235,8 +238,8 @@ async def cmd_handler(websocket, _):
                     fetch_delay = int(os.getenv("METRIC_FETCH_DELAY", 5))
 
                     metric_task = asyncio.create_task(fetch_metrics(metric_url, fetch_delay))
-                    watcher.start()
-                    return_code = await run_nuclei(arguments, debug=False)
+                    # watcher.start()
+                    return_code = await run_nuclei(arguments, debug=True)
 
                     logger.info(f"Nuclei Return Code: {return_code}")
                     
@@ -282,9 +285,11 @@ async def cmd_handler(websocket, _):
 
 
 async def main():
-    load_dotenv()
+    # load_dotenv()
     bip, bport = os.getenv("BACKEND_WS_IP"), int(os.getenv("BACKEND_WS_PORT"))
+    
     watcher.start()
+    logger.info(f"Watcher Running....")
 
     async with websockets.serve(cmd_handler, bip, bport):
         logger.info(f"WebSocket server is running on ws://{bip}:{bport}")

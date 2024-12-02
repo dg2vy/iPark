@@ -1,7 +1,7 @@
 import asyncio
 import os
 import threading
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import aiofiles
@@ -40,18 +40,17 @@ class WebSocketFileServer:
         try:
             data = json.loads(message)  # 메시지가 JSON 형식이라고 가정
             command = data.get("command")
-            file_dir = os.getenv("SERVING_PATH")
 
             match command:
                 case "get_file": 
-                    if not file_dir or not os.path.isdir(file_dir):
+                    if not self.directory or not os.path.isdir(self.directory):
                         await websocket.send(json.dumps({
                             "response": "error",
                             "message": "Invalid or non-existent folder path"
                         }))
                         return
                     
-                    await self.send_folder_as_zip(websocket, file_dir)
+                    await self.send_folder_as_zip(websocket, self.directory)
 
                 case _:
                     await websocket.send(json.dumps({"response": "error", "message": "Unknown command"}))
@@ -202,7 +201,7 @@ class DirectoryChangeHandler(FileSystemEventHandler):
 
 
 # 환경 변수 로드 및 서버 초기화
-load_dotenv()
+# load_dotenv()
 ip = os.getenv("FILE_SERVE_WS_IP")
 port = int(os.getenv("FILE_SERVE_WS_PORT"))
 directory = os.getenv("SERVING_PATH")

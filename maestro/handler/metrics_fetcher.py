@@ -9,6 +9,7 @@ logger = setup_logger(__name__)
 
 async def fetch_metrics(url, metric_fetch_delay):
     redis_client = redis.from_url(f"redis://localhost:{str(os.getenv('REDIS_PORT', 6379))}", db=0)
+    # redis_client = redis.StrictRedis(host='redis', port=int(os.getenv('REDIS_PORT')), db=0, ssl=False)
 
     while True:
         try:
@@ -30,11 +31,11 @@ async def fetch_metrics(url, metric_fetch_delay):
                                 "errors": data.get("errors", 0),
                                 "matched": data.get("matched", 0),
                                 "templates": data.get("templates", 0),
-                                "percent_complete": float(data.get("percent", 0)),
+                                "percent_complete": int(data.get("percent", 0)),
                                 "requests": data.get("requests", 0),
                                 "total_requests": data.get("total", 0),
                                 "hosts": data.get("hosts", 0),
-                                "rps": float(data.get("rps", 0)),
+                                "rps": int(data.get("rps", 0)),
                             }
 
                             await redis_client.publish("metrics_channel", json.dumps(metrics_data))
